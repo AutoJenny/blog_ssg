@@ -1,8 +1,14 @@
 // .eleventy.js
 module.exports = function(eleventyConfig) {
 
-    // Tell Eleventy to copy the 'css' and 'images' directories
-    // to the output (_site) folder unchanged.
+    // --- Add this line: ---
+    eleventyConfig.addCollection("post", function(collectionApi) {
+      // Get all files in the 'posts' directory, sorted by filename (or date if available)
+      return collectionApi.getFilteredByGlob("./posts/**/*.md");
+    });
+    // --- End of added line ---
+  
+    // Tell Eleventy to copy the 'css' and 'images' directories...
     eleventyConfig.addPassthroughCopy("css");
     eleventyConfig.addPassthroughCopy("images");
   

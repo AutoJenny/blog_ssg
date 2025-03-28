@@ -1,1 +1,43 @@
-test
+{% extends "base.njk" %}
+
+{# Define specific title for the home page #}
+{% set title = "My Awesome Blog - Home" %}
+
+{% block content %}
+
+{# --- DEBUGGING: Show all collections --- #}
+<details>
+    <summary><strong>Debug: Available Collections</strong></summary>
+    <pre><code>{{ collections | dump }}</code></pre>
+</details>
+<hr>
+{# --- END DEBUGGING --- #}
+    <h1>Blog Posts</h1>
+
+    {# Check if the 'posts' collection exists and has items #}
+    {% if collections.post and collections.post.length > 0 %}
+        <ul>
+            {# Loop through posts (Eleventy sorts by date descending by default) #}
+            {# Use collections.post.reverse() if you need ascending #}
+            {% for post in collections.post %}
+                <li>
+                    <h2><a href="{{ post.url }}">{{ post.data.title }}</a></h2>
+                    {# Optionally display date (we'll add date data later) #}
+                    {# {% if post.data.date %}
+                       <p><time datetime="{{ post.data.date | htmlDateString }}">{{ post.data.date | readableDate }}</time></p>
+                    {% endif %} #}
+
+                    {# Optionally display summary #}
+                    {% if post.data.summary %}
+                       <div class="post-summary">
+                           {{ post.data.summary | safe }}
+                       </div>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No blog posts found yet!</p>
+    {% endif %}
+
+{% endblock %}

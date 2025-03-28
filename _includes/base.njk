@@ -14,7 +14,9 @@
 
     <main>
         {# This is where the content of individual pages/posts will be injected #}
-        {{ content | safe }}
+        {% block content %}
+        {# Default content can go here if needed, but often left empty #}
+        {% endblock %}
     </main>
 
     <!-- Placeholder for CLAN.com Footer -->

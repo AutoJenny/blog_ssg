@@ -1,11 +1,8 @@
-{# This layout inherits from the base layout #}
 {% extends "base.njk" %}
 
-{# Define the content that goes into the 'main' section of base.njk #}
-{% block content %}
+{% block content %} {# Make sure ALL unique content for this layout is inside this block #}
 <article class="blog-post" id="post-{{ page.fileSlug }}">
     <header class="blog-post__header">
-        {# --- Use variables from front matter --- #}
         <h1>{{ title }}</h1>
         {% if subtitle %}
         <p class="blog-post__subtitle">{{ subtitle }}</p>
@@ -13,12 +10,10 @@
 
         {% if summary %}
         <div class="blog-post__summary">
-            {# Assuming summary might contain paragraphs or basic HTML #}
             {{ summary | safe }}
         </div>
         {% endif %}
 
-        {# Check if headerImage data exists in front matter #}
         {% if headerImage and headerImage.src %}
         <figure class="section-image">
             <img src="{{ headerImage.src }}" alt="{{ headerImage.alt or '' }}">
@@ -29,10 +24,8 @@
         {% endif %}
     </header>
 
-    {# Check if 'sections' array exists and has items #}
     {% if sections and sections.length > 0 %}
     <div class="blog-sections">
-        {# --- Loop through the 'sections' array from front matter --- #}
         {% for section in sections %}
         <section class="blog-section" id="section-{{ loop.index }}">
             {% if section.heading %}
@@ -41,7 +34,6 @@
 
             {% if section.text %}
             <div class="section-text">
-                {# Assuming section.text might contain paragraphs or basic HTML #}
                 {{ section.text | safe }}
             </div>
             {% endif %}
@@ -56,9 +48,7 @@
             {% endif %}
         </section>
         {% endfor %}
-        {# --- End of loop --- #}
 
-        {# Include the optional conclusion section if it exists #}
         {% if conclusion and conclusion.heading %}
           <section class="blog-section blog-section--conclusion" id="section-conclusion">
               <h2>{{ conclusion.heading }}</h2>
@@ -74,4 +64,4 @@
     {% endif %}
 
 </article> <!-- /.blog-post -->
-{% endblock %}
+{% endblock %} {# End the content block #}

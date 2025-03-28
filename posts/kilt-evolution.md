@@ -2,14 +2,11 @@
 # --- Metadata for the entire post ---
 title: "The Evolution of the Modern Scottish Kilt"
 subtitle: "From Ancient Practicality to Global Icon"
-# Specify which layout file to use for this post
 layout: "post.njk"
-# Define the main header image (optional alt and caption)
 headerImage:
   src: "/images/0.jpg" # Path relative to the site root
   alt: "Collage of kilt styles over the centuries."
   caption: "The kilt has evolved constantly from its earliest origins."
-# Summary text (can include basic HTML like <p>)
 summary: "<p>The Scottish kilt, with its swirling tartans and cultural resonance, is a garment steeped in history, rebellion, and reinvention. Its journey from a simple Highland wrap to a symbol of national identity—and later, a global fashion statement—mirrors Scotland’s own turbulent and triumphant narrative. This expanded exploration delves deeper into the kilt’s evolution, tracing its transformation across ten centuries while highlighting the social, political, and artistic forces that shaped its legacy.</p>"
 
 # --- Array of Content Sections ---
@@ -63,7 +60,6 @@ sections:
       caption: "The birth of the modern kilt: An ironworker demonstrates the practicality of the féileadh beag around 1720."
 
   - heading: "Suppression of Highland Dress (1746–1782)"
-    # Note: Using a list within the text. Ensure HTML is correct.
     text: |
       <p>The post-Culloden <b>Dress Act</b> (1746) aimed to erase Highland culture by banning tartan and kilts. Penalties included six months’ imprisonment or exile—a law enforced by brutal <b>Redcoat patrols</b>. Yet Highlanders resisted covertly:</p>
       <ul>
@@ -124,6 +120,3 @@ conclusion:
     <p>The kilt’s evolution—from the féileadh mòr to haute couture—encapsulates Scotland’s resilience and creativity. It has been a shroud, a uniform, a protest symbol, and a canvas for art. As it adapts to the 21st century, the kilt remains not just a garment, but a narrative woven through time, thread by colourful thread. Whether on a Glasgow catwalk or a Canadian high street, it endures as a testament to heritage and innovation—a tartan tapestry still being written.</p>
 
 ---
-
-# (You can add main Markdown content here later if needed, but for now,
-# all content is handled by the front matter and the post.njk layout)

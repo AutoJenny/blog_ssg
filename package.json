@@ -1,0 +1,24 @@
+{
+  "name": "blog_ssg",
+  "version": "1.0.0",
+  "description": "Experimental dev zone for new blog ideas",
+  "main": "index.js",
+  "scripts": {
+    "start": "eleventy --serve",
+    "build": "eleventy"      
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AutoJenny/blog_ssg.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AutoJenny/blog_ssg/issues"
+  },
+  "homepage": "https://github.com/AutoJenny/blog_ssg#readme",
+  "devDependencies": {
+    "@11ty/eleventy": "^3.0.0"
+  }
+}

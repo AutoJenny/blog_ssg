@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {# Use the 'title' variable from front matter, or a default title #}
+    <title>{{ title or "My Awesome Blog" }}</title>
+    {# Link to our CSS file #}
+    <link rel="stylesheet" href="/css/blog.css">
+</head>
+<body>
+    <!-- Placeholder for CLAN.com Header -->
+    <header class="site-header">[CLAN.com Header Placeholder]</header>
+
+    <main>
+        {# This is where the content of individual pages/posts will be injected #}
+        {{ content | safe }}
+    </main>
+
+    <!-- Placeholder for CLAN.com Footer -->
+    <footer class="site-footer">[CLAN.com Footer Placeholder]</footer>
+
+</body>
+</html>

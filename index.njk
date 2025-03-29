@@ -5,32 +5,15 @@
 
 {% block content %}
 
-{# --- DEBUGGING: Show collection names and 'post' content --- #}
-<details>
-    <summary><strong>Debug: Collections Info</strong></summary>
-    <p><strong>Collection Keys:</strong> {{ collections | keys | dump }}</p> {# Show only the names #}
-    <p><strong>'post' Collection Content:</strong></p>
-    <pre><code>{{ collections.post | dump }}</code></pre> {# Dump only the 'post' collection #}
-</details>
-<hr>
-{# --- END DEBUGGING --- #}
 
     <h1>Blog Posts</h1>
 
-    {# Check if the 'post' collection exists and has items #}
+    {# This is the actual display logic #}
     {% if collections.post and collections.post.length > 0 %}
         <ul>
-            {# Loop through posts (Eleventy sorts by date descending by default) #}
-            {# Use collections.post.reverse() if you need ascending #}
             {% for post in collections.post %}
                 <li>
-                    <h2><a href="{{ post.url }}">{{ post.data.title }}</a></h2>
-                    {# Optionally display date (we'll add date data later) #}
-                    {# {% if post.data.date %}
-                       <p><time datetime="{{ post.data.date | htmlDateString }}">{{ post.data.date | readableDate }}</time></p>
-                    {% endif %} #}
-
-                    {# Optionally display summary #}
+                    <h2><a href="{{ post.url | url }}">{{ post.data.title }}</a></h2>
                     {% if post.data.summary %}
                        <div class="post-summary">
                            {{ post.data.summary | safe }}

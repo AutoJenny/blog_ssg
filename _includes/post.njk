@@ -8,6 +8,12 @@
         <p class="blog-post__subtitle">{{ subtitle }}</p>
         {% endif %}
 
+        {% if date %}
+        <p class="blog-post__date">
+            Published on <time datetime="{{ date | htmlDateString }}">{{ date | readableDate }}</time>
+        </p>
+        {% endif %}
+
         {% if summary %}
         <div class="blog-post__summary">
             {{ summary | safe }}

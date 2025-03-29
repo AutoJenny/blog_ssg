@@ -3,6 +3,8 @@
 title: "The Evolution of the Modern Scottish Kilt"
 subtitle: "From Ancient Practicality to Global Icon"
 layout: "post.njk"
+date: 2023-10-26
+tags: ["post"]
 headerImage:
   src: "/images/0.jpg" # Path relative to the site root
   alt: "Collage of kilt styles over the centuries."

@@ -232,3 +232,19 @@ html {
       padding-left: 1.2rem;
     }
   }
+
+  /* Styling for date on individual post page */
+.blog-post__date {
+  font-size: 0.9em;
+  color: #777;
+  margin-top: -0.8em; /* Adjust spacing below subtitle */
+  margin-bottom: 1.5em;
+}
+
+/* Styling for date/meta on index page */
+.post-meta {
+  font-size: 0.9em;
+  color: #777;
+  margin-top: -0.5em; /* Pull closer to heading */
+  margin-bottom: 0.5em;
+}

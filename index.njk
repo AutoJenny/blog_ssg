@@ -1,28 +1,43 @@
 {% extends "base.njk" %}
 
 {# Define specific title for the home page #}
-{% set title = "My Awesome Blog - Home" %}
+{% set title = "CLAN.com Blog" %} {# Updated Title #}
 
 {% block content %}
 
-    <h1>Blog Posts</h1>
+    <h1>{{ title }}</h1> {# Use the title variable #}
 
     {# Check if the 'post' collection exists and has items #}
     {% if collections.post and collections.post.length > 0 %}
-        <ul>
-            {# Loop through posts (Eleventy sorts by date descending by default if dates are present) #}
+        <ul class="post-list"> {# Added a class for potential styling #}
+            {# Loop through posts (Sorted descending by date in .eleventy.js) #}
             {% for post in collections.post %}
-                <li>
+                <li class="post-list-item"> {# Added a class #}
                     <h2><a href="{{ post.url | url }}">{{ post.data.title }}</a></h2>
 
-                    {# Optionally display summary #}
+                    {# --- Display Post Meta: Date and Author --- #}
+                    <p class="post-meta">
+                        {% if post.date %}
+                           <span class="post-meta__date">
+                               <time datetime="{{ post.date | htmlDateString }}">{{ post.date | readableDate }}</time>
+                           </span>
+                        {% endif %}
+                        {% if post.data.author %}
+                           <span class="post-meta__separator"> | </span> {# Separator #}
+                           <span class="post-meta__author">
+                               By {{ post.data.author }} {# Display Author Name #}
+                               {# Later, this could be a link: <a href="/authors/{{ post.data.author | slugify }}/">{{ post.data.author }}</a> #}
+                           </span>
+                        {% endif %}
+                    </p>
+                    {# --- End Post Meta --- #}
+
+                    {# Display summary #}
                     {% if post.data.summary %}
                        <div class="post-summary">
                            {{ post.data.summary | safe }}
                        </div>
                     {% endif %}
-
-                    {# We will add date display here later #}
 
                 </li>
             {% endfor %}

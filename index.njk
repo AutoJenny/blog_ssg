@@ -5,20 +5,25 @@
 
 {% block content %}
 
-
     <h1>Blog Posts</h1>
 
-    {# This is the actual display logic #}
+    {# Check if the 'post' collection exists and has items #}
     {% if collections.post and collections.post.length > 0 %}
         <ul>
+            {# Loop through posts (Eleventy sorts by date descending by default if dates are present) #}
             {% for post in collections.post %}
                 <li>
                     <h2><a href="{{ post.url | url }}">{{ post.data.title }}</a></h2>
+
+                    {# Optionally display summary #}
                     {% if post.data.summary %}
                        <div class="post-summary">
                            {{ post.data.summary | safe }}
                        </div>
                     {% endif %}
+
+                    {# We will add date display here later #}
+
                 </li>
             {% endfor %}
         </ul>

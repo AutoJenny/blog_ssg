@@ -1,0 +1,5 @@
+{
+    "layout": "post.njk",
+    "permalink": "/{{ page.fileSlug }}/",
+    "sourceInfo": "Set in posts.11tydata.json"
+  }

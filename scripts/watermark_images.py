@@ -8,8 +8,8 @@ import argparse # Keep argparse just for the input directory
 DEFAULT_INPUT_DIRECTORY = "images/kilt-evolution" # Default if no argument provided
 # <<< --- OTHER FIXED SETTINGS --- >>>
 WATERMARK_PATH = "images/site/clan-watermark.png"
-TARGET_WATERMARK_WIDTH = 250  # Baked in: 250px
-OFFSET = 20                   # Baked in: 20px
+TARGET_WATERMARK_WIDTH = 200  # Baked in: 250px
+OFFSET = 10                   # Baked in: 10px
 # Background settings
 ADD_BACKGROUND = True         # Set to False to disable background
 BACKGROUND_COLOR = (128, 128, 128) # RGB for grey

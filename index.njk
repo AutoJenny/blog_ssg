@@ -1,32 +1,34 @@
 {% extends "base.njk" %}
 
 {# Define specific title for the home page #}
-{% set title = "CLAN.com Blog" %} {# Updated Title #}
+{% set title = "CLAN.com Blog" %}
 
 {% block content %}
 
-    <h1>{{ title }}</h1> {# Use the title variable #}
+    <h1>{{ title }}</h1>
 
     {# Check if the 'post' collection exists and has items #}
     {% if collections.post and collections.post.length > 0 %}
-        <ul class="post-list"> {# Added a class for potential styling #}
+        <ul class="post-list">
             {# Loop through posts (Sorted descending by date in .eleventy.js) #}
             {% for post in collections.post %}
-                <li class="post-list-item"> {# Added a class #}
+                <li class="post-list-item">
                     <h2><a href="{{ post.url | url }}">{{ post.data.title }}</a></h2>
 
-                    {# --- Display Post Meta: Date and Author --- #}
+                    {# --- Display Post Meta: Date and Author Lookup --- #}
                     <p class="post-meta">
                         {% if post.date %}
                            <span class="post-meta__date">
                                <time datetime="{{ post.date | htmlDateString }}">{{ post.date | readableDate }}</time>
                            </span>
                         {% endif %}
-                        {% if post.data.author %}
-                           <span class="post-meta__separator"> | </span> {# Separator #}
+                        {# UPDATED: Check if author key exists in post AND in global authors data #}
+                        {% if post.data.author and authors[post.data.author] %}
+                           <span class="post-meta__separator"> | </span>
                            <span class="post-meta__author">
-                               By {{ post.data.author }} {# Display Author Name #}
-                               {# Later, this could be a link: <a href="/authors/{{ post.data.author | slugify }}/">{{ post.data.author }}</a> #}
+                               {# UPDATED: Look up name from global authors data #}
+                               By {{ authors[post.data.author].name }}
+                               {# Example future link: <a href="{{ authors[post.data.author].bioPageUrl | url }}">{{ authors[post.data.author].name }}</a> #}
                            </span>
                         {% endif %}
                     </p>

@@ -2,281 +2,239 @@
 
 /* --- Base & Resets --- */
 html {
-    box-sizing: border-box;
-    font-size: 105%; /* Approx 16.8px if default is 16px */
-  }
-  
-  *, *::before, *::after {
-    box-sizing: inherit;
-  }
-  
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-    color: #333;
-    /* UPDATED: Warmer off-white background */
-    background-color: #FAF8F1; /* Example: Linen/Warm Off-white */
-    /* UPDATED: Increased line height */
-    line-height: 1.7;
-    /* ADDED: Subtle letter spacing for body text (applied here affects most text) */
-    letter-spacing: 0.015em;
-  }
-  
-  /* --- UPDATED Header/Footer Styles --- */
+  box-sizing: border-box;
+  font-size: 105%; /* Approx 16.8px if default is 16px */
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  color: #333;
+  background-color: #FAF8F1; /* Linen/Warm Off-white */
+  line-height: 1.7;
+  letter-spacing: 0.015em;
+}
+
+/* --- Header/Footer Styles --- */
 .site-header,
 .site-footer {
-    padding: 0; /* Remove padding */
-    border: none; /* Remove borders */
-    line-height: 0; /* Prevent potential extra space around image */
-    /* Remove previous text styling */
-    /* background-color: #f8f8f8; */
-    /* text-align: center; */
-    /* color: #777; */
+  padding: 0;
+  border: none;
+  line-height: 0;
 }
 
 .site-header a,
 .site-footer a {
-    display: block; /* Make link fill the container */
-    line-height: 0; /* Prevent extra space */
+  display: block;
+  line-height: 0;
 }
 
 .site-header-image,
 .site-footer-image {
-    display: block; /* Remove potential space below image */
-    width: 100%;   /* Make image scale to container width */
-    height: auto;  /* Maintain aspect ratio */
-    max-width: 100%; /* Prevent overflow */
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
 }
 
-/* Keep margin above footer if desired */
 .site-footer {
-    margin-top: 3rem;
+  margin-top: 3rem;
 }
 
-  
-  /* --- Blog Post Layout & Structure --- */
-  main {
-    max-width: 100%;
-  }
-  
-  .blog-post {
-    max-width: 750px;
-    margin: 2rem auto;
-    padding: 1.5rem 2rem; /* Slightly more horizontal padding inside */
-    background-color: #fff; /* Keep content area white for contrast */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.08); /* Slightly softer shadow */
-  }
-  
-  .blog-post__header {
-    margin-bottom: 2.5rem;
-    border-bottom: 2px solid #d9534f;
-    padding-bottom: 1.5rem;
-  }
-  
-  .blog-sections {
-    margin-top: 2rem;
-  }
-  
-  .blog-section {
-    margin-bottom: 3rem;
-  }
-  .blog-section:last-of-type {
-     border-bottom: none;
-  }
-  
-  .blog-section--conclusion {
-    margin-top: 2rem;
-    border-top: 1px solid #e1e1e1;
-    padding-top: 1.5rem;
-     /* background-color: #f0f0f0; */ /* Optional contrast background */
-  }
-  
-  /* --- Typography --- */
-  h1, h2 {
-    font-family: Georgia, Times, serif;
-    color: #1a2a4d;
-    letter-spacing: normal; /* Reset letter spacing for headings */
-  }
-  
-  h1 {
-    font-size: 2.25rem;
-    line-height: 1.2;
-    margin-top: 0;
-    margin-bottom: 0.5rem;
-  }
-  
-  h2 {
-    font-size: 1.75rem;
-    margin-top: 1.5rem; /* Space above section heading */
-    margin-bottom: 1rem;
-    border-bottom: 1px solid #e1e1e1;
-    padding-bottom: 0.25rem;
-  }
-  
-  .blog-post__subtitle {
-    font-size: 1.25rem;
-    color: #555;
-    margin-top: 0;
-    margin-bottom: 1.5rem;
-    font-style: italic;
-    font-weight: normal;
-    letter-spacing: normal; /* Reset letter spacing */
-    line-height: 1.4; /* Adjust subtitle line height if needed */
-  }
-  
-  /* Apply slightly tighter line-height specific to paragraphs if 1.7 is too much elsewhere */
-  /*
-  .blog-post__summary p,
-  .section-text p {
-    line-height: 1.7;
-  }
-  */
-  
-  .blog-post__summary p,
-  .section-text p {
-    margin-top: 0;
-    margin-bottom: 1rem;
-  }
-  
-  p:last-child,
-  ul:last-child,
-  ol:last-child {
-      margin-bottom: 0;
-  }
-  
-  .section-text {
-    margin-bottom: 1.5rem; /* Space between text block and element below (like image) */
-  }
-  
-  p { /* Base paragraph margin */
-    margin-top: 0;
-    margin-bottom: 1rem;
-  }
-  
-  b, strong {
-    font-weight: bold;
-    letter-spacing: normal; /* Avoid spacing issues with bold text */
-  }
-  
-  i, em {
-    font-style: italic;
-  }
-  
-  ul, ol {
-    margin-top: 0;
-    margin-bottom: 1rem;
-    padding-left: 1.5rem;
-  }
-  
-  li {
-    margin-bottom: 0.5rem;
-  }
-  
-  li:last-child {
-      margin-bottom: 0;
-  }
-  
-  /* --- Images & Captions --- */
-  .section-image {
-    /* UPDATED: Added margin-top for space above image */
-    margin: 1.5rem 0 1rem 0; /* Top, Right, Bottom, Left */
-    padding: 0;
-    text-align: center;
-  }
-  
-  .section-image img {
-    display: block;
-    max-width: 100%;
-    height: auto;
-    margin: 0 auto 0.5rem auto;
-    border: 1px solid #e1e1e1;
-  }
-  
-  .section-image figcaption {
-    display: block;
-    font-size: 0.9rem;
-    color: #666;
-    text-align: center;
-    font-style: italic;
-    padding: 0 0.5rem;
-    line-height: 1.4;
-    letter-spacing: normal; /* Reset letter spacing for captions */
-  }
-  
-  /* --- Responsiveness --- */
-  @media (max-width: 600px) {
-    html {
-       /* font-size: 100%; */ /* Optional: Reset size on small screens */
-    }
-  
-    body {
-      /* Optionally reduce letter spacing on small screens if it feels too wide */
-      /* letter-spacing: 0.01em; */
-    }
-  
-    h1 {
-      font-size: 1.8rem;
-      line-height: 1.25;
-    }
-  
-    h2 {
-      font-size: 1.4rem;
-    }
-  
-    .blog-post__subtitle {
-        font-size: 1.1rem;
-    }
-  
-    .blog-post {
-      padding: 1rem; /* Reduce padding */
-      margin: 1rem auto;
-      /* box-shadow: none; */ /* Optional: Remove shadow */
-    }
-  
-    .blog-section {
-        margin-bottom: 2rem;
-    }
-  
-    /* Ensure image margin isn't excessive on mobile */
-    .section-image {
-        margin-top: 1rem;
-    }
-  
-    ul, ol {
-      padding-left: 1.2rem;
-    }
-  }
 
-  /* Styling for date on individual post page */
-.blog-post__date {
-  font-size: 0.9em;
-  color: #777;
-  margin-top: -0.8em; /* Adjust spacing below subtitle */
-  margin-bottom: 1.5em;
+/* --- Blog Post Layout & Structure --- */
+main {
+  max-width: 100%;
 }
 
-/* Styling for date/meta on index page */
+.blog-post {
+  max-width: 750px;
+  margin: 2rem auto;
+  padding: 1.5rem 2rem;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+
+/* --- ADDED/MODIFIED: Post Navigation Top Link --- */
+.post-navigation-top {
+  margin-bottom: 2.5rem; /* Increased space below link */
+  font-size: 0.95em; /* Slightly larger */
+  padding-bottom: 0.5rem; /* Add a little space below text */
+  /* border-bottom: 1px dotted #ccc; */ /* Optional subtle separator */
+}
+.post-navigation-top a {
+  color: #777; /* Subtle grey color */
+  text-decoration: none;
+  font-weight: 500; /* Slightly bolder */
+  transition: color 0.2s ease-in-out; /* Smooth hover */
+}
+.post-navigation-top a:hover {
+  color: #d9534f; /* Accent color on hover */
+  text-decoration: none; /* Keep no underline */
+}
+/* --- End Post Navigation Top Link --- */
+
+
+.blog-post__header {
+  margin-bottom: 2.5rem;
+  border-bottom: 2px solid #d9534f;
+  padding-bottom: 1.5rem;
+   /* NOTE: H1 margin top might be affected by nav link margin */
+}
+
+.blog-sections {
+  margin-top: 2rem;
+}
+
+.blog-section {
+  margin-bottom: 3rem;
+}
+.blog-section:last-of-type {
+   border-bottom: none;
+}
+
+.blog-section--conclusion {
+  margin-top: 2rem;
+  border-top: 1px solid #e1e1e1;
+  padding-top: 1.5rem;
+}
+
+/* --- Typography --- */
+h1, h2 {
+  font-family: Georgia, Times, serif;
+  color: #1a2a4d;
+  letter-spacing: normal;
+}
+
+h1 {
+  font-size: 2.25rem;
+  line-height: 1.2;
+  margin-top: 0; /* H1 will now sit right below the nav link's bottom margin */
+  margin-bottom: 0.5rem;
+}
+
+h2 {
+  font-size: 1.75rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e1e1e1;
+  padding-bottom: 0.25rem;
+}
+
+.blog-post__subtitle {
+  font-size: 1.25rem;
+  color: #555;
+  margin-top: 0;
+  margin-bottom: 1.5rem; /* Space before meta */
+  font-style: italic;
+  font-weight: normal;
+  letter-spacing: normal;
+  line-height: 1.4;
+}
+
+.blog-post__summary p,
+.section-text p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+p:last-child,
+ul:last-child,
+ol:last-child {
+  margin-bottom: 0;
+}
+
+.section-text {
+  margin-bottom: 1.5rem;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+b, strong {
+  font-weight: bold;
+  letter-spacing: normal;
+}
+
+i, em {
+  font-style: italic;
+}
+
+ul, ol {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+li {
+  margin-bottom: 0.5rem;
+}
+
+li:last-child {
+  margin-bottom: 0;
+}
+
+
+/* --- Post Meta (Date/Author) --- */
+/* MERGED & UPDATED Rules */
 .post-meta {
   font-size: 0.9em;
-  color: #777;
-  margin-top: -0.5em; /* Pull closer to heading */
-  margin-bottom: 0.5em;
-}
-
-
-/* Meta on post page (shares class with index, adjust if needed) */
-.post-meta {
-  font-size: 0.9em;
-  color: #777;
-  margin-top: -0.8em; /* Adjust spacing */
-  margin-bottom: 1.5em;
+  color: #666; /* Slightly darker than default */
+  margin-top: 0; /* Reset from negative */
+  margin-bottom: 2rem; /* More space after meta */
+  padding: 0.6em 1em; /* Padding around text */
+  text-align: center; /* Center align */
+  background-color: #f8f8f8; /* Light grey background */
+  border-radius: 4px; /* Slightly rounded corners */
+  border: 1px solid #eee; /* Subtle border */
 }
 .post-meta__separator {
-  margin: 0 0.5em;
+  margin: 0 0.75em; /* Slightly more space around separator */
+}
+.post-meta__date,
+.post-meta__author {
+  /* Styles specific to date or author spans if needed */
+  /* e.g., font-weight: 500; */
+}
+.post-meta time {
+  /* Inherits styles, specific overrides if needed */
 }
 
-/* Post Footer / Tags */
+
+/* --- Images & Captions --- */
+.section-image {
+  margin: 1.5rem 0 1rem 0;
+  padding: 0;
+  text-align: center;
+}
+
+.section-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto 0.5rem auto;
+  border: 1px solid #e1e1e1;
+}
+
+.section-image figcaption {
+  display: block;
+  font-size: 0.9rem;
+  color: #666;
+  text-align: center;
+  font-style: italic;
+  padding: 0 0.5rem;
+  line-height: 1.4;
+  letter-spacing: normal;
+}
+
+/* --- Post Footer / Tags --- */
 .post-footer {
   margin-top: 3rem;
   padding-top: 1.5rem;
@@ -289,14 +247,66 @@ html {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: inline-block; /* Keep tags on same line */
+  display: inline-block;
 }
 .post-tags li {
   display: inline-block;
   background-color: #eee;
   padding: 0.2em 0.6em;
   margin-right: 0.5em;
-  margin-bottom: 0.5em; /* Allow wrapping */
+  margin-bottom: 0.5em;
   border-radius: 3px;
   font-size: 0.85em;
 }
+
+/* --- Responsiveness --- */
+@media (max-width: 600px) {
+  html {
+     /* font-size: 100%; */
+  }
+
+  body {
+    /* letter-spacing: 0.01em; */
+  }
+
+  h1 {
+      font-size: 1.8rem;
+      line-height: 1.25;
+  }
+
+  h2 {
+      font-size: 1.4rem;
+  }
+
+  .blog-post__subtitle {
+      font-size: 1.1rem;
+  }
+
+  .blog-post {
+      padding: 1rem;
+      margin: 1rem auto;
+      /* box-shadow: none; */
+  }
+
+  .blog-section {
+      margin-bottom: 2rem;
+  }
+
+  .section-image {
+      margin-top: 1rem;
+  }
+
+  ul, ol {
+      padding-left: 1.2rem;
+  }
+
+  /* Adjust meta padding on small screens */
+  .post-meta {
+      padding: 0.5em 0.8em;
+      margin-bottom: 1.5rem;
+  }
+}
+
+/* --- REMOVED redundant/old rules --- */
+/* Removed duplicate .post-meta rule */
+/* Removed .blog-post__date (now handled by .post-meta spans) */

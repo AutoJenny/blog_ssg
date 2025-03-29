@@ -1,2 +1,151 @@
-<h1>blog_ssg</h1>
-<p>Experimental dev zone for new blog ideas</p>
+<h2>Blog Post Creation Workflow (Manual)</h2>
+<p>This document outlines the current manual steps required to create and publish a new blog post using the Eleventy framework established in this project. This serves as a reference and a basis for future automation efforts.</p>
+<p><strong>Goal:</strong> To add a new, formatted blog post with associated images, metadata, and tags, viewable locally and committed to Git.</p>
+<p><strong>Prerequisites:</strong></p>
+<ol>
+<li><strong>Content:</strong> The main text content for the post, including section breaks, is written (e.g., in a separate document).</li>
+<li><strong>Images:</strong> Raw image files intended for the post are gathered and available.</li>
+<li><strong>Project Setup:</strong> The Eleventy project is set up, and <code>npm install</code> has been run.</li>
+<li><strong>Author Data:</strong> If using a new author, ensure their details are added to <code>_data/authors.json</code> with a unique key.</li>
+</ol>
+<p><strong>Authoring article:</strong></p>
+<ol>
+<li><strong>First draft</strong> Use ChatGPT4.5 (or new better authoring AI) with prompt eg
+&quot;Please write a 2000 word blog article titled &quot;xxx&quot;. Give the article a subtitle, a summary-introduction, and about 6-10 sections covering all aspects of its earliest origins to the modern day, exploring its evolution and usage and meaning. Use only UK English spellings and idioms.&quot;</li>
+<li><strong>Make HTML</strong> .</li>
+</ol>
+<p><strong>Step-by-Step Process:</strong></p>
+<ol>
+<li>
+<p>**Determine Post Slug:**ort, URL-friendly identifier for the post (e.g., <code>new-post-topic</code>). This will be used for the filename and the image subdirectory. Keep it lowercase, using hyphens for spaces.</p>
+</li>
+<li>
+<p><strong>Create Markdown File:</strong></p>
+<ul>
+<li>In the <code>posts/</code> directory, create a new Markdown file named using the slug: <code>posts/&lt;your-post-slug&gt;.md</code> (e.g., <code>posts/new-post-topic.md</code>).</li>
+</ul>
+</li>
+<li>
+<p><strong>Add YAML Front Matter:</strong></p>
+<ul>
+<li>At the very top of the new <code>.md</code> file, add the YAML block (<code>--- ... ---</code>).</li>
+<li>Fill in the required and optional metadata fields, referencing existing posts for structure:
+<ul>
+<li><code>title</code>: &quot;Your Full Post Title&quot;</li>
+<li><code>subtitle</code>: &quot;Optional Subtitle&quot; (if applicable)</li>
+<li><code>description</code>: &quot;A concise sentence or two summarizing the post for SEO/sharing.&quot;</li>
+<li><code>layout</code>: &quot;post.njk&quot; (Should usually be this)</li>
+<li><code>date</code>: YYYY-MM-DD (The publication date)</li>
+<li><code>author</code>: &quot;author-key&quot; (The unique key matching an entry in <code>_data/authors.json</code>)</li>
+<li><code>tags</code>:
+<ul>
+<li><code>- post</code> (Essential for the post collection)</li>
+<li><code>- relevant-tag-1</code></li>
+<li><code>- relevant-tag-2</code></li>
+<li>(Add other relevant keywords/topics)</li>
+</ul>
+</li>
+<li><code>headerImage</code>: (Object with <code>src</code>, <code>alt</code>, <code>caption</code>. Path TBD in step 6).</li>
+<li><code>summary</code>: &quot;<p>HTML summary paragraph(s).</p>&quot;</li>
+<li><code>sections</code>: (Array of objects, each with <code>heading</code>, <code>text</code> [using HTML paragraphs], <code>image</code> [object with <code>src</code>, <code>alt</code>, <code>caption</code>. Path TBD in step 6]).</li>
+<li><code>conclusion</code>: (Optional object with <code>heading</code>, <code>text</code>).</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Prepare Image Subdirectory:</strong></p>
+<ul>
+<li>In the <code>images/</code> directory, create a new subdirectory named after the post slug: <code>images/&lt;your-post-slug&gt;/</code></li>
+<li>Use the command line (from project root): <code>mkdir -p images/&lt;your-post-slug&gt;</code></li>
+</ul>
+</li>
+<li>
+<p><strong>Process and Place Images:</strong></p>
+<ul>
+<li>Rename your gathered raw image files using descriptive, URL-friendly names based on their content or section (e.g., <code>header.jpg</code>, <code>section-1-topic.jpg</code>, <code>conclusion-image.png</code>). Use lowercase and hyphens. Ensure they have appropriate file extensions (<code>.jpg</code>, <code>.png</code>, <code>.webp</code>, etc.).</li>
+<li>Move the renamed images into the newly created subdirectory: <code>images/&lt;your-post-slug&gt;/</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Update Image Paths in Front Matter:</strong></p>
+<ul>
+<li>Go back to the <code>.md</code> file's front matter.</li>
+<li>Update the <code>src</code> path for the <code>headerImage</code> and each <code>image</code> within the <code>sections</code> array to point to the correct file within the new subdirectory. Paths should be relative to the site root:
+<ul>
+<li>Example: <code>src: &quot;/images/&lt;your-post-slug&gt;/header.jpg&quot;</code></li>
+<li>Example: <code>src: &quot;/images/&lt;your-post-slug&gt;/section-1-topic.jpg&quot;</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Watermark Images (Optional Manual Step):</strong></p>
+<ul>
+<li>If watermarking is desired <em>before</em> local preview uses them (this depends on your desired workflow):
+<ul>
+<li>Run the watermarking script, targeting the <em>new</em> image subdirectory and outputting to a <em>new</em> watermarked directory:</li>
+</ul>
+<pre><code class="language-bash">python3 watermark_images.py images/&lt;your-post-slug&gt; images/site/clan-watermark.png
+</code></pre>
+<ul>
+<li>This will create <code>images/&lt;your-post-slug&gt;-watermarked/</code>.</li>
+<li><strong>Note:</strong> Currently, the templates (<code>post.njk</code>) read image paths from the front matter, which point to the <em>original</em> (non-watermarked) directory (<code>/images/&lt;your-post-slug&gt;/</code>). The watermarked images are generated but not used by default in the local preview or build. Further workflow changes would be needed to use the watermarked images directly.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Preview Locally:</strong></p>
+<ul>
+<li>Run the Eleventy development server from the project root:<pre><code class="language-bash">npm start
+</code></pre>
+</li>
+<li>Open your browser and navigate to the post's URL: <code>http://localhost:8080/&lt;your-post-slug&gt;/</code></li>
+<li>Check for:
+<ul>
+<li>Correct rendering of title, subtitle, meta (date/author).</li>
+<li>All sections appearing correctly.</li>
+<li>All images loading (check developer console for 404 errors).</li>
+<li>Correct display of tags at the bottom.</li>
+<li>Working navigation links.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Commit to Git:</strong></p>
+<ul>
+<li>Once satisfied with the preview:
+<ul>
+<li>Stop the server (<code>Ctrl+C</code>).</li>
+<li>Stage the new/modified files (the <code>.md</code> file and the new image directory/files).</li>
+</ul>
+<pre><code class="language-bash">git status
+git add .
+</code></pre>
+<ul>
+<li>Commit the changes with a descriptive message:</li>
+</ul>
+<pre><code class="language-bash">git commit -m &quot;feat: Add blog post '&lt;Your Post Title&gt;'&quot;
+</code></pre>
+<ul>
+<li>Push the changes to the remote repository:</li>
+</ul>
+<pre><code class="language-bash">git push origin main
+</code></pre>
+</li>
+</ul>
+</li>
+</ol>
+<hr>
+<p><strong>Potential Future Automation Points:</strong></p>
+<ul>
+<li>Script to generate a boilerplate <code>.md</code> file with front matter structure based on a slug.</li>
+<li>Script to automatically create the image subdirectory.</li>
+<li>Script/tool to assist with renaming/moving images based on section titles or prompts.</li>
+<li>Integration of the watermarking script into the build process or as an easier-to-run task (potentially only watermarking for production builds).</li>
+<li>A simple CLI or GUI to manage post creation steps.</li>
+</ul>
+<hr>
+<p>*   Choose a sh</p>

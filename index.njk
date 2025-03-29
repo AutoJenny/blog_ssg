@@ -5,16 +5,19 @@
 
 {% block content %}
 
-{# --- DEBUGGING: Show all collections --- #}
+{# --- DEBUGGING: Show collection names and 'post' content --- #}
 <details>
-    <summary><strong>Debug: Available Collections</strong></summary>
-    <pre><code>{{ collections | dump }}</code></pre>
+    <summary><strong>Debug: Collections Info</strong></summary>
+    <p><strong>Collection Keys:</strong> {{ collections | keys | dump }}</p> {# Show only the names #}
+    <p><strong>'post' Collection Content:</strong></p>
+    <pre><code>{{ collections.post | dump }}</code></pre> {# Dump only the 'post' collection #}
 </details>
 <hr>
 {# --- END DEBUGGING --- #}
+
     <h1>Blog Posts</h1>
 
-    {# Check if the 'posts' collection exists and has items #}
+    {# Check if the 'post' collection exists and has items #}
     {% if collections.post and collections.post.length > 0 %}
         <ul>
             {# Loop through posts (Eleventy sorts by date descending by default) #}

@@ -3,24 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {# Use the 'title' variable from front matter, or a default title #}
-    <title>{{ title or "My Awesome Blog" }}</title>
-    {# Link to our CSS file #}
-    <link rel="stylesheet" href="/css/blog.css">
+
+    {# --- Metadata --- #}
+    {# Use 'title' from front matter, append site name if it exists, or use default #}
+    {% set pageTitle = title or "Untitled" %}
+    {% set siteName = "CLAN.com Blog" %} {# Define site name here or in _data #}
+    <title>{{ pageTitle }}{% if pageTitle != siteName %} | {{ siteName }}{% endif %}</title>
+
+    {# Description: Use 'description' from front matter, fallback to 'summary', else default #}
+    {# Note: Stripping HTML tags from summary for meta description #}
+    {% set metaDescription = description or (summary | striptags | truncate(155, true, "...") if summary) or "The official blog of CLAN.com" %}
+    <meta name="description" content="{{ metaDescription }}">
+
+    {# Add Open Graph / Twitter Card meta tags later for social sharing #}
+    {# <meta property="og:title" content="{{ pageTitle }}"> #}
+    {# <meta property="og:description" content="{{ metaDescription }}"> #}
+    {# <meta property="og:image" content="{{ featuredImage | url or '/images/site/default-social.jpg' | url }}"> #}
+    {# <meta name="twitter:card" content="summary_large_image"> #}
+    {# --- End Metadata --- #}
+
+    {# Link to CSS file #}
+    <link rel="stylesheet" href="{{ '/css/blog.css' | url }}">
 </head>
 <body>
-    <!-- Placeholder for CLAN.com Header -->
-    <header class="site-header">[CLAN.com Header Placeholder]</header>
+    <header class="site-header">
+        {# --- Replaced text link with image link --- #}
+        <a href="{{ '/' | url }}" aria-label="CLAN.com Blog Home">
+            <img src="{{ '/images/site/header.jpg' | url }}" alt="CLAN.com Blog Header" class="site-header-image">
+        </a>
+        {# --- End Header Image Link --- #}
+    </header>
 
     <main>
-        {# This is where the content of individual pages/posts will be injected #}
+        {# Use Nunjucks block for content injection #}
         {% block content %}
         {# Default content can go here if needed, but often left empty #}
         {% endblock %}
     </main>
 
-    <!-- Placeholder for CLAN.com Footer -->
-    <footer class="site-footer">[CLAN.com Footer Placeholder]</footer>
+    <footer class="site-footer">
+         {# --- Replaced text placeholder with image link --- #}
+         <a href="{{ '/' | url }}" aria-label="CLAN.com Blog Home">
+            <img src="{{ '/images/site/footer.jpg' | url }}" alt="CLAN.com Blog Footer" class="site-footer-image">
+        </a>
+        {# --- End Footer Image Link --- #}
+    </footer>
 
 </body>
 </html>

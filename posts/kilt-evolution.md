@@ -2,11 +2,21 @@
 # --- Metadata for the entire post ---
 title: "The Evolution of the Modern Scottish Kilt"
 subtitle: "From Ancient Practicality to Global Icon"
+description: "Explore the rich history of the Scottish kilt, tracing its journey from ancient Highland practicality to a global symbol of identity and fashion."
 layout: "post.njk"
 date: 2023-10-26
-tags: ["post"]
+author: "Dr Nick Fiddes"
+tags:
+  - post # Keep this tag for the collection
+  - history
+  - scotland
+  - clothing
+  - tartan
+  - kilts
+  - highlandwear
 headerImage:
-  src: "/images/0.jpg" # Path relative to the site root
+  # UPDATED src path
+  src: "/images/kilt-evolution/kilt-evolution-header.jpg"
   alt: "Collage of kilt styles over the centuries."
   caption: "The kilt has evolved constantly from its earliest origins."
 summary: "<p>The Scottish kilt, with its swirling tartans and cultural resonance, is a garment steeped in history, rebellion, and reinvention. Its journey from a simple Highland wrap to a symbol of national identity—and later, a global fashion statement—mirrors Scotland’s own turbulent and triumphant narrative. This expanded exploration delves deeper into the kilt’s evolution, tracing its transformation across ten centuries while highlighting the social, political, and artistic forces that shaped its legacy.</p>"
@@ -19,7 +29,8 @@ sections:
       <p>Archaeological evidence, such as the 8th-century <b>Dunfallandy Stone</b> in Perthshire, depicts figures draped in knee-length tunics and cloaks secured by penannular brooches—a style echoed in the <b>Book of Kells</b>. The <b>Lewis chessmen</b>, 12th-century carvings found in the Outer Hebrides, further illustrate the use of belted tunics, suggesting early precursors to pleated garments.</p>
       <p>Natural dyes derived from local plants, such as <b>crottle</b> (lichen) for russet tones and <b>woad</b> for blue, introduced regional colour variations. These early textiles were not merely functional; they signified social rank. Chieftains wore finer weaves and elaborate brooches, while commoners relied on simpler designs. This period laid the groundwork for the structured, identity-driven attire that would define later Highland dress.</p>
     image:
-      src: "/images/1.jpg"
+      # UPDATED src path
+      src: "/images/kilt-evolution/early-highland-dress.jpg"
       alt: "Pictish warrior in tunic and brat cloak on a cliff with standing stones."
       caption: "Early Highland attire: A Pictish warrior embodying resilience in practical woollen tunic and cloak."
 
@@ -29,7 +40,8 @@ sections:
       <p>Contemporary accounts, such as those by <b>Bishop John Leslie</b> in 1578, praised its adaptability: <i>“Their plaids protect them from the cold… and in summer, they cast off the upper part, retaining only the skirt.”</i> Regional variations in weave and hue began to emerge, with <b>Lochaber</b> weavers producing earthy greens and browns, while <b>Aberdeenshire</b> clans favoured deeper blues.</p>
       <p>The féileadh mòr’s design also held tactical advantages. During the 1544 Battle of Loch Lochy, Highland fighters reportedly discarded their plaids mid-battle to increase mobility—a practice later romanticised in Jacobite lore.</p>
     image:
-      src: "/images/2.jpg"
+      # UPDATED src path
+      src: "/images/kilt-evolution/great-kilt-origins.jpg"
       alt: "16th-century Highlander pleating and belting a large féileadh mòr tartan wrap."
       caption: "The versatile féileadh mòr: A 16th-century Highlander dons the great kilt for protection and practicality."
 
@@ -39,7 +51,8 @@ sections:
       <p>Clan chiefs distributed tartan as tokens of allegiance. After the 1645 Battle of Inverlochy, <b>Alasdair MacColla</b> rewarded his followers with plaids in the MacDonald tartan, reinforcing kinship ties. Tartans also denoted social hierarchy: finer, lighter cloth was reserved for elites, while coarser weaves clothed tenants.</p>
       <p>The kilt’s role in ceremonies deepened. At <b>Dunvegan Castle</b>, MacLeod chiefs were inaugurated on a ceremonial stone wrapped in their ancestral tartan—a ritual echoing ancient Celtic traditions.</p>
     image:
-      src: "/images/3.jpg"
+      # UPDATED src path
+      src: "/images/kilt-evolution/great-kilt-significance.jpg"
       alt: "17th-century MacLeod chief distributing tartan plaids to clansmen during a gathering."
       caption: "Tartan as identity: A 17th-century clan chief reinforces kinship through the distribution of plaids."
 
@@ -48,7 +61,8 @@ sections:
       <p>As Highland life grew more dynamic, the féileadh mòr’s bulk became impractical. Hunters and soldiers began folding away the upper plaid, leaving only the pleated skirt. <b>Martin Martin</b>, a Gaelic-speaking scholar, documented this shift in his 1703 <i>Description of the Western Isles</i>: <i>“They gird the lower part close to their bodies… leaving the upper loose for swift motion.”</i></p>
       <p>Regional adaptations arose. In <b>Skye</b>, the plaid was often belted higher for peat-cutting, while <b>Badenoch shepherds</b> layered theirs for warmth. These modifications retained cultural symbolism while embracing pragmatism—a balance that would define the kilt’s future.</p>
     image:
-      src: "/images/4.jpg"
+      # UPDATED src path
+      src: "/images/kilt-evolution/kilt-adaptations-practicality.jpg"
       alt: "Highland hunter around 1700 tucking the upper part of his féileadh mòr into his belt."
       caption: "Adapting for action: A Highland hunter modifies the great kilt for greater freedom of movement circa 1700."
 
@@ -57,7 +71,8 @@ sections:
       <p>The <b>féileadh beag</b> (small kilt) emerged around 1720, catalysed by <b>Thomas Rawlinson</b>, an English Quaker industrialist. Managing furnaces in <b>Glengarry</b>, Rawlinson observed workers struggling with the féileadh mòr’s bulk. Collaborating with an Inverness tailor, he removed the upper plaid, creating a knee-length, pre-pleated skirt fastened with buckles.</p>
       <p>Despite initial resistance, the féileadh beag gained traction. By 1745, it was worn by <b>Prince Charles Edward Stuart’s</b> Jacobite army, blending tradition with utility. Rawlinson’s innovation, though controversial, marked a turning point—the kilt began evolving from a rustic garment into a tailored symbol of identity.</p>
     image:
-      src: "/images/5.jpg"
+      # UPDATED src path
+      src: "/images/kilt-evolution/small-kilt-emergence.jpg"
       alt: "18th-century ironworker wearing the knee-length féileadh beag (small kilt) while working at a forge."
       caption: "The birth of the modern kilt: An ironworker demonstrates the practicality of the féileadh beag around 1720."
 
@@ -71,7 +86,8 @@ sections:
       </ul>
       <p>The ban’s psychological impact was profound. As clansman <b>Ewen MacPherson</b> lamented in 1755: <i>“They’ve stripped us of our dress… but never our spirit.”</i></p>
     image:
-      src: "/images/6.jpg"
+      # UPDATED src path
+      src: "/images/kilt-evolution/highland-dress-suppression.jpg"
       alt: "Highland woman secretly weaving tartan by candlelight while Redcoats patrol outside, circa 1760."
       caption: "Defiance in the shadows: Secretly weaving banned tartan during the Dress Act suppression (1746-1782)."
 
@@ -81,7 +97,8 @@ sections:
       <p>Queen Victoria’s 1852 acquisition of <b>Balmoral Castle</b> cemented the kilt’s elite status. The monarch sketched servants in tartan and commissioned the <b>Balmoral tartan</b>, worn exclusively by the Royal Family. Meanwhile, the dubious <b>Vestiarium Scoticum</b> (1842) codified “ancient” clan tartans, despite its origins in forgery.</p>
       <p>By 1893, <b>The Highland Society of London</b> documented over 300 tartans, blending myth with history. The kilt became a staple at <b>Eton College</b> and <b>Oxbridge</b>, symbolising aristocratic Scots’ dual identity.</p>
     image:
-      src: "/images/7.jpg"
+      # UPDATED src path
+      src: "/images/kilt-evolution/romantic-revival-renaissance.jpg"
       alt: "Sir Walter Scott in Royal Stewart tartan leading nobles during King George IV's 1822 Edinburgh visit."
       caption: "Romantic revival: Sir Walter Scott orchestrates a tartan spectacle for King George IV in 1822 Edinburgh."
 
@@ -91,7 +108,8 @@ sections:
       <p>World War I saw kilts in the trenches, though practicality led to their partial replacement by trousers post-1915. Yet, the <b>51st Highland Division</b>’s 1944 Normandy landing in kilts underscored their enduring symbolic power.</p>
       <p>Military tartans also influenced civilian fashion. The <b>Royal Stewart</b>, once reserved for stewards to the monarch, became a global favourite, adorning everything from handbags to rockstar outfits.</p>
     image:
-      src: "/images/8.jpg"
+      # UPDATED src path
+      src: "/images/kilt-evolution/military-adoption-influence.jpg"
       alt: "Black Watch soldier in government sett kilt charging across a WWI battlefield with a bagpiper."
       caption: "Courage in tartan: A Black Watch soldier embodies the kilt's military legacy during World War I."
 
@@ -101,7 +119,8 @@ sections:
       <p>The diaspora fuelled tartan’s spread. In <b>Nova Scotia</b>, <b>Cape Breton</b>’s Gaelic mods (festivals) revived kilt-wearing, while <b>American Scots</b> embraced it as ethnic pride. Politically, the kilt became a tool for <b>SNP</b> campaigners in the 1970s, symbolising a distinct Scottish identity.</p>
       <p>Then in 1995 <b>Scotweb</b> pioneered use of the fledgling World Wide Web to make authentic kilts and tartans directly from Scotland available to anyone anywhere for the first time, whose <b>CLAN.com</b> site remains the most respected outlet to this day.</p>
     image:
-      src: "/images/9.jpg"
+      # UPDATED src path
+      src: "/images/kilt-evolution/formal-everyday-attire.jpg"
       alt: "1950s Scottish wedding scene with groom in Prince Charlie kilt outfit and guests dancing a ceilidh."
       caption: "From battlefield to ballroom: Kilts become central to 20th-century formal and celebratory wear."
 
@@ -111,7 +130,8 @@ sections:
       <p>Gender norms are challenged through designs like <b>Lydia Higginson</b>’s unisex <i>“Utility Kilt”</i> and <b>Harry Styles</b>’ lace-trimmed stage outfits. Social media amplifies trends: TikTok’s #KiltTok celebrates everything from trad weddings to punk-styled kilts.</p>
       <p>Yet debates persist. The <b>Scottish Tartans Authority</b> battles cultural appropriation, as brands like <b>Burberry</b> commercialise tartan. Meanwhile, new patterns honour causes—the <b>HIV Awareness Tartan</b> and the <b>Doddie Weir</b> tartan’s commemorative impact at Rugby Union events reflect evolving values.</p>
     image:
-      src: "/images/10.jpg"
+      # UPDATED src path
+      src: "/images/kilt-evolution/modern-innovations-fashion.jpg"
       alt: "Gender-fluid model on a neon runway wearing a deconstructed, futuristic tartan kilt."
       caption: "The kilt reimagined: 21st-century fashion fuses tartan tradition with avant-garde and inclusive design."
 

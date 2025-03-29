@@ -23,22 +23,37 @@ html {
     letter-spacing: 0.015em;
   }
   
-  /* --- Placeholders for CLAN.com Header/Footer --- */
-  .site-header,
-  .site-footer {
-    padding: 1.5rem 1rem;
-    background-color: #f8f8f8; /* Keep placeholders relatively neutral */
-    text-align: center;
-    color: #777;
-    border-bottom: 1px solid #e1e1e1;
-    letter-spacing: normal; /* Reset letter spacing for placeholders */
-  }
-  
-  .site-footer {
-    border-top: 1px solid #e1e1e1;
-    border-bottom: none;
+  /* --- UPDATED Header/Footer Styles --- */
+.site-header,
+.site-footer {
+    padding: 0; /* Remove padding */
+    border: none; /* Remove borders */
+    line-height: 0; /* Prevent potential extra space around image */
+    /* Remove previous text styling */
+    /* background-color: #f8f8f8; */
+    /* text-align: center; */
+    /* color: #777; */
+}
+
+.site-header a,
+.site-footer a {
+    display: block; /* Make link fill the container */
+    line-height: 0; /* Prevent extra space */
+}
+
+.site-header-image,
+.site-footer-image {
+    display: block; /* Remove potential space below image */
+    width: 100%;   /* Make image scale to container width */
+    height: auto;  /* Maintain aspect ratio */
+    max-width: 100%; /* Prevent overflow */
+}
+
+/* Keep margin above footer if desired */
+.site-footer {
     margin-top: 3rem;
-  }
+}
+
   
   /* --- Blog Post Layout & Structure --- */
   main {
@@ -247,4 +262,41 @@ html {
   color: #777;
   margin-top: -0.5em; /* Pull closer to heading */
   margin-bottom: 0.5em;
+}
+
+
+/* Meta on post page (shares class with index, adjust if needed) */
+.post-meta {
+  font-size: 0.9em;
+  color: #777;
+  margin-top: -0.8em; /* Adjust spacing */
+  margin-bottom: 1.5em;
+}
+.post-meta__separator {
+  margin: 0 0.5em;
+}
+
+/* Post Footer / Tags */
+.post-footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+.post-tags strong {
+  margin-right: 0.5em;
+}
+.post-tags ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: inline-block; /* Keep tags on same line */
+}
+.post-tags li {
+  display: inline-block;
+  background-color: #eee;
+  padding: 0.2em 0.6em;
+  margin-right: 0.5em;
+  margin-bottom: 0.5em; /* Allow wrapping */
+  border-radius: 3px;
+  font-size: 0.85em;
 }

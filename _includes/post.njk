@@ -1,6 +1,6 @@
 {% extends "base.njk" %}
 
-{% block content %} {# Make sure ALL unique content for this layout is inside this block #}
+{% block content %}
 <article class="blog-post" id="post-{{ page.fileSlug }}">
     <header class="blog-post__header">
         <h1>{{ title }}</h1>
@@ -8,21 +8,34 @@
         <p class="blog-post__subtitle">{{ subtitle }}</p>
         {% endif %}
 
-        {% if date %}
-        <p class="blog-post__date">
-            Published on <time datetime="{{ date | htmlDateString }}">{{ date | readableDate }}</time>
-        </p>
-        {% endif %}
+        {# --- Post Meta: Date and Author --- #}
+        <div class="post-meta">
+            {% if date %}
+               <span class="post-meta__date">
+                   Published on <time datetime="{{ date | htmlDateString }}">{{ date | readableDate }}</time>
+               </span>
+            {% endif %}
+            {% if author %} {# Use author directly from front matter data #}
+               <span class="post-meta__separator"> | </span>
+               <span class="post-meta__author">
+                   By {{ author }}
+                   {# Later: <a href="/authors/{{ author | slugify }}/">{{ author }}</a> #}
+               </span>
+            {% endif %}
+        </div>
+        {# --- End Post Meta --- #}
 
+        {# Summary comes AFTER meta now #}
         {% if summary %}
         <div class="blog-post__summary">
             {{ summary | safe }}
         </div>
         {% endif %}
 
+        {# Header Image #}
         {% if headerImage and headerImage.src %}
         <figure class="section-image">
-            <img src="{{ headerImage.src }}" alt="{{ headerImage.alt or '' }}">
+            <img src="{{ headerImage.src | url }}" alt="{{ headerImage.alt or '' }}"> {# Added |url filter #}
             {% if headerImage.caption %}
             <figcaption>{{ headerImage.caption }}</figcaption>
             {% endif %}
@@ -30,6 +43,7 @@
         {% endif %}
     </header>
 
+    {# --- Main Content Sections --- #}
     {% if sections and sections.length > 0 %}
     <div class="blog-sections">
         {% for section in sections %}
@@ -46,7 +60,7 @@
 
             {% if section.image and section.image.src %}
             <figure class="section-image">
-                <img src="{{ section.image.src }}" alt="{{ section.image.alt or '' }}">
+                <img src="{{ section.image.src | url }}" alt="{{ section.image.alt or '' }}"> {# Added |url filter #}
                 {% if section.image.caption %}
                 <figcaption>{{ section.image.caption }}</figcaption>
                 {% endif %}
@@ -55,6 +69,7 @@
         </section>
         {% endfor %}
 
+        {# Conclusion Section #}
         {% if conclusion and conclusion.heading %}
           <section class="blog-section blog-section--conclusion" id="section-conclusion">
               <h2>{{ conclusion.heading }}</h2>
@@ -68,6 +83,38 @@
 
     </div> <!-- /.blog-sections -->
     {% endif %}
+    {# --- End Main Content Sections --- #}
+
+
+        {# --- Post Footer: Tags --- #}
+    {% if tags %} {# Check if tags array exists #}
+        {# Filter out internal tags before looping #}
+        {% set tagsToShow = [] %}
+        {% for tag in tags %}
+            {% if tag != "post" and tag != "all" %} {# Example: Filter out 'post' and 'all' tags #}
+                {% set tagsToShow = tagsToShow.concat([tag]) %} {# Use concat to build the array #}
+            {% endif %}
+        {% endfor %}
+
+        {# Now check if the filtered list has items #}
+        {% if tagsToShow.length > 0 %}
+            <footer class="post-footer">
+                <div class="post-tags">
+                    <strong>Tags:</strong>
+                    <ul>
+                    {# Loop through the filtered tags #}
+                    {% for tag in tagsToShow %}
+                        <li>
+                            {# Later: <a href="/tags/{{ tag | slugify }}/">{{ tag }}</a> #}
+                            {{ tag }}
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </div>
+            </footer>
+        {% endif %}
+    {% endif %}
+    {# --- End Post Footer --- #}
 
 </article> <!-- /.blog-post -->
-{% endblock %} {# End the content block #}
+{% endblock %}

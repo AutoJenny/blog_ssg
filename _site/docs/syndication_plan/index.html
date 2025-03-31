@@ -1,0 +1,263 @@
+<h1>Technical Implementation Plan: Blog Post Syndication MVP (Instagram &amp; Facebook)</h1>
+<p><strong>Goal:</strong> Create a local Python script that reads metadata about blog post images from a central JSON file, identifies images pending publication, and posts them with appropriate captions and hashtags to specified Instagram Business/Creator accounts and Facebook Pages via their respective APIs.</p>
+<p><strong>Scope (MVP):</strong></p>
+<ul>
+<li>Target Platforms: Instagram (single image feed posts), Facebook Page (single image posts).</li>
+<li>Trigger: Manual execution of the local Python script.</li>
+<li>Data Source: Local JSON file (<code>_data/syndication.json</code>).</li>
+<li>Image Source: Assumes images will eventually have publicly accessible URLs (placeholders used initially for testing).</li>
+<li>Functionality: Post pending images, update status in JSON upon success/failure.</li>
+<li>Content: Platform-specific captions and hashtags loaded from JSON.</li>
+</ul>
+<hr>
+<h2>Phase 1: Setup &amp; Data Definition</h2>
+<ul>
+<li>[X] <strong>1.1. Python Environment:</strong>
+<ul>
+<li>Ensure Python 3 is installed and accessible (<code>python3 --version</code>).</li>
+<li>Consider setting up a virtual environment (optional but recommended):<pre><code class="language-bash">python3 -m venv .venv
+source .venv/bin/activate # Linux/macOS
+# or .\.venv\Scripts\activate # Windows
+</code></pre>
+</li>
+</ul>
+</li>
+<li>[X] <strong>1.2. Install Dependencies:</strong><pre><code class="language-bash">pip install requests python-dotenv Pillow # Pillow might be useful later for validation/local testing
+</code></pre>
+</li>
+<li>[X] <strong>1.3. Define Data Structure (<code>_data/syndication.json</code>):</strong>
+<ul>
+<li>Create the <code>_data</code> directory if it doesn't exist.</li>
+<li>Create <code>_data/syndication.json</code>.</li>
+<li>Define the JSON structure (example below, adjust as needed):<pre><code class="language-json">{
+  &quot;POST_SLUG&quot;: { // e.g., &quot;kilt-evolution&quot;
+    &quot;IMAGE_KEY&quot;: { // e.g., &quot;header&quot;, &quot;early-highland-dress&quot;
+      &quot;source_path_local&quot;: &quot;/images/kilt-evolution/kilt-evolution-header.jpg&quot;, // Relative local path
+      &quot;source_url_public&quot;: null, // Placeholder for public URL needed by API
+      &quot;alt&quot;: &quot;Descriptive alt text...&quot;,
+      &quot;blog_caption&quot;: &quot;Caption used on the blog...&quot;,
+      &quot;prompt&quot;: &quot;LLM prompt used for generation...&quot;, // Optional
+      &quot;syndication&quot;: {
+        &quot;instagram&quot;: {
+          &quot;status&quot;: &quot;pending&quot;, // pending | published | error | skipped
+          &quot;post_id&quot;: null, // ID returned by API on success
+          &quot;last_attempt&quot;: null, // ISO 8601 timestamp
+          &quot;error_message&quot;: null,
+          &quot;caption&quot;: &quot;Platform-specific caption for Instagram. #hashtags&quot;,
+          &quot;hashtags&quot;: [&quot;list&quot;, &quot;of&quot;, &quot;hashtags&quot;] // Store separately if preferred
+        },
+        &quot;facebook&quot;: {
+          &quot;status&quot;: &quot;pending&quot;,
+          &quot;post_id&quot;: null,
+          &quot;last_attempt&quot;: null,
+          &quot;error_message&quot;: null,
+          &quot;caption&quot;: &quot;Platform-specific caption/text for Facebook Page.&quot;
+        }
+      }
+    }
+    // ... more images for this post ...
+  }
+  // ... more posts ...
+}
+</code></pre>
+</li>
+</ul>
+</li>
+<li>[X] <strong>1.4. Populate Initial Data:</strong>
+<ul>
+<li>Manually fill <code>_data/syndication.json</code> with entries for the images from the <code>kilt-evolution</code> post. Leave <code>source_url_public</code> as <code>null</code> for now. Draft initial Instagram/Facebook captions and hashtags.</li>
+</ul>
+</li>
+<li>[X] <strong>1.5. Configuration (<code>.env</code> file):</strong>
+<ul>
+<li>Create a file named <code>.env</code> in the project root.</li>
+<li><strong>Add <code>.env</code> to your <code>.gitignore</code> file</strong> to avoid committing secrets.</li>
+<li>Define placeholder variables needed for API access (we'll get the real values in Phase 2):<pre><code class="language-dotenv"># .env file
+META_APP_ID=YOUR_APP_ID
+META_APP_SECRET=YOUR_APP_SECRET
+META_ACCESS_TOKEN=YOUR_LONG_LIVED_USER_OR_PAGE_ACCESS_TOKEN
+FB_PAGE_ID=YOUR_FACEBOOK_PAGE_ID
+IG_BUSINESS_ACCOUNT_ID=YOUR_INSTAGRAM_BUSINESS_ACCOUNT_ID
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>Phase 2: API Credentials &amp; Setup (Meta/Facebook/Instagram)</h2>
+<ul>
+<li>
+<p><strong>Note:</strong> This phase involves interacting with the Meta Developer platform and can be complex. Refer to official documentation frequently.</p>
+</li>
+<li>
+<p>[ ] <strong>2.1. Meta Developer Account &amp; App:</strong></p>
+<ul>
+<li>Register as a Meta Developer at <a href="https://developers.facebook.com/">developers.facebook.com</a>.</li>
+<li>Create a new Meta App (Type: Business).</li>
+</ul>
+</li>
+<li>
+<p>[ ] <strong>2.2. Connect Facebook Page &amp; Instagram Account:</strong></p>
+<ul>
+<li>Ensure you have an Instagram Business or Creator account.</li>
+<li>Ensure this Instagram account is correctly linked to a Facebook Page that you manage.</li>
+</ul>
+</li>
+<li>
+<p>[ ] <strong>2.3. Configure App Permissions:</strong></p>
+<ul>
+<li>In the Meta App Dashboard, add the &quot;Instagram Graph API&quot; and &quot;Facebook Login&quot; (even for app tokens) products.</li>
+<li>Request/Add the necessary permissions:
+<ul>
+<li><code>pages_show_list</code> (to find Page ID)</li>
+<li><code>pages_read_engagement</code> (needed by IG)</li>
+<li><code>instagram_basic</code> (to get IG Account ID)</li>
+<li><code>instagram_content_publish</code> (to post to IG)</li>
+<li>(Optional for FB Page posting if needed: <code>pages_manage_posts</code>)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>[ ] <strong>2.4. Obtain IDs:</strong></p>
+<ul>
+<li>Find your Facebook Page ID (often visible in Page settings or via Graph API Explorer <code>me/accounts</code>).</li>
+<li>Use the Graph API Explorer (<code>GET me/accounts?fields=instagram_business_account{id}</code>) with a User Token that has <code>instagram_basic</code> and <code>pages_show_list</code> permissions to find your Instagram Business Account ID linked to your Page.</li>
+</ul>
+</li>
+<li>
+<p>[ ] <strong>2.5. Obtain Access Token:</strong></p>
+<ul>
+<li>Use the Graph API Explorer to generate a <strong>User Access Token</strong> with <em>all</em> the required permissions from step 2.3.</li>
+<li><strong>Crucially:</strong> Extend this short-lived User Token into a <strong>Long-Lived User Access Token</strong> (lasts ~60 days). Document the expiry. (For true automation, a System User or server-side Page Token flow is needed later, but a long-lived User token is sufficient for initial local scripting).</li>
+<li><em>(Alternative for FB Page posting only: Obtain a Page Access Token directly if possible/needed)</em>.</li>
+</ul>
+</li>
+<li>
+<p>[ ] <strong>2.6. Populate <code>.env</code>:</strong></p>
+<ul>
+<li>Fill in the actual values obtained in steps 2.1, 2.4, and 2.5 into your <code>.env</code> file.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>Phase 3: Script Development (<code>syndicate.py</code>)</h2>
+<ul>
+<li>[ ] <strong>3.1. Create Script File:</strong> Create <code>syndicate.py</code> in the project root.</li>
+<li>[ ] <strong>3.2. Boilerplate &amp; Config Loading:</strong>
+<ul>
+<li>Add necessary imports (<code>os</code>, <code>json</code>, <code>requests</code>, <code>datetime</code>, <code>dotenv</code>).</li>
+<li>Use <code>dotenv.load_dotenv()</code> to load variables from <code>.env</code>.</li>
+<li>Define constants for API base URLs (e.g., <code>https://graph.facebook.com/v18.0</code>).</li>
+</ul>
+</li>
+<li>[ ] <strong>3.3. Load Syndication Data:</strong>
+<ul>
+<li>Write function to load <code>_data/syndication.json</code> into a Python dictionary. Handle potential <code>FileNotFoundError</code>.</li>
+</ul>
+</li>
+<li>[ ] <strong>3.4. Save Syndication Data:</strong>
+<ul>
+<li>Write function to save the (updated) Python dictionary back to <code>_data/syndication.json</code>.</li>
+</ul>
+</li>
+<li>[ ] <strong>3.5. Core Logic - Identify Pending Posts:</strong>
+<ul>
+<li>Implement logic to iterate through the loaded data.</li>
+<li>Identify images where <code>syndication.instagram.status == &quot;pending&quot;</code> or <code>syndication.facebook.status == &quot;pending&quot;</code>.</li>
+<li><strong>Crucially:</strong> Skip items where <code>source_url_public</code> is still <code>null</code>. Print a warning.</li>
+</ul>
+</li>
+<li>[ ] <strong>3.6. Instagram Posting Function (MVP):</strong>
+<ul>
+<li><strong>3.6.1. Hashtag Research:</strong> Perform research using online tools, competitor analysis, and platform search to identify relevant, effective hashtags for the kilt/quaich posts. Consider a mix of high-volume, medium, and niche tags. Update the <code>hashtags</code> field in the JSON data.</li>
+<li><strong>3.6.2. Create Media Container:</strong> Implement API call (<code>POST /{ig-user-id}/media</code>) with <code>image_url</code> and <code>caption</code> (including hashtags from JSON). Handle API response, check for errors. Extract the returned container <code>id</code>.</li>
+<li><strong>3.6.3. Publish Media Container:</strong> Implement API call (<code>POST /{ig-user-id}/media_publish</code>) with <code>creation_id</code> (the container ID from the previous step). Handle API response. Extract the final media (post) <code>id</code> on success.</li>
+<li><strong>3.6.4. Error Handling:</strong> Basic try/except blocks around API calls. Log errors.</li>
+</ul>
+</li>
+<li>[ ] <strong>3.7. Facebook Page Posting Function (MVP):</strong>
+<ul>
+<li><strong>3.7.1. API Call:</strong> Implement API call (<code>POST /{page-id}/photos</code>) with <code>url</code> (public image URL) and <code>caption</code> (message/text from JSON). Handle API response. Extract <code>post_id</code> on success.</li>
+<li><strong>3.7.2. Error Handling:</strong> Basic try/except blocks. Log errors.</li>
+</ul>
+</li>
+<li>[ ] <strong>3.8. Update State Logic:</strong>
+<ul>
+<li>After attempting a post for a platform:
+<ul>
+<li>If successful: Update the corresponding platform's <code>status</code> to &quot;published&quot;, store the <code>post_id</code>, update <code>last_attempt</code> timestamp.</li>
+<li>If failed: Update <code>status</code> to &quot;error&quot;, store the <code>error_message</code>, update <code>last_attempt</code>.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>[ ] <strong>3.9. Main Script Flow:</strong>
+<ul>
+<li>Load config &amp; data.</li>
+<li>Loop through pending items.</li>
+<li>Call Instagram function if needed. Update state.</li>
+<li>Call Facebook function if needed. Update state.</li>
+<li>Save updated data back to JSON file at the end.</li>
+<li>Add print statements for logging progress.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>Phase 4: Local Testing</h2>
+<ul>
+<li>[ ] <strong>4.1. Prepare Test Data:</strong>
+<ul>
+<li>Ensure <code>_data/syndication.json</code> has entries for testing.</li>
+<li><strong>Temporarily</strong> fill in <code>source_url_public</code> for 1-2 test images using known public URLs (e.g., from Wikimedia Commons, Unsplash, or even a GitHub raw link if the repo is public).</li>
+</ul>
+</li>
+<li>[ ] <strong>4.2. Execute Script:</strong>
+<ul>
+<li>Run <code>python3 syndicate.py</code> locally from the project root.</li>
+</ul>
+</li>
+<li>[ ] <strong>4.3. Verify Posts:</strong>
+<ul>
+<li>Check your Instagram account and Facebook Page to see if the test images were posted correctly with captions/hashtags.</li>
+</ul>
+</li>
+<li>[ ] <strong>4.4. Verify JSON Update:</strong>
+<ul>
+<li>Check <code>_data/syndication.json</code> to confirm the <code>status</code>, <code>post_id</code>, <code>last_attempt</code>, and <code>error_message</code> fields were updated as expected.</li>
+</ul>
+</li>
+<li>[ ] <strong>4.5. Test Error Cases (Optional):</strong> Temporarily use an invalid token or bad image URL to ensure error status is recorded correctly.</li>
+</ul>
+<hr>
+<h2>Phase 5: Future Enhancements (Post-MVP)</h2>
+<ul>
+<li>
+<p>[ ] <strong>Error Handling:</strong> Implement retry logic for transient API errors. More detailed error reporting/logging.</p>
+</li>
+<li>
+<p>[ ] <strong>Token Management:</strong> Implement a more robust solution for Access Tokens (auto-refresh, System Users if running server-side).</p>
+</li>
+<li>
+<p>[ ] <strong>Content Types:</strong> Support video posts, Instagram Carousels/Reels/Stories.</p>
+</li>
+<li>
+<p>[ ] <strong>Instagram Hashtags:</strong> Option to post hashtags as the first comment instead of in the caption.</p>
+</li>
+<li>
+<p>[ ] <strong>Scheduling/Automation:</strong> Use <code>cron</code> (Linux/macOS), Task Scheduler (Windows), or cloud services (GitHub Actions, AWS Lambda) to run the script automatically.</p>
+</li>
+<li>
+<p>[ ] <strong>User Interface:</strong> Develop a CLI or web interface to manage syndication status and trigger posts.</p>
+</li>
+<li>
+<p><strong>Public URL Strategy:</strong> Integrate with the blog deployment process to automatically populate <code>source_url_public</code> in the JSON file once the site (and images) are live.</p>
+</li>
+<li>
+<p>[ ] <strong>Refactoring:</strong> Improve script structure (e.g., classes, helper functions).</p>
+</li>
+<li>
+<p>[ ] <strong>Platform Refinements:</strong> Add location tagging, user tagging, etc.</p>
+</li>
+</ul>
+<hr>

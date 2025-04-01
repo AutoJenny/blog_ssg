@@ -32,6 +32,9 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("images");
   // --- End Passthrough ---
 
+      // ---  IGNORE 'docs' ---
+      eleventyConfig.ignores.add("docs/"); // Ignore markdown files in docs
+
   // --- Return Project Configuration ---
   return {
     dir: {

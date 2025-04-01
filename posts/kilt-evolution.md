@@ -4,7 +4,7 @@ title: "The Evolution of the Modern Scottish Kilt"
 subtitle: "From Ancient Practicality to Global Icon"
 description: "Explore the rich history of the Scottish kilt, tracing its journey from ancient Highland practicality to a global symbol of identity and fashion."
 layout: "post.njk"
-date: 2023-10-26
+date: 2025-03-30
 author: "nick-fiddes" 
 tags:
   - post # Keep this tag for the collection

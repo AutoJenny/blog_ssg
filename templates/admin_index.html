@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Workflow Manager</title>
+    <!-- Basic styling (optional - can add more later) -->
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        h1, h2 { border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 15px; }
+        #log-output {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #eee;
+            background-color: #f8f8f8;
+            min-height: 100px;
+            white-space: pre-wrap; /* Allow wrapping */
+            font-family: monospace;
+            font-size: 0.9em;
+            max-height: 400px; /* Limit height */
+            overflow-y: auto; /* Add scrollbar if needed */
+        }
+        .post-list { list-style: none; padding: 0; }
+        .post-list li { border: 1px solid #ddd; margin-bottom: 10px; padding: 10px; }
+        .post-actions button { margin-right: 5px; }
+    </style>
+</head>
+<body>
+
+    <h1>Blog Workflow Manager</h1>
+
+    <section id="post-management">
+        <h2>Manage Posts <a href="README.md#blog-post-creation-workflow-manual" target="_blank" title="View Overall Workflow Documentation">(?)</a></h2>
+
+        <div id="post-list-container">
+            {% if posts %}
+                <ul class="post-list">
+                    {% for post in posts %}
+                        <li class="post-list-item" data-post-slug="{{ post.slug }}">
+                            <strong>{{ post.title }}</strong>
+                            <br>
+                            <small>Slug: <code>{{ post.slug }}</code></small>
+                            {# Link to local file for editing - opens in editor if configured #}
+                            <a href="vscode://file/{{ config.BASE_DIR }}/posts/{{ post.slug }}.md" title="Edit Markdown File" style="font-size: 0.8em; margin-left: 5px;">(Edit MD)</a>
+                            <br>
+                            <span class="status-clancom">Clan.com Status: {{ post.clan_com_status }}</span>
+                            <div class="post-actions" style="margin-top: 10px;">
+                                <button class="publish-clan-button" data-slug="{{ post.slug }}">Publish/Update Clan.com</button>
+                                {# --- UPDATED DOC LINK --- #}
+                                <a href="README.md#publishing-to-clancom-via-admin-interface" target="_blank" title="Documentation for Publishing via Interface">(?)</a>
+
+                                {# --- Example Future Buttons --- #}
+                                <!--
+                                <button class="watermark-button" data-slug="{{ post.slug }}" disabled title="Not implemented yet">Watermark Images</button>
+                                <a href="README.md#watermarking-images" target="_blank" title="Documentation for Watermarking">(?)</a>
+
+                                <button class="syndicate-button" data-slug="{{ post.slug }}" disabled title="Not implemented yet">Syndicate IG/FB</button>
+                                <a href="#TBD" target="_blank" title="Documentation for Syndication">(?)</a>
+                                -->
+
+                                <a href="http://localhost:8080/{{ post.slug }}/" target="_blank" style="margin-left: 10px;">Preview Locally</a>
+                                {# --- UPDATED DOC LINK --- #}
+                                <a href="README.md#previewing-locally" target="_blank" title="Documentation for Local Preview">(?)</a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No posts found in the '{{ config.POSTS_DIR if config else 'posts' }}' directory.</p>
+            {% endif %}
+        </div>
+    </section>
+
+    <section id="log-section">
+        <h2>Action Log / Output</h2>
+        <pre id="log-output">(Script output will appear here)</pre>
+    </section>
+
+    <!-- JavaScript (keep existing script block) -->
+    <script>
+        const logOutput = document.getElementById('log-output');
+        const postListContainer = document.getElementById('post-list-container');
+        function logMessage(message, isError = false) {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.textContent = `[${timestamp}] ${message}`;
+            if (isError) entry.style.color = 'red';
+            logOutput.appendChild(entry);
+            logOutput.scrollTop = logOutput.scrollHeight;
+        }
+        postListContainer.addEventListener('click', function(event) {
+            if (event.target.matches('.publish-clan-button')) {
+                const button = event.target;
+                const slug = button.dataset.slug;
+                if (!slug) { logMessage("Error: No slug found for button.", true); return; }
+                logMessage(`Starting Publish/Update job for '${slug}'...`);
+                button.disabled = true; button.textContent = 'Processing...';
+                fetch(`/api/publish_clan/${slug}`, { method: 'POST' })
+                .then(response => { if (!response.ok) { throw new Error(`HTTP error ${response.status}`); } return response.json(); })
+                .then(data => {
+                    logMessage(`Job finished for '${slug}'. Success: ${data.success}`);
+                    logMessage("--- Script Output ---");
+                    const outputLines = data.output.split('\n');
+                    outputLines.forEach(line => { const isErrorLine = /ERROR|Traceback|Failed/i.test(line); logMessage(line.trim(), isErrorLine); });
+                    logMessage("--- End Script Output ---");
+                    if (!data.success) { alert(`Script failed for ${slug}. Check log.`); }
+                    else {
+                        button.textContent = 'Success!';
+                        setTimeout(() => { button.disabled = false; button.textContent = 'Publish/Update Clan.com'; logMessage(`Action complete for ${slug}. Refresh page to see updated status.`); }, 2000);
+                        return;
+                    }
+                })
+                .catch(error => { logMessage(`Error during fetch for '${slug}': ${error.message}`, true); console.error('Fetch Error:', error); })
+                .finally(() => { if (button.textContent !== 'Success!') { button.disabled = false; button.textContent = 'Publish/Update Clan.com'; } });
+            }
+            // Add listeners for other buttons here later...
+        });
+        console.log("Admin interface loaded.");
+    </script>
+
+</body>
+</html>

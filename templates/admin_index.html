@@ -4,25 +4,86 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog Workflow Manager</title>
-    <!-- Basic styling (optional - can add more later) -->
+    <!-- Basic styling (will be enhanced in next step) -->
     <style>
         body { font-family: sans-serif; padding: 20px; }
         h1, h2 { border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 15px; }
-        #log-output {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #eee;
-            background-color: #f8f8f8;
-            min-height: 100px;
-            white-space: pre-wrap; /* Allow wrapping */
-            font-family: monospace;
-            font-size: 0.9em;
-            max-height: 400px; /* Limit height */
-            overflow-y: auto; /* Add scrollbar if needed */
-        }
+        #log-output { margin-top: 20px; padding: 10px; border: 1px solid #eee; background-color: #f8f8f8; min-height: 100px; white-space: pre-wrap; font-family: monospace; font-size: 0.9em; max-height: 400px; overflow-y: auto; }
         .post-list { list-style: none; padding: 0; }
-        .post-list li { border: 1px solid #ddd; margin-bottom: 10px; padding: 10px; }
+        .post-list li { border: 1px solid #ddd; margin-bottom: 10px; padding: 10px; position: relative; } /* Added position:relative for help positioning later */
         .post-actions button { margin-right: 5px; }
+        /* Placeholder styles for help elements (will be improved) */
+        .help-trigger { cursor: pointer; color: blue; font-weight: bold; margin-left: 5px; font-size: 0.8em; display: inline-block; border: 1px solid blue; border-radius: 50%; width: 1.2em; height: 1.2em; line-height: 1.2em; text-align: center; }
+        .help-content { display: none; /* Hidden by default */ }
+    
+                /* --- Help System Styles --- */
+                .help-trigger {
+            display: inline-block; /* Allows setting width/height */
+            width: 16px;           /* Size of the circle */
+            height: 16px;
+            line-height: 16px;     /* Vertically center the '?' */
+            margin-left: 6px;
+            font-size: 11px;       /* Size of the '?' */
+            font-weight: bold;
+            text-align: center;
+            color: #fff;           /* White '?' */
+            background-color: #77aaff; /* Light blue background */
+            border-radius: 50%;    /* Make it a circle */
+            cursor: pointer;
+            user-select: none;     /* Prevent text selection */
+            vertical-align: middle;/* Align nicely with text/buttons */
+            transition: background-color 0.2s ease; /* Smooth hover */
+        }
+        .help-trigger:hover {
+            background-color: #4477cc; /* Darker blue on hover */
+        }
+
+        .help-content {
+            display: none; /* Hidden by default */
+            position: absolute; /* Position relative to the nearest positioned ancestor (the <li>) */
+            background-color: #ffffe0; /* Light yellow background */
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px 15px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
+            z-index: 10; /* Ensure it appears above other elements */
+            /* Positioning adjustments - may need tweaking */
+            left: 25px; /* Position slightly to the right of the trigger */
+            top: 0; /* Align top with trigger (can adjust) */
+            width: 300px; /* Set a reasonable width */
+            font-size: 0.9em; /* Slightly smaller text */
+            line-height: 1.5; /* Standard line height */
+            letter-spacing: normal; /* Reset letter spacing */
+            text-align: left;
+        }
+        /* Style paragraphs inside help content */
+        .help-content p,
+        .help-content ul,
+        .help-content ol {
+             margin-bottom: 0.8em;
+             letter-spacing: normal; /* Ensure reset */
+        }
+        .help-content ul, .help-content ol {
+            padding-left: 1.5em; /* Indent lists */
+        }
+         .help-content code {
+            background-color: #eee;
+            padding: 0.1em 0.3em;
+            border-radius: 2px;
+            font-size: 0.95em;
+        }
+        /* Style to show the help content */
+        .help-content.active {
+            display: block;
+        }
+        /* Minor adjustment for help next to heading */
+        h2 > .help-trigger {
+             vertical-align: baseline; /* Align better with heading text */
+        }
+        h2 + .help-content { /* Position help for heading */
+             top: 25px; /* Position below the heading */
+             left: 0;
+        }
     </style>
 </head>
 <body>
@@ -30,7 +91,15 @@
     <h1>Blog Workflow Manager</h1>
 
     <section id="post-management">
-        <h2>Manage Posts <a href="README.md#blog-post-creation-workflow-manual" target="_blank" title="View Overall Workflow Documentation">(?)</a></h2>
+        <h2>
+            Manage Posts
+            {# --- ADDED: Help Trigger and Content for Section --- #}
+            <span class="help-trigger" data-help-id="manage-posts-main-help" title="Help for Manage Posts Section">?</span>
+            <div class="help-content" id="manage-posts-main-help">
+                {% include 'help/manage_posts_help.njk' %}
+            </div>
+            {# --- END HELP --- #}
+        </h2>
 
         <div id="post-list-container">
             {% if posts %}
@@ -40,33 +109,33 @@
                             <strong>{{ post.title }}</strong>
                             <br>
                             <small>Slug: <code>{{ post.slug }}</code></small>
-                            {# Link to local file for editing - opens in editor if configured #}
-                            <a href="vscode://file/{{ config.BASE_DIR }}/posts/{{ post.slug }}.md" title="Edit Markdown File" style="font-size: 0.8em; margin-left: 5px;">(Edit MD)</a>
+                            <a href="vscode://file/{{ config.BASE_DIR }}/posts/{{ post.slug }}.md" title="Edit Markdown File in VS Code" style="font-size: 0.8em; margin-left: 5px;">(Edit MD)</a>
                             <br>
                             <span class="status-clancom">Clan.com Status: {{ post.clan_com_status }}</span>
+
                             <div class="post-actions" style="margin-top: 10px;">
                                 <button class="publish-clan-button" data-slug="{{ post.slug }}">Publish/Update Clan.com</button>
-                                {# --- UPDATED DOC LINK --- #}
-                                <a href="README.md#publishing-to-clancom-via-admin-interface" target="_blank" title="Documentation for Publishing via Interface">(?)</a>
+                                {# --- ADDED: Help Trigger and Content for Publish Button --- #}
+                                <span class="help-trigger" data-help-id="publish-help-{{ post.slug }}" title="Help for Publish/Update Clan.com Button">?</span>
+                                <div class="help-content" id="publish-help-{{ post.slug }}">
+                                    {% include 'help/publish_clan_help.njk' %}
+                                </div>
+                                {# --- END HELP --- #}
 
-                                {# --- Example Future Buttons --- #}
-                                <!--
-                                <button class="watermark-button" data-slug="{{ post.slug }}" disabled title="Not implemented yet">Watermark Images</button>
-                                <a href="README.md#watermarking-images" target="_blank" title="Documentation for Watermarking">(?)</a>
-
-                                <button class="syndicate-button" data-slug="{{ post.slug }}" disabled title="Not implemented yet">Syndicate IG/FB</button>
-                                <a href="#TBD" target="_blank" title="Documentation for Syndication">(?)</a>
-                                -->
 
                                 <a href="http://localhost:8080/{{ post.slug }}/" target="_blank" style="margin-left: 10px;">Preview Locally</a>
-                                {# --- UPDATED DOC LINK --- #}
-                                <a href="README.md#previewing-locally" target="_blank" title="Documentation for Local Preview">(?)</a>
+                                {# --- ADDED: Help Trigger and Content for Preview Link --- #}
+                                <span class="help-trigger" data-help-id="preview-help-{{ post.slug }}" title="Help for Preview Locally Link">?</span>
+                                <div class="help-content" id="preview-help-{{ post.slug }}">
+                                     {% include 'help/preview_local_help.njk' %}
+                                </div>
+                                {# --- END HELP --- #}
                             </div>
                         </li>
                     {% endfor %}
                 </ul>
             {% else %}
-                <p>No posts found in the '{{ config.POSTS_DIR if config else 'posts' }}' directory.</p>
+                 <p>No posts found in the '{{ config.POSTS_DIR if config else 'posts' }}' directory.</p>
             {% endif %}
         </div>
     </section>
@@ -77,46 +146,90 @@
     </section>
 
     <!-- JavaScript (keep existing script block) -->
-    <script>
-        const logOutput = document.getElementById('log-output');
-        const postListContainer = document.getElementById('post-list-container');
-        function logMessage(message, isError = false) {
-            const timestamp = new Date().toLocaleTimeString();
-            const entry = document.createElement('div');
-            entry.textContent = `[${timestamp}] ${message}`;
-            if (isError) entry.style.color = 'red';
-            logOutput.appendChild(entry);
-            logOutput.scrollTop = logOutput.scrollHeight;
-        }
-        postListContainer.addEventListener('click', function(event) {
-            if (event.target.matches('.publish-clan-button')) {
-                const button = event.target;
-                const slug = button.dataset.slug;
-                if (!slug) { logMessage("Error: No slug found for button.", true); return; }
-                logMessage(`Starting Publish/Update job for '${slug}'...`);
-                button.disabled = true; button.textContent = 'Processing...';
-                fetch(`/api/publish_clan/${slug}`, { method: 'POST' })
-                .then(response => { if (!response.ok) { throw new Error(`HTTP error ${response.status}`); } return response.json(); })
-                .then(data => {
-                    logMessage(`Job finished for '${slug}'. Success: ${data.success}`);
-                    logMessage("--- Script Output ---");
-                    const outputLines = data.output.split('\n');
-                    outputLines.forEach(line => { const isErrorLine = /ERROR|Traceback|Failed/i.test(line); logMessage(line.trim(), isErrorLine); });
-                    logMessage("--- End Script Output ---");
-                    if (!data.success) { alert(`Script failed for ${slug}. Check log.`); }
-                    else {
-                        button.textContent = 'Success!';
-                        setTimeout(() => { button.disabled = false; button.textContent = 'Publish/Update Clan.com'; logMessage(`Action complete for ${slug}. Refresh page to see updated status.`); }, 2000);
-                        return;
-                    }
-                })
-                .catch(error => { logMessage(`Error during fetch for '${slug}': ${error.message}`, true); console.error('Fetch Error:', error); })
-                .finally(() => { if (button.textContent !== 'Success!') { button.disabled = false; button.textContent = 'Publish/Update Clan.com'; } });
+        <!-- JavaScript for interactions -->
+        <script>
+            const logOutput = document.getElementById('log-output');
+            const postListContainer = document.getElementById('post-list-container');
+    
+            // --- Log Message Function (from previous step) ---
+            function logMessage(message, isError = false) {
+                const timestamp = new Date().toLocaleTimeString();
+                const entry = document.createElement('div');
+                entry.textContent = `[${timestamp}] ${message}`;
+                if (isError) { entry.style.color = 'red'; }
+                logOutput.appendChild(entry);
+                logOutput.scrollTop = logOutput.scrollHeight;
             }
-            // Add listeners for other buttons here later...
-        });
-        console.log("Admin interface loaded.");
-    </script>
+    
+            // --- Event Listener for Actions (Publish Button) ---
+            postListContainer.addEventListener('click', function(event) {
+                if (event.target.matches('.publish-clan-button')) {
+                    const button = event.target;
+                    const slug = button.dataset.slug;
+                    if (!slug) { logMessage("Error: No slug found for publish button.", true); return; }
+                    logMessage(`Starting Publish/Update job for '${slug}'...`);
+                    button.disabled = true; button.textContent = 'Processing...';
+                    fetch(`/api/publish_clan/${slug}`, { method: 'POST' })
+                    .then(response => { if (!response.ok) { throw new Error(`HTTP error ${response.status}`); } return response.json(); })
+                    .then(data => {
+                        logMessage(`Job finished for '${slug}'. Success: ${data.success}`);
+                        logMessage("--- Script Output ---");
+                        const outputLines = data.output.split('\n');
+                        outputLines.forEach(line => { const isErrorLine = /ERROR|Traceback|Failed/i.test(line); logMessage(line.trim(), isErrorLine); });
+                        logMessage("--- End Script Output ---");
+                        if (!data.success) { alert(`Script failed for ${slug}. Check log.`); }
+                        else {
+                            button.textContent = 'Success!';
+                            setTimeout(() => { button.disabled = false; button.textContent = 'Publish/Update Clan.com'; logMessage(`Action complete for ${slug}. Refresh page to see updated status.`); }, 2000);
+                            return;
+                        }
+                    })
+                    .catch(error => { logMessage(`Error during fetch for '${slug}': ${error.message}`, true); console.error('Fetch Error:', error); })
+                    .finally(() => { if (button.textContent !== 'Success!') { button.disabled = false; button.textContent = 'Publish/Update Clan.com'; } });
+                }
+                // Add handlers for other buttons later...
+            });
+    
+            // --- NEW: Event Listener for Help Triggers ---
+            document.body.addEventListener('click', function(event) {
+                // Check if a help trigger was clicked
+                if (event.target.matches('.help-trigger')) {
+                    const trigger = event.target;
+                    const helpId = trigger.dataset.helpId;
+                    const helpElement = document.getElementById(helpId);
+    
+                    if (helpElement) {
+                        // Toggle the 'active' class
+                        const isActive = helpElement.classList.contains('active');
+    
+                        // Hide all other currently active help elements first
+                        document.querySelectorAll('.help-content.active').forEach(activeHelp => {
+                            // Don't hide the one we are about to show if it was already active
+                            if (activeHelp.id !== helpId || !isActive) {
+                                activeHelp.classList.remove('active');
+                            }
+                        });
+    
+                        // Now toggle the clicked one
+                        helpElement.classList.toggle('active');
+    
+                    } else {
+                        console.warn(`Help content not found for ID: ${helpId}`);
+                    }
+                }
+                // Optional: Hide help if clicking outside trigger/content
+                else if (!event.target.closest('.help-content') && !event.target.matches('.help-trigger')) {
+                     document.querySelectorAll('.help-content.active').forEach(activeHelp => {
+                          activeHelp.classList.remove('active');
+                     });
+                }
+            });
+            // --- END Help Trigger Listener ---
+    
+    
+            console.log("Admin interface loaded.");
+    
+        </script>
 
 </body>
 </html>

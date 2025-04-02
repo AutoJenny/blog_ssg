@@ -140,7 +140,7 @@ def publish_to_clan_api(slug):
     """Triggers the post_to_clan.py script for the given slug."""
     # ... (Function remains the same as previous version) ...
     logging.info(f"Received request to publish/update slug: {slug}")
-    script_path = str(BASE_DIR / 'post_to_clan.py')
+    script_path = str(BASE_DIR / 'scripts' / 'post_to_clan.py')
     markdown_file_relative_path = f"{POSTS_DIR}/{slug}.md"
     markdown_file_abs_path = str(BASE_DIR / markdown_file_relative_path)
     if not os.path.exists(markdown_file_abs_path):

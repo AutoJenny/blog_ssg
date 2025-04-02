@@ -88,18 +88,27 @@ def index():
            )
 
 
-# --- NEW: Post Detail Route ---
+# Add near top imports if missing
+# from pathlib import Path
+# import os
+# import json
+# import frontmatter
+# import logging
+# from flask import ...
+
 @app.route('/admin/post/<string:slug>')
 def view_post_detail(slug):
     """Displays the detailed workflow management page for a single post."""
     logging.info(f"Processing detail route '/admin/post/{slug}'...")
-    md_file_path = BASE_DIR / POSTS_DIR / f"{slug}.md"
-    syndication_data_path = BASE_DIR / SYNDICATION_DATA_FILE # Use updated filename
+    md_file_path = BASE_DIR / POSTS_DIR_NAME / f"{slug}.md" # Use constant
+    workflow_status_path = WORKFLOW_STATUS_FILE # Path object
+    image_library_path = IMAGE_LIBRARY_FILE # Path object
 
     metadata = {}
     status_data = {} # Default empty status
+    images_detailed = [] # To hold detailed info for template
 
-    # Load Markdown Front Matter
+    # 1. Load Markdown Front Matter
     if md_file_path.exists():
         try:
             post_fm = frontmatter.load(md_file_path)
@@ -107,33 +116,130 @@ def view_post_detail(slug):
             logging.info(f"Loaded metadata for '{slug}'.")
         except Exception as e:
             logging.error(f"Error loading front matter for '{slug}': {e}")
-            metadata = {'title': f"Error Loading Post: {slug}"} # Provide error title
+            metadata = {'title': f"Error Loading Post: {slug}"}
     else:
         logging.warning(f"Markdown file not found for slug '{slug}': {md_file_path}")
-        metadata = {'title': f"Post Not Found: {slug}"} # Provide error title
+        metadata = {'title': f"Post Not Found: {slug}"}
 
-    # Load Workflow Status Data
-    workflow_data = load_syndication_data(syndication_data_path)
+    # 2. Load Workflow Status Data
+    workflow_data = load_json_data(workflow_status_path)
     if workflow_data is None:
         logging.error("Failed to load workflow data for detail page.")
-        # Potentially pass an error flag to the template
-    elif slug in workflow_data:
-        status_data = workflow_data[slug]
-        logging.info(f"Loaded workflow status for '{slug}'.")
-    else:
-        logging.warning(f"No workflow status found for slug '{slug}' in {SYNDICATION_DATA_FILE}.")
-        # Template will use default filters if status_data is empty
+        workflow_data = {} # Prevent downstream errors
+    status_data = workflow_data.get(slug, {"stages": {}}) # Get status or provide default structure
 
-    # Pass BASE_DIR needed for vscode:// links in the detail page too if needed later
+    # 3. Load Image Library Data
+    image_library_data = load_json_data(image_library_path)
+    if image_library_data is None:
+        logging.error("Failed to load image library data.")
+        image_library_data = {} # Prevent downstream errors
+
+    # 4. Get Referenced Image IDs from Post Metadata
+    referenced_image_ids = []
+    if metadata.get('headerImageId'):
+        referenced_image_ids.append(metadata['headerImageId'])
+    for section in metadata.get('sections', []):
+        if section.get('imageId'):
+            referenced_image_ids.append(section['imageId'])
+    if metadata.get('conclusion', {}).get('imageId'):
+         referenced_image_ids.append(metadata['conclusion']['imageId'])
+    logging.info(f"Found {len(referenced_image_ids)} image IDs referenced by post '{slug}'.")
+
+    # 5. Process Referenced Images - Calculate Statuses
+    all_image_prompts_defined = True
+    all_image_assets_prepared = True
+    all_image_metadata_integrated = True # Check if essential metadata exists
+    # Watermarking status is tracked separately
+
+    for img_id in referenced_image_ids:
+        img_details = image_library_data.get(img_id)
+        if not img_details:
+            logging.warning(f"Image ID '{img_id}' referenced in post '{slug}' not found in image library.")
+            images_detailed.append({"id": img_id, "error": "Not found in image library"})
+            all_image_prompts_defined = False
+            all_image_assets_prepared = False
+            all_image_metadata_integrated = False
+            continue
+
+        calculated_status = {
+            "id": img_id,
+            "description": img_details.get("description", ""),
+            "prompt": img_details.get("prompt", ""),
+            "notes": img_details.get("notes", ""),
+            "filename_local": img_details.get("source_details", {}).get("filename_local", ""),
+            "local_dir": img_details.get("source_details", {}).get("local_dir", ""),
+            "alt": img_details.get("metadata", {}).get("alt", ""),
+            "blog_caption": img_details.get("metadata", {}).get("blog_caption", ""),
+            # Add syndication details if needed later
+        }
+
+        # Calculate 'prompt_status'
+        if calculated_status["prompt"]:
+            calculated_status["prompt_status"] = "complete"
+        else:
+            calculated_status["prompt_status"] = "pending"
+            all_image_prompts_defined = False
+
+        # Calculate 'assets_prepared_status' (filename exists AND file exists)
+        local_file_path = None
+        if calculated_status["local_dir"] and calculated_status["filename_local"]:
+             local_file_path = BASE_DIR / calculated_status["local_dir"].strip('/') / calculated_status["filename_local"]
+             if local_file_path.is_file():
+                 calculated_status["assets_prepared_status"] = "complete"
+             else:
+                 calculated_status["assets_prepared_status"] = "pending" # File missing
+                 all_image_assets_prepared = False
+        else:
+             calculated_status["assets_prepared_status"] = "pending" # Path info missing
+             all_image_assets_prepared = False
+
+        # Calculate 'metadata_integrated_status' (Check alt and caption)
+        if calculated_status["alt"] and calculated_status["blog_caption"]:
+             calculated_status["metadata_integrated_status"] = "complete"
+        else:
+             calculated_status["metadata_integrated_status"] = "pending"
+             all_image_metadata_integrated = False
+
+        # Get watermarking status directly from stored data
+        calculated_status["watermarking_status"] = img_details.get("watermark_status", "pending")
+
+        images_detailed.append(calculated_status)
+
+    # 6. Determine Overall Image Stage Status (can be refined)
+    # Update the status_data IN MEMORY before passing to template
+    # This uses the calculated statuses based on image_library checks
+    if 'stages' not in status_data: status_data['stages'] = {} # Ensure stages exists
+    if 'images' not in status_data['stages']: status_data['stages']['images'] = {} # Ensure images stage exists
+
+    # Update sub-statuses based on checks
+    status_data['stages']['images']['prompts_defined_status'] = 'complete' if all_image_prompts_defined and referenced_image_ids else 'pending'
+    status_data['stages']['images']['assets_prepared_status'] = 'complete' if all_image_assets_prepared and referenced_image_ids else 'pending'
+    status_data['stages']['images']['metadata_integrated_status'] = 'complete' if all_image_metadata_integrated and referenced_image_ids else 'pending'
+    # Keep stored watermarking status
+    if 'watermarking_status' not in status_data['stages']['images']:
+         status_data['stages']['images']['watermarking_status'] = 'pending' # Default if missing
+
+    # Determine overall image stage status (example logic)
+    if all_image_prompts_defined and all_image_assets_prepared and all_image_metadata_integrated:
+         status_data['stages']['images']['status'] = 'complete' # Only complete if all sub-steps done
+    elif any(s != 'pending' for s in [status_data['stages']['images']['prompts_defined_status'],
+                                      status_data['stages']['images']['assets_prepared_status'],
+                                      status_data['stages']['images']['metadata_integrated_status']]):
+         status_data['stages']['images']['status'] = 'partial'
+    else:
+         status_data['stages']['images']['status'] = 'pending'
+
+    # Note: This doesn't save the calculated statuses back to workflow_status.json yet.
+    # It just calculates them for display on this page load. Saving happens via API calls.
+
     return render_template(
         'admin_post_detail.html',
         slug=slug,
         metadata=metadata,
         status=status_data,
+        images_detailed=images_detailed, # Pass the detailed image list
         config={'BASE_DIR': str(BASE_DIR)}
     )
-# --- End Post Detail Route ---
-
 
 @app.route('/api/publish_clan/<string:slug>', methods=['POST'])
 def publish_to_clan_api(slug):

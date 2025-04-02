@@ -6,53 +6,63 @@
     {# Title uses metadata passed from Flask #}
     <title>Manage: {{ metadata.title | default('Unknown Post') }} - Blog Workflow</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 900px; margin: auto; }
-        h1, h2, h3 { border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 15px; }
+        /* --- Base & General Styles --- */
+        body { font-family: sans-serif; padding: 20px; max-width: 900px; margin: auto; background-color: #fdfdfd; }
+        h1, h2, h3 { border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 15px; color: #333; }
+        h1 { font-size: 1.8em; }
+        h2 { font-size: 1.4em; margin-top: 2em; } /* Added top margin to H2 */
+        h3 { font-size: 1.1em; border-bottom: 1px dotted #ccc; margin-top: 1.5em;}
         a { color: #007bff; text-decoration: none; }
         a:hover { text-decoration: underline; }
-        .back-link { margin-bottom: 20px; display: block; }
-        code { background-color: #eee; padding: 0.1em 0.3em; border-radius: 2px; font-size: 0.95em; }
-        button { padding: 5px 10px; margin-left: 10px; cursor: pointer; font-size: 0.9em;}
+        .back-link { margin-bottom: 20px; display: block; font-size: 0.9em; }
+        code { background-color: #e8e8e8; padding: 0.1em 0.4em; border-radius: 3px; font-size: 0.95em; }
+        button { padding: 5px 10px; margin-left: 10px; cursor: pointer; font-size: 0.9em; border: 1px solid #ccc; border-radius: 3px; background-color: #f0f0f0; }
+        button:hover:not(:disabled) { background-color: #e0e0e0; border-color: #bbb; }
         button:disabled { cursor: not-allowed; opacity: 0.6; }
         small { font-size: 0.85em; }
+        hr { border: none; border-top: 1px solid #eee; margin: 1em 0; }
+        textarea[readonly] { cursor: default; } /* Indicate readonly textarea */
 
-        /* Traffic Light Styles */
+        /* --- Traffic Light Styles --- */
         .traffic-light { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; vertical-align: middle; border: 1px solid rgba(0,0,0,0.1); }
         .traffic-light[data-status="pending"] { background-color: #ccc; /* Grey */ }
         .traffic-light[data-status="partial"] { background-color: #f0ad4e; /* Orange */ }
         .traffic-light[data-status="complete"] { background-color: #5cb85c; /* Green */ }
         .traffic-light[data-status="error"] { background-color: #d9534f; /* Red */ }
 
-        /* Collapsible Section Styles */
-        details.workflow-stage { border: 1px solid #eee; margin-bottom: 10px; border-radius: 4px; }
-        details.workflow-stage summary { padding: 10px; background-color: #f9f9f9; cursor: pointer; font-weight: bold; outline: none; display: flex; align-items: center; }
-        details.workflow-stage[open] summary { border-bottom: 1px solid #eee; }
-        div.stage-content { padding: 15px; border-top: 1px solid #eee; }
-        div.stage-content p { margin-bottom: 0.75em; line-height: 1.5; }
+        /* --- Collapsible Section Styles --- */
+        details.workflow-stage { border: 1px solid #ddd; margin-bottom: 10px; border-radius: 4px; background-color: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        details.workflow-stage summary { padding: 10px 15px; background-color: #f9f9f9; cursor: pointer; font-weight: bold; outline: none; display: flex; align-items: center; border-radius: 3px; transition: background-color 0.2s ease-out; }
+        details.workflow-stage[open] summary { border-bottom: 1px solid #ddd; background-color: #f0f0f0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+        div.stage-content { padding: 20px; border-top: none; background-color: #ffffff; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; }
+        div.stage-content p { margin-bottom: 0.8em; line-height: 1.5; }
         div.stage-content p:last-child { margin-bottom: 0; }
         div.stage-content .status-text { font-weight: bold; }
+        ul.image-detail-list { list-style: none; padding: 0; }
+        ul.image-detail-list li { border: 1px solid #eee; margin-bottom: 15px; padding: 15px; border-radius: 3px; background-color: #fafafa;} /* Style image list items */
 
-        /* Help System Styles */
+        /* --- Help System Styles --- */
         .help-trigger { display: inline-block; width: 16px; height: 16px; line-height: 16px; margin-left: 6px; font-size: 11px; font-weight: bold; text-align: center; color: #fff; background-color: #77aaff; border-radius: 50%; cursor: pointer; user-select: none; vertical-align: middle; transition: background-color 0.2s ease; }
         .help-trigger:hover { background-color: #4477cc; }
-        .help-content { display: none; position: absolute; background-color: #ffffe0; border: 1px solid #ccc; border-radius: 4px; padding: 10px 15px; box-shadow: 2px 2px 5px rgba(0,0,0,0.15); z-index: 10; left: 25px; top: 0; width: 300px; font-size: 0.9em; line-height: 1.5; letter-spacing: normal; text-align: left; }
+        .help-content { display: none; position: absolute; background-color: #ffffe0; border: 1px solid #ccc; border-radius: 4px; padding: 10px 15px; box-shadow: 2px 2px 5px rgba(0,0,0,0.15); z-index: 10; margin-left: 5px; margin-top: -5px; /* Adjust positioning */ width: 350px; font-size: 0.9em; line-height: 1.5; letter-spacing: normal; text-align: left; }
         .help-content p, .help-content ul, .help-content ol { margin-bottom: 0.8em; letter-spacing: normal; }
         .help-content ul, .help-content ol { padding-left: 1.5em; }
         .help-content code { background-color: #eee; padding: 0.1em 0.3em; border-radius: 2px; font-size: 0.95em; }
         .help-content.active { display: block; }
         h2 > .help-trigger { vertical-align: baseline; }
-        h2 + .help-content { top: 25px; left: 0; }
+        /* h2 + .help-content { position: static; display: block; border: 1px dashed blue; margin-top: -10px; margin-bottom: 10px; } */ /* Alternative non-popup display */
 
-        /* Log Output Styles */
-        #log-output { margin-top: 20px; padding: 10px; border: 1px solid #eee; background-color: #f8f8f8; min-height: 100px; white-space: pre-wrap; font-family: monospace; font-size: 0.9em; max-height: 300px; overflow-y: auto; }
-        #log-output div { margin-bottom: 2px; line-height: 1.3; }
+        /* --- Log Output Styles --- */
+        #log-output { margin-top: 20px; padding: 10px; border: 1px solid #ccc; background-color: #f0f0f0; /* Slightly darker log */ min-height: 100px; white-space: pre-wrap; font-family: monospace; font-size: 0.9em; max-height: 300px; overflow-y: auto; border-radius: 3px;}
+        #log-output div { margin-bottom: 2px; line-height: 1.3; border-bottom: 1px dotted #ccc; padding-bottom: 2px; }
+        #log-output div:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
     <p class="back-link"><a href="{{ url_for('index') }}">← Back to Post List</a></p>
 
     <h1>Manage: {{ metadata.title | default('Post Details') }}</h1>
-    <p><strong>Slug:</strong> <code>{{ slug }}</code></p>
+    <p><strong>Slug:</strong> <code>{{ slug }}</code> <a href="vscode://file/{{ config.BASE_DIR }}/posts/{{ slug }}.md" title="Edit Markdown File in VS Code" style="font-size: 0.8em; margin-left: 5px;">(Edit MD)</a> </p>
 
     <section id="workflow-stages">
         <h2>Workflow Stages <span class="help-trigger" data-help-id="manage-posts-main-help" title="Help for Manage Posts Section">?</span></h2>
@@ -72,7 +82,7 @@
                     {% if current_status != 'complete' %}<button class="status-update-button" data-slug="{{ slug }}" data-stage="conceptualisation" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
                     {% if current_status != 'pending' %}<button class="status-update-button" data-slug="{{ slug }}" data-stage="conceptualisation" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
                 </p>
-                <p>Notes: {{ status.stages.conceptualisation.notes | default('N/A') }}</p>
+                <p>Notes: {{ status.stages.conceptualisation.notes | default('N/A') }}</p> {# Add textarea later #}
             </div>
         </details>
 
@@ -90,7 +100,7 @@
                     {% if current_status != 'complete' %}<button class="status-update-button" data-slug="{{ slug }}" data-stage="authoring" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
                     {% if current_status != 'pending' %}<button class="status-update-button" data-slug="{{ slug }}" data-stage="authoring" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
                 </p>
-                <p><strong>HTML Formatting Status:</strong> <span class="traffic-light" data-status="{{ status.stages.authoring.text_format_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.authoring.text_format_status | default('pending') }}</code></p>
+                <p><strong>HTML Formatting Status:</strong> <span class="traffic-light" data-status="{{ status.stages.authoring.text_format_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.authoring.text_format_status | default('pending') }}</code></p> {# Sub-status - no button for now #}
             </div>
         </details>
 
@@ -125,29 +135,62 @@
                  IV. Image Workflow
             </summary>
             <div class="stage-content">
-                <p>Define prompts, generate/select, rename/place, watermark (optional), integrate paths/alt/captions.</p>
+                <p>Define prompts, generate/select, rename/place, watermark (optional), integrate IDs into MD.</p>
                  <p>
-                     <strong>Overall Status:</strong> <code class="status-text">{{ status.stages.images.status | default('pending') }}</code>
+                     <strong>Overall Stage Status:</strong> <code class="status-text">{{ status.stages.images.status | default('pending') }}</code>
                      {% set current_status = status.stages.images.status | default('pending') %}
-                     {% if current_status != 'complete' %}<button class="status-update-button" data-slug="{{ slug }}" data-stage="images" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
+                     {% if current_status != 'complete' %}<button class="status-update-button" data-slug="{{ slug }}" data-stage="images" data-new-status="complete" title="Mark this stage as fully complete (Manual Override)">Mark Complete</button>{% endif %}
                      {% if current_status != 'pending' %}<button class="status-update-button" data-slug="{{ slug }}" data-stage="images" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
                  </p>
                  <hr>
-                 <p><strong>Prompts Defined:</strong> <span class="traffic-light" data-status="{{ status.stages.images.prompts_defined_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.images.prompts_defined_status | default('pending') }}</code></p>
-                 <p><strong>Image Generation/Selection:</strong> <span class="traffic-light" data-status="{{ status.stages.images.generation_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.images.generation_status | default('pending') }}</code></p>
-                 <p><strong>Assets Prepared (Renamed/Placed):</strong> <span class="traffic-light" data-status="{{ status.stages.images.assets_prepared_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.images.assets_prepared_status | default('pending') }}</code></p>
-                 <p><strong>Metadata Integrated (src/alt/caption):</strong> <span class="traffic-light" data-status="{{ status.stages.images.metadata_integrated_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.images.metadata_integrated_status | default('pending') }}</code></p>
-                 <p><strong>Watermarking Status:</strong> <span class="traffic-light" data-status="{{ status.stages.images.watermarking_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.images.watermarking_status | default('pending') }}</code></p>
-                 <p style="margin-top: 1em;">
-                     {% set assets_ready = status.stages.images.assets_prepared_status == 'complete' %}
-                     <button class="watermark-button" data-slug="{{ slug }}"
-                             {{ 'disabled' if not assets_ready }}
-                             title="{{ 'Run the watermarking script' if assets_ready else 'Assets must be prepared first' }}">
-                         Run Watermark Script
-                     </button>
-                     <span class="help-trigger" data-help-id="watermark-help-{{ slug }}" title="Help for Watermarking">?</span>
-                     <div class="help-content" id="watermark-help-{{ slug }}">{% include 'help/watermark_help.njk' %}</div> {# Placeholder - create this help file #}
-                 </p>
+
+                 {# --- Loop through detailed image list passed from Flask --- #}
+                 <h3>Images for this Post:</h3>
+                 {% if images_detailed %}
+                    <ul class="image-detail-list">
+                    {% for img_info in images_detailed %}
+                        <li>
+                            {% if img_info.error %}
+                                <p style="color: red;"><strong>Error:</strong> Image ID <code>{{ img_info.id }}</code> - {{ img_info.error }}</p>
+                            {% else %}
+                                <p><strong>ID:</strong> <code>{{ img_info.id }}</code> | <strong>File:</strong> <code>{{ img_info.filename_local | default('N/A') }}</code></p>
+                                <p><i>Description: {{ img_info.description | default('N/A') }}</i></p>
+
+                                <p style="margin-top: 0.5em;">
+                                    <strong>Prompt Status:</strong> <span class="traffic-light" data-status="{{ img_info.prompt_status }}"></span> <code class="status-text">{{ img_info.prompt_status }}</code>
+                                    <button disabled style="font-size:0.8em; padding: 2px 5px;">Edit Prompt</button> {# Placeholder #}
+                                </p>
+                                <textarea readonly style="width: 95%; min-height: 60px; font-size: 0.85em; background-color: #f8f8f8; border: 1px dashed #ccc; padding: 5px; margin-bottom: 0.5em;">{{ img_info.prompt | default('No prompt defined.') }}</textarea>
+
+                                <p>
+                                    <strong>Assets Prepared (File Exists):</strong> <span class="traffic-light" data-status="{{ img_info.assets_prepared_status }}"></span> <code class="status-text">{{ img_info.assets_prepared_status }}</code>
+                                </p>
+                                <p>
+                                    <strong>Metadata Integrated (Alt & Caption):</strong> <span class="traffic-light" data-status="{{ img_info.metadata_integrated_status }}"></span> <code class="status-text">{{ img_info.metadata_integrated_status }}</code>
+                                    <button disabled style="font-size:0.8em; padding: 2px 5px;">Edit Meta</button> {# Placeholder #}
+                                     <small>(Alt: {{ img_info.alt | truncate(30) | default('N/A') }} | Caption: {{ img_info.blog_caption | truncate(30) | default('N/A') }})</small>
+                                </p>
+                                <p>
+                                    <strong>Watermarking Status:</strong> <span class="traffic-light" data-status="{{ img_info.watermarking_status }}"></span> <code class="status-text">{{ img_info.watermarking_status }}</code>
+                                     <button class="watermark-button" data-slug="{{ slug }}" data-image-id="{{ img_info.id }}"
+                                             {{ 'disabled' if img_info.assets_prepared_status != 'complete' }}
+                                             title="{{ 'Run watermarking for this image' if img_info.assets_prepared_status == 'complete' else 'Image file must exist first' }}">
+                                         Watermark This Image
+                                     </button>
+                                     <span class="help-trigger" data-help-id="watermark-help-{{ img_info.id }}" title="Help for Watermarking">?</span> {# Changed ID #}
+                                     <div class="help-content" id="watermark-help-{{ img_info.id }}">{% include 'help/watermark_help.njk' %}</div>
+                                </p>
+                                {% if img_info.notes %}
+                                <p><small>Notes: {{ img_info.notes }}</small></p>
+                                {% endif %}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                    </ul>
+                 {% else %}
+                    <p>No images referenced by this post.</p>
+                 {% endif %}
+                 {# --- END Image Loop --- #}
             </div>
         </details>
 
@@ -171,7 +214,6 @@
                      <span class="help-trigger" data-help-id="preview-help-{{ slug }}" title="Help for Preview Locally Link">?</span>
                      <div class="help-content" id="preview-help-{{ slug }}">{% include 'help/preview_local_help.njk' %}</div>
                  </p>
-                 {# Add button to mark preview OK later #}
             </div>
         </details>
 
@@ -193,12 +235,14 @@
                 <p><strong>Last Attempt:</strong> {{ status.stages.publishing_clancom.last_publish_attempt | default('N/A') }}</p>
                 <p><strong>Last Error:</strong> <code style="color: red;">{{ status.stages.publishing_clancom.last_error | default('None') }}</code></p>
                 <p style="margin-top: 1em;">
-                     {# --- UPDATED: Conditional Disable for Publish Button --- #}
-                     {% set watermark_done = status.stages.images.watermarking_status == 'complete' %}
-                     {# You might add other checks, e.g. validation complete: and status.stages.validation.status == 'complete' #}
+                     {% set watermark_status = status.stages.images.watermarking_status | default('pending') %} {# Use default filter #}
+                     {% set validation_status = status.stages.validation.status | default('pending') %} {# Use default filter #}
+                     {% set watermark_done = watermark_status == 'complete' %}
+                     {% set validation_done = validation_status == 'complete' %}
+                     {% set ready_to_publish = watermark_done and validation_done %}
                      <button class="publish-clan-button" data-slug="{{ slug }}"
-                             {{ 'disabled' if not watermark_done }}
-                             title="{{ 'Publish or Update post on Clan.com' if watermark_done else 'Watermarking must be complete first' }}">
+                             {{ 'disabled' if not ready_to_publish }}
+                             title="{{ 'Publish or Update post on Clan.com' if ready_to_publish else 'Complete Image Watermarking and Local Validation first' }}">
                          Publish/Update Clan.com Now
                      </button>
                      <span class="help-trigger" data-help-id="publish-help-{{ slug }}" title="Help for Publish/Update Clan.com Button">?</span>
@@ -230,7 +274,7 @@
                     <button class="syndicate-button" data-slug="{{ slug }}" data-platform="instagram" disabled title="Instagram syndication not yet implemented">Syndicate to Instagram</button>
                     <button class="syndicate-button" data-slug="{{ slug }}" data-platform="facebook" disabled title="Facebook syndication not yet implemented">Syndicate to Facebook</button>
                     <span class="help-trigger" data-help-id="syndicate-help-{{ slug }}" title="Help for Syndication">?</span>
-                    <div class="help-content" id="syndicate-help-{{ slug }}">{% include 'help/syndicate_help.njk' %}</div> {# Placeholder - create this help file #}
+                    <div class="help-content" id="syndicate-help-{{ slug }}">{% include 'help/syndicate_help.njk' %}</div>
                 </p>
             </div>
         </details>
@@ -244,9 +288,11 @@
 
     <!-- JavaScript for interactions -->
     <script>
-        // ... (JavaScript remains the same as previous version) ...
         const logOutput = document.getElementById('log-output');
+        // Use body for delegated listeners to catch clicks anywhere
         document.body.addEventListener('click', function(event) {
+
+            // --- Handle Publish Button ---
             if (event.target.matches('.publish-clan-button')) {
                 const button = event.target; const slug = button.dataset.slug; if (!slug) { logMessage("Error: No slug found.", true); return; }
                 logMessage(`Starting Publish/Update job for '${slug}'...`); button.disabled = true; button.textContent = 'Processing...';
@@ -261,6 +307,7 @@
                 }).catch(error => { logMessage(`Error during fetch for '${slug}': ${error.message}`, true); console.error('Fetch Error:', error); })
                 .finally(() => { if (button.textContent !== 'Success!') { button.disabled = false; button.textContent = 'Publish/Update Clan.com Now'; } });
             }
+            // --- Handle Status Update Buttons ---
             else if (event.target.matches('.status-update-button')) {
                 const button = event.target; const slug = button.dataset.slug; const stageKey = button.dataset.stage; const newStatus = button.dataset.newStatus;
                 if (!slug || !stageKey || !newStatus) { logMessage("Error: Missing data on status button.", true); return; }
@@ -270,8 +317,30 @@
                 .then(data => { if (data.success) { logMessage(`Status updated for '${data.slug}/${data.stage}' to '${data.new_status}'. Reloading...`); window.location.reload(); } else { logMessage(`Error: ${data.message}`, true); alert(`Error: ${data.message}`); button.disabled = false; } })
                 .catch(error => { logMessage(`Error during status update fetch for '${slug}/${stageKey}': ${error.message}`, true); console.error('Fetch Error:', error); button.disabled = false; });
             }
-             else if (event.target.matches('.help-trigger')) { /* ... Help logic ... */ }
-             else if (!event.target.closest('.help-content') && !event.target.matches('.help-trigger')) { /* ... Hide help logic ... */ }
+             // --- Handle Help Trigger Clicks ---
+             else if (event.target.matches('.help-trigger')) {
+                 const trigger = event.target;
+                 const helpId = trigger.dataset.helpId;
+                 const helpElement = document.getElementById(helpId);
+                 if (helpElement) {
+                     const isActive = helpElement.classList.contains('active');
+                     // Close others *before* toggling the current one
+                     document.querySelectorAll('.help-content.active').forEach(activeHelp => {
+                         if (activeHelp.id !== helpId) { // Only close *other* active ones
+                             activeHelp.classList.remove('active');
+                         }
+                     });
+                     // Now toggle the one that was clicked
+                     helpElement.classList.toggle('active');
+                 } else { console.warn(`Help content not found for ID: ${helpId}`); }
+             }
+             // --- Handle clicking outside help ---
+             // Updated: Check if click target is NOT a trigger AND NOT inside an active help box
+             else if (!event.target.matches('.help-trigger') && !event.target.closest('.help-content.active')) {
+                  document.querySelectorAll('.help-content.active').forEach(activeHelp => {
+                       activeHelp.classList.remove('active');
+                  });
+             }
         });
         console.log("Admin interface loaded.");
     </script>

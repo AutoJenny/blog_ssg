@@ -101,26 +101,75 @@ def extract_html_content(built_html_path, selector):
         logging.error(f"Error parsing, modifying, or extracting HTML from file {built_html_path}: {e}")
         return None
 
-def upload_image_to_clan(local_image_path):
+# Add this near other imports if not already present
+# from pathlib import Path # Already imported
+# import json # Already imported
+# import os # Already imported
+# import requests # Already imported
+# import logging # Already imported
+# import re # Already imported
+# from urllib.parse import urlparse # Already imported
+
+# Assume BASE_DIR is defined globally or passed appropriately later in main
+# BASE_DIR = Path(__file__).resolve().parent # Example if needed standalone
+
+# --- UPDATED FUNCTION ---
+def upload_image_to_clan(image_id, image_library_data):
     """
-    Uploads a single image. Handles URL in response message.
+    Uploads a single image identified by its ID using data from image_library.
+    Parses URL from response message.
     Returns the relative path needed for thumbnail fields (e.g., /blog/image.jpg)
     or None on failure.
+
+    Args:
+        image_id (str): The unique ID of the image (e.g., "IMG00001").
+        image_library_data (dict): The loaded content of _data/image_library.json.
+
+    Returns:
+        str | None: Relative path like /blog/filename.jpg on success, None otherwise.
     """
     api_function = "uploadImage"
     url = f"{API_BASE_URL}{api_function}"
-    logging.info(f"Uploading image: {local_image_path}...")
-    if not os.path.exists(local_image_path): logging.error(f"  Image file not found: {local_image_path}"); return None
+    logging.info(f"Attempting upload for Image ID: {image_id}...")
+
+    # --- Look up image details ---
+    img_entry = image_library_data.get(image_id)
+    if not img_entry:
+        logging.error(f"  Image ID '{image_id}' not found in image_library data.")
+        return None
+
+    source_details = img_entry.get("source_details", {})
+    local_dir = source_details.get("local_dir")
+    filename_local = source_details.get("filename_local")
+
+    if not local_dir or not filename_local:
+        logging.error(f"  Missing 'local_dir' or 'filename_local' for Image ID '{image_id}'.")
+        return None
+
+    # Construct absolute local path
+    # Assume BASE_DIR is accessible (e.g., defined globally in the script)
+    full_local_path = BASE_DIR / local_dir.strip('/') / filename_local
+    logging.info(f"  Found local path: {full_local_path}")
+
+    if not os.path.exists(full_local_path):
+        logging.error(f"  Image file not found at calculated path: {full_local_path}")
+        return None
+    # --- End lookup ---
+
     payload = {'api_user': API_USER, 'api_key': API_KEY}
     thumbnail_submit_path = None
+
     try:
-        with open(local_image_path, 'rb') as f:
-            upload_filename = os.path.basename(local_image_path)
-            files = {'image_file': (upload_filename, f)} # Confirm key
+        with open(full_local_path, 'rb') as f:
+            # Use the unique filename from image_library
+            files = {'image_file': (filename_local, f)} # Confirm 'image_file' key
             verify_ssl = True
             if not verify_ssl: import urllib3; urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning); logging.warning("  SSL verification disabled!")
+
             response = requests.post(url, data=payload, files=files, timeout=60, verify=verify_ssl)
-            response.raise_for_status()
+            response.raise_for_status() # Check for HTTP errors first
+
+        # Parse response (assuming JSON message structure)
         try:
              response_data = response.json()
              logging.debug(f"  Upload API JSON Response: {response_data}")
@@ -130,19 +179,28 @@ def upload_image_to_clan(local_image_path):
                  if url_match:
                      full_public_url = url_match.group(1).strip()
                      logging.info(f"  Raw success message URL: {full_public_url}")
-                     path_part = urlparse(full_public_url).path
+                     path_part = urlparse(full_public_url).path # e.g., /media/blog/kilt-evolution_header.jpg
                      if path_part.startswith(MEDIA_URL_PREFIX_EXPECTED):
-                          image_filename_part = path_part[len(MEDIA_URL_PREFIX_EXPECTED):]
-                          thumbnail_submit_path = MEDIA_URL_SUBMIT_PREFIX + image_filename_part.lstrip('/')
+                          image_filename_part = path_part[len(MEDIA_URL_PREFIX_EXPECTED):] # -> kilt-evolution_header.jpg
+                          thumbnail_submit_path = MEDIA_URL_SUBMIT_PREFIX + image_filename_part.lstrip('/') # -> /blog/kilt-evolution_header.jpg
                           logging.info(f"  Upload successful. Relative path for API thumbnails: {thumbnail_submit_path}")
+                          # --- IMPORTANT: Update image library data IN MEMORY ---
+                          # The main function will handle saving the entire updated library later
+                          image_library_data[image_id]["source_details"]["public_url"] = full_public_url
+                          image_library_data[image_id]["source_details"]["uploaded_path_relative"] = thumbnail_submit_path
                      else:
                           logging.error(f"  Extracted URL path '{path_part}' does not start with expected prefix '{MEDIA_URL_PREFIX_EXPECTED}'")
                  else: logging.error("  Upload successful but could not parse URL from message.")
              else: logging.error(f"  Upload API response indicates failure or unexpected format: {response_data}")
-        except json.JSONDecodeError: logging.error(f"  Failed to decode JSON response from image upload API. Status: {response.status_code}. Body: {response.text[:500]}...")
+        except json.JSONDecodeError:
+             logging.error(f"  Failed to decode JSON response from image upload API. Status: {response.status_code}. Body: {response.text[:500]}...")
+
+    # ... (Error handling: HTTPError, RequestException, Exception remains same) ...
     except requests.exceptions.HTTPError as e: logging.error(f"  HTTP error during image upload: {e}")
     except requests.exceptions.RequestException as e: logging.error(f"  Network error during image upload: {e}")
     except Exception as e: logging.error(f"  Unexpected error during image upload: {e}")
+
+    # Return the path needed for thumbnails, or None if failed
     return thumbnail_submit_path
 
 def _prepare_api_args(post_metadata):

@@ -106,7 +106,7 @@
                 <ul class="post-list">
                     {% for post in posts %}
                         <li class="post-list-item" data-post-slug="{{ post.slug }}">
-                            <strong>{{ post.title }}</strong>
+                            <strong><a href="{{ url_for('view_post_detail', slug=post.slug) }}">{{ post.title }}</a></strong>
                             <br>
                             <small>Slug: <code>{{ post.slug }}</code></small>
                             <a href="vscode://file/{{ config.BASE_DIR }}/posts/{{ post.slug }}.md" title="Edit Markdown File in VS Code" style="font-size: 0.8em; margin-left: 5px;">(Edit MD)</a>

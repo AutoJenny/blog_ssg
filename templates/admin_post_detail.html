@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {# Title uses metadata passed from Flask #}
+    <title>Manage: {{ metadata.title | default('Unknown Post') }} - Blog Workflow</title>
+    {# Link to a potential shared CSS or use inline styles for now #}
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 900px; margin: auto; }
+        h1, h2, h3 { border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 15px; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .back-link { margin-bottom: 20px; display: block; }
+        
+        /* Add styles for details/summary/traffic light later */
+        /* Add these styles inside the <style> tag */
+            .traffic-light {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            vertical-align: middle;
+            border: 1px solid rgba(0,0,0,0.1); /* Subtle border */
+        }
+        .traffic-light[data-status="pending"] { background-color: #ccc; /* Grey */ }
+        .traffic-light[data-status="partial"] { background-color: #f0ad4e; /* Orange */ }
+        .traffic-light[data-status="complete"] { background-color: #5cb85c; /* Green */ }
+        .traffic-light[data-status="error"] { background-color: #d9534f; /* Red */ }
+
+        details.workflow-stage {
+            border: 1px solid #eee;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        details.workflow-stage summary {
+            padding: 10px;
+            background-color: #f9f9f9;
+            cursor: pointer;
+            font-weight: bold;
+            outline: none; /* Remove default focus outline if desired */
+        }
+         details.workflow-stage[open] summary {
+             border-bottom: 1px solid #eee;
+         }
+        div.stage-content {
+            padding: 15px;
+            border-top: 1px solid #eee; /* Separator when open */
+        }
+        div.stage-content p { margin-bottom: 0.5em;}
+        div.stage-content code { background-color: #eee; padding: 0.1em 0.3em; border-radius: 2px; }
+        div.stage-content .status-text { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <p class="back-link"><a href="{{ url_for('index') }}">← Back to Post List</a></p>
+
+    {# Display Title from metadata #}
+    <h1>Manage: {{ metadata.title | default('Post Details') }}</h1>
+    <p><strong>Slug:</strong> <code>{{ slug }}</code></p>
+
+    <section id="workflow-stages">
+        <h2>Workflow Stages</h2>
+
+        {# --- Stage I: Conceptualisation --- #}
+        <details class="workflow-stage" data-stage-key="conceptualisation">
+            <summary>
+                <span class="traffic-light" data-status="{{ status.stages.conceptualisation.status | default('pending') }}"></span>
+                I. Conceptualisation
+            </summary>
+            <div class="stage-content">
+                <p>Define the core idea, Title, Subtitle, and URL Slug.</p>
+                <p><strong>Status:</strong> <code class="status-text">{{ status.stages.conceptualisation.status | default('pending') }}</code></p>
+                {# Add form elements for notes/status later #}
+            </div>
+        </details>
+
+        {# --- Stage II: Authoring --- #}
+        <details class="workflow-stage" data-stage-key="authoring">
+            <summary>
+                <span class="traffic-light" data-status="{{ status.stages.authoring.status | default('pending') }}"></span>
+                II. Content Authoring & Structuring
+            </summary>
+            <div class="stage-content">
+                <p>Generate/write, review, edit, structure, and format the text content (Summary, Sections, Conclusion) using HTML.</p>
+                <p><strong>Overall Status:</strong> <code class="status-text">{{ status.stages.authoring.status | default('pending') }}</code></p>
+                <p><strong>HTML Formatting Status:</strong> <span class="traffic-light" data-status="{{ status.stages.authoring.text_format_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.authoring.text_format_status | default('pending') }}</code></p>
+                {# Add form elements later #}
+            </div>
+        </details>
+
+        {# --- Stage III: Metadata & File Setup --- #}
+        <details class="workflow-stage" data-stage-key="metadata">
+            <summary>
+                <span class="traffic-light" data-status="{{ status.stages.metadata.status | default('pending') }}"></span>
+                III. Metadata & File Setup
+            </summary>
+            <div class="stage-content">
+                <p>Create the `.md` file and populate YAML front matter (Title, Subtitle, Description, Date, Author Key, Tags, Content Placeholders).</p>
+                <p><strong>Overall Status:</strong> <code class="status-text">{{ status.stages.metadata.status | default('pending') }}</code></p>
+                <p><strong>Front Matter:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.front_matter_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.front_matter_status | default('pending') }}</code></p>
+                <p><strong>Tags Defined:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.tags_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.tags_status | default('pending') }}</code></p>
+                <p><strong>Author Assigned:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.author_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.author_status | default('pending') }}</code></p>
+                 {# Display metadata for reference #}
+                 <p><i>Title: {{ metadata.title }}</i></p>
+                 <p><i>Author Key: {{ metadata.author }}</i></p>
+                 <p><i>Tags: {{ metadata.tags | join(', ') }}</i></p>
+                {# Add form elements later #}
+            </div>
+        </details>
+
+        {# --- Stage IV: Image Workflow --- #}
+        <details class="workflow-stage" data-stage-key="images">
+            <summary>
+                <span class="traffic-light" data-status="{{ status.stages.images.status | default('pending') }}"></span>
+                IV. Image Workflow
+            </summary>
+            <div class="stage-content">
+                <p>Define prompts, generate/select images, rename/place assets, integrate paths/alt/captions into front matter.</p>
+                 <p><strong>Overall Status:</strong> <code class="status-text">{{ status.stages.images.status | default('pending') }}</code></p>
+                 <p><strong>Prompts Defined:</strong> <span class="traffic-light" data-status="{{ status.stages.images.prompts_defined_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.images.prompts_defined_status | default('pending') }}</code></p>
+                 <p><strong>Image Generation/Selection:</strong> <span class="traffic-light" data-status="{{ status.stages.images.generation_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.images.generation_status | default('pending') }}</code></p>
+                 <p><strong>Assets Prepared (Renamed/Placed):</strong> <span class="traffic-light" data-status="{{ status.stages.images.assets_prepared_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.images.assets_prepared_status | default('pending') }}</code></p>
+                 <p><strong>Metadata Integrated (src/alt/caption):</strong> <span class="traffic-light" data-status="{{ status.stages.images.metadata_integrated_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.images.metadata_integrated_status | default('pending') }}</code></p>
+                 {# Add image list and editing forms later #}
+            </div>
+        </details>
+
+        {# --- Stage V: Local Validation --- #}
+        <details class="workflow-stage" data-stage-key="validation">
+            <summary>
+                <span class="traffic-light" data-status="{{ status.stages.validation.status | default('pending') }}"></span>
+                V. Local Validation
+            </summary>
+            <div class="stage-content">
+                <p>Run `npm start` and preview the post locally at `http://localhost:8080/{{ slug }}/`. Check everything thoroughly.</p>
+                <p><strong>Status:</strong> <code class="status-text">{{ status.stages.validation.status | default('pending') }}</code></p>
+                <p><strong>Last Preview OK:</strong> {{ 'Yes' if status.stages.validation.last_preview_ok else 'No / Not Yet Run' }}</p>
+                 {# Add button to mark as previewed/ok later #}
+            </div>
+        </details>
+
+        {# --- Stage VI: Publishing (Clan.com) --- #}
+        <details class="workflow-stage" data-stage-key="publishing_clancom">
+            <summary>
+                <span class="traffic-light" data-status="{{ status.stages.publishing_clancom.status | default('pending') }}"></span>
+                VI. Publishing (Clan.com)
+            </summary>
+            <div class="stage-content">
+                <p>Uses the interface button to run `post_to_clan.py` script, which uploads images and creates/updates the post via API.</p>
+                <p><strong>Status:</strong> <code class="status-text">{{ status.stages.publishing_clancom.status | default('pending') }}</code></p>
+                <p><strong>Clan.com Post ID:</strong> <code>{{ status.stages.publishing_clancom.post_id | default('N/A') }}</code></p>
+                <p><strong>Last Attempt:</strong> {{ status.stages.publishing_clancom.last_publish_attempt | default('N/A') }}</p>
+                <p><strong>Last Error:</strong> <code style="color: red;">{{ status.stages.publishing_clancom.last_error | default('None') }}</code></p>
+                {# --- Action Button (Moved here later) --- #}
+                <!-- <button class="publish-clan-button" data-slug="{{ slug }}">Publish/Update Clan.com</button> -->
+                {# Add link to live post if ID exists #}
+                {% if status.stages.publishing_clancom.post_id %}
+                    <p><a href="https://clan.com/blog/{{ slug }}.html" target="_blank">View Live Post (Check URL structure)</a></p> {# Adjust URL structure if needed #}
+                {% endif %}
+            </div>
+        </details>
+
+         {# --- Stage VII: Watermarking --- #}
+        <details class="workflow-stage" data-stage-key="watermarking">
+            <summary>
+                <span class="traffic-light" data-status="{{ status.stages.watermarking.status | default('pending') }}"></span>
+                VII. Watermarking Images (Optional)
+            </summary>
+            <div class="stage-content">
+                <p>Run the `watermark_images.py` script to create watermarked versions in a separate directory.</p>
+                <p><strong>Status:</strong> <code class="status-text">{{ status.stages.watermarking.status | default('pending') }}</code></p>
+                <p><strong>Watermarked Images Used in Last Publish:</strong> {{ 'Yes' if status.stages.watermarking.used_in_publish else 'No' }}</p>
+                {# Add button to trigger script later #}
+            </div>
+        </details>
+
+        {# --- Stage VIII: Social Media Syndication --- #}
+        <details class="workflow-stage" data-stage-key="syndication">
+            <summary>
+                <span class="traffic-light" data-status="{{ status.stages.syndication.status | default('pending') }}"></span>
+                VIII. Social Media Syndication (Future)
+            </summary>
+            <div class="stage-content">
+                <p>Prepare platform-specific content (captions, hashtags) in `_data/syndication.json` and run the syndication script.</p>
+                <p><strong>Overall Status:</strong> <code class="status-text">{{ status.stages.syndication.status | default('pending') }}</code></p>
+                <p><strong>Instagram:</strong> <span class="traffic-light" data-status="{{ status.stages.syndication.instagram.overall_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.syndication.instagram.overall_status | default('pending') }}</code></p>
+                <p><strong>Facebook:</strong> <span class="traffic-light" data-status="{{ status.stages.syndication.facebook.overall_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.syndication.facebook.overall_status | default('pending') }}</code></p>
+                 {# Add buttons/status details later #}
+            </div>
+        </details>
+
+        {# Remove temporary status display #}
+        <!-- <p>Status Data Received:</p>
+        <pre><code>{{ status | tojson(indent=2) | safe }}</code></pre> -->
+
+    </section>
+
+    <section id="log-section" style="margin-top: 30px;">
+        <h2>Action Log / Output</h2>
+        <pre id="log-output" style="border: 1px solid #eee; background-color: #f8f8f8; min-height: 100px; padding: 10px; white-space: pre-wrap; font-family: monospace; font-size: 0.9em; max-height: 300px; overflow-y: auto;">(Action output will appear here)</pre>
+    </section>
+
+    <!-- Add JS later -->
+
+</body>
+</html>

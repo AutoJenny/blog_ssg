@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {# Title uses metadata passed from Flask #}
     <title>Manage: {{ metadata.title | default('Unknown Post') }} - Blog Workflow</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
         /* --- Base & General Styles --- */
         body { font-family: sans-serif; padding: 20px; max-width: 900px; margin: auto; background-color: #fdfdfd; }
@@ -12,16 +14,11 @@
         h1 { font-size: 1.8em; }
         h2 { font-size: 1.4em; margin-top: 2em; } /* Added top margin to H2 */
         h3 { font-size: 1.1em; border-bottom: 1px dotted #ccc; margin-top: 1.5em;}
-        a { color: #007bff; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        .back-link { margin-bottom: 20px; display: block; font-size: 0.9em; }
-        code { background-color: #e8e8e8; padding: 0.1em 0.4em; border-radius: 3px; font-size: 0.95em; }
-        button { padding: 5px 10px; margin-left: 10px; cursor: pointer; font-size: 0.9em; border: 1px solid #ccc; border-radius: 3px; background-color: #f0f0f0; }
-        button:hover:not(:disabled) { background-color: #e0e0e0; border-color: #bbb; }
-        button:disabled { cursor: not-allowed; opacity: 0.6; }
         small { font-size: 0.85em; }
         hr { border: none; border-top: 1px solid #eee; margin: 1em 0; }
-        textarea[readonly] { cursor: default; } /* Indicate readonly textarea */
+        textarea[readonly] { cursor: default; background-color: #f8f8f8 !important; } /* Indicate readonly textarea */
+        .back-link { margin-bottom: 20px; display: block; font-size: 0.9em; }
+        code { background-color: #e8e8e8; padding: 0.1em 0.4em; border-radius: 3px; font-size: 0.95em; }
 
         /* --- Traffic Light Styles --- */
         .traffic-light { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; vertical-align: middle; border: 1px solid rgba(0,0,0,0.1); }
@@ -31,291 +28,498 @@
         .traffic-light[data-status="error"] { background-color: #d9534f; /* Red */ }
 
         /* --- Collapsible Section Styles --- */
-        details.workflow-stage { border: 1px solid #ddd; margin-bottom: 10px; border-radius: 4px; background-color: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        details.workflow-stage summary { padding: 10px 15px; background-color: #f9f9f9; cursor: pointer; font-weight: bold; outline: none; display: flex; align-items: center; border-radius: 3px; transition: background-color 0.2s ease-out; }
-        details.workflow-stage[open] summary { border-bottom: 1px solid #ddd; background-color: #f0f0f0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-        div.stage-content { padding: 20px; border-top: none; background-color: #ffffff; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; }
+        .workflow-stage summary { padding: 10px 15px; background-color: #f9f9f9; cursor: pointer; font-weight: bold; outline: none; display: flex; align-items: center; border-radius: 3px; transition: background-color 0.2s ease-out; }
+        .workflow-stage[open] summary { border-bottom: 1px solid #ddd; background-color: #f0f0f0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+        div.stage-content { padding: 20px; border: 1px solid #ddd; border-top: none; background-color: #ffffff; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; }
         div.stage-content p { margin-bottom: 0.8em; line-height: 1.5; }
         div.stage-content p:last-child { margin-bottom: 0; }
         div.stage-content .status-text { font-weight: bold; }
-        ul.image-detail-list { list-style: none; padding: 0; }
-        ul.image-detail-list li { border: 1px solid #eee; margin-bottom: 15px; padding: 15px; border-radius: 3px; background-color: #fafafa;} /* Style image list items */
 
         /* --- Help System Styles --- */
-        .help-trigger { display: inline-block; width: 16px; height: 16px; line-height: 16px; margin-left: 6px; font-size: 11px; font-weight: bold; text-align: center; color: #fff; background-color: #77aaff; border-radius: 50%; cursor: pointer; user-select: none; vertical-align: middle; transition: background-color 0.2s ease; }
-        .help-trigger:hover { background-color: #4477cc; }
+        .help-trigger { display: inline-block; width: 16px; height: 16px; line-height: 16px; margin-left: 6px; font-size: 11px; font-weight: bold; text-align: center; color: #fff; background-color: #0d6efd; border-radius: 50%; cursor: pointer; user-select: none; vertical-align: middle; transition: background-color 0.2s ease; }
+        .help-trigger:hover { background-color: #0a58ca; }
         .help-content { display: none; position: absolute; background-color: #ffffe0; border: 1px solid #ccc; border-radius: 4px; padding: 10px 15px; box-shadow: 2px 2px 5px rgba(0,0,0,0.15); z-index: 10; margin-left: 5px; margin-top: -5px; /* Adjust positioning */ width: 350px; font-size: 0.9em; line-height: 1.5; letter-spacing: normal; text-align: left; }
         .help-content p, .help-content ul, .help-content ol { margin-bottom: 0.8em; letter-spacing: normal; }
         .help-content ul, .help-content ol { padding-left: 1.5em; }
         .help-content code { background-color: #eee; padding: 0.1em 0.3em; border-radius: 2px; font-size: 0.95em; }
         .help-content.active { display: block; }
         h2 > .help-trigger { vertical-align: baseline; }
-        /* h2 + .help-content { position: static; display: block; border: 1px dashed blue; margin-top: -10px; margin-bottom: 10px; } */ /* Alternative non-popup display */
 
         /* --- Log Output Styles --- */
-        #log-output { margin-top: 20px; padding: 10px; border: 1px solid #ccc; background-color: #f0f0f0; /* Slightly darker log */ min-height: 100px; white-space: pre-wrap; font-family: monospace; font-size: 0.9em; max-height: 300px; overflow-y: auto; border-radius: 3px;}
+        #log-output { margin-top: 20px; padding: 10px; border: 1px solid #ccc; background-color: #f8f9fa; /* Slightly lighter log */ min-height: 100px; white-space: pre-wrap; font-family: monospace; font-size: 0.9em; max-height: 300px; overflow-y: auto; border-radius: 3px;}
         #log-output div { margin-bottom: 2px; line-height: 1.3; border-bottom: 1px dotted #ccc; padding-bottom: 2px; }
         #log-output div:last-child { border-bottom: none; }
+        #log-output div.log-error { color: #dc3545; } /* Add style for error lines */
     </style>
 </head>
 <body>
-    <p class="back-link"><a href="{{ url_for('index') }}">← Back to Post List</a></p>
+    <div class="container"> {# Wrap content in container for Bootstrap #}
+        <p class="back-link mt-3"><a href="{{ url_for('index') }}">← Back to Post List</a></p>
 
-    <h1>Manage: {{ metadata.title | default('Post Details') }}</h1>
-    <p><strong>Slug:</strong> <code>{{ slug }}</code> <a href="vscode://file/{{ config.BASE_DIR }}/posts/{{ slug }}.md" title="Edit Markdown File in VS Code" style="font-size: 0.8em; margin-left: 5px;">(Edit MD)</a> </p>
+        <h1>Manage: {{ metadata.title | default('Post Details') }}</h1>
+        <p><strong>Slug:</strong> <code>{{ slug }}</code>
+            <a href="vscode://file/{{ config.BASE_DIR_STR }}/posts/{{ slug }}.md" title="Edit Markdown File in VS Code" class="ms-2">
+                <i class="bi bi-pencil-square"></i> (Edit MD)
+            </a>
+         </p>
 
-    <section id="workflow-stages">
-        <h2>Workflow Stages <span class="help-trigger" data-help-id="manage-posts-main-help" title="Help for Manage Posts Section">?</span></h2>
-         <div class="help-content" id="manage-posts-main-help">{% include 'help/manage_posts_help.njk' %}</div>
-
-        {# --- Stage I: Conceptualisation --- #}
-        <details class="workflow-stage" data-stage-key="conceptualisation">
-            <summary>
-                <span class="traffic-light" data-status="{{ status.stages.conceptualisation.status | default('pending') }}"></span>
-                I. Conceptualisation
-            </summary>
-            <div class="stage-content">
-                <p>Define the core idea, Title, Subtitle, and URL Slug.</p>
-                <p>
-                    <strong>Status:</strong> <code class="status-text">{{ status.stages.conceptualisation.status | default('pending') }}</code>
-                    {% set current_status = status.stages.conceptualisation.status | default('pending') %}
-                    {% if current_status != 'complete' %}<button class="status-update-button" data-slug="{{ slug }}" data-stage="conceptualisation" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
-                    {% if current_status != 'pending' %}<button class="status-update-button" data-slug="{{ slug }}" data-stage="conceptualisation" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
-                </p>
-                <p>Notes: {{ status.stages.conceptualisation.notes | default('N/A') }}</p> {# Add textarea later #}
-            </div>
-        </details>
-
-        {# --- Stage II: Authoring --- #}
-        <details class="workflow-stage" data-stage-key="authoring">
-            <summary>
-                <span class="traffic-light" data-status="{{ status.stages.authoring.status | default('pending') }}"></span>
-                II. Content Authoring & Structuring
-            </summary>
-            <div class="stage-content">
-                <p>Generate/write, review, edit, structure, and format the text content (Summary, Sections, Conclusion) using HTML.</p>
-                <p>
-                    <strong>Overall Status:</strong> <code class="status-text">{{ status.stages.authoring.status | default('pending') }}</code>
-                    {% set current_status = status.stages.authoring.status | default('pending') %}
-                    {% if current_status != 'complete' %}<button class="status-update-button" data-slug="{{ slug }}" data-stage="authoring" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
-                    {% if current_status != 'pending' %}<button class="status-update-button" data-slug="{{ slug }}" data-stage="authoring" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
-                </p>
-                <p><strong>HTML Formatting Status:</strong> <span class="traffic-light" data-status="{{ status.stages.authoring.text_format_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.authoring.text_format_status | default('pending') }}</code></p> {# Sub-status - no button for now #}
-            </div>
-        </details>
-
-        {# --- Stage III: Metadata & File Setup --- #}
-        <details class="workflow-stage" data-stage-key="metadata">
-            <summary>
-                <span class="traffic-light" data-status="{{ status.stages.metadata.status | default('pending') }}"></span>
-                III. Metadata & File Setup
-            </summary>
-            <div class="stage-content">
-                <p>Create the `.md` file and populate YAML front matter (Title, Subtitle, Description, Date, Author Key, Tags, Content Placeholders).</p>
-                <p>
-                    <strong>Overall Status:</strong> <code class="status-text">{{ status.stages.metadata.status | default('pending') }}</code>
-                     {% set current_status = status.stages.metadata.status | default('pending') %}
-                     {% if current_status != 'complete' %}<button class="status-update-button" data-slug="{{ slug }}" data-stage="metadata" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
-                     {% if current_status != 'pending' %}<button class="status-update-button" data-slug="{{ slug }}" data-stage="metadata" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
-                </p>
-                <p><strong>Front Matter Populated:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.front_matter_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.front_matter_status | default('pending') }}</code></p>
-                <p><strong>Tags Defined:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.tags_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.tags_status | default('pending') }}</code></p>
-                <p><strong>Author Assigned:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.author_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.author_status | default('pending') }}</code></p>
-                <hr>
-                 <p><i>Title: {{ metadata.title }}</i></p>
-                 <p><i>Author Key: {{ metadata.author }}</i></p>
-                 <p><i>Tags: {{ metadata.tags | join(', ') }}</i></p>
-            </div>
-        </details>
-
-        {# --- Stage IV: Image Workflow --- #}
-        <details class="workflow-stage" data-stage-key="images">
-            <summary>
-                <span class="traffic-light" data-status="{{ status.stages.images.status | default('pending') }}"></span>
-                 IV. Image Workflow
-            </summary>
-            <div class="stage-content">
-                <p>Define prompts, generate/select, rename/place, watermark (optional), integrate IDs into MD.</p>
-                 <p>
-                     <strong>Overall Stage Status:</strong> <code class="status-text">{{ status.stages.images.status | default('pending') }}</code>
-                     {% set current_status = status.stages.images.status | default('pending') %}
-                     {% if current_status != 'complete' %}<button class="status-update-button" data-slug="{{ slug }}" data-stage="images" data-new-status="complete" title="Mark this stage as fully complete (Manual Override)">Mark Complete</button>{% endif %}
-                     {% if current_status != 'pending' %}<button class="status-update-button" data-slug="{{ slug }}" data-stage="images" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
-                 </p>
-                 <hr>
-
-                 {# --- Loop through detailed image list passed from Flask --- #}
-                 <h3>Images for this Post:</h3>
-                 {% if images_detailed %}
-                    <ul class="image-detail-list">
-                    {% for img_info in images_detailed %}
-                        <li>
-                            {% if img_info.error %}
-                                <p style="color: red;"><strong>Error:</strong> Image ID <code>{{ img_info.id }}</code> - {{ img_info.error }}</p>
-                            {% else %}
-                                <p><strong>ID:</strong> <code>{{ img_info.id }}</code> | <strong>File:</strong> <code>{{ img_info.filename_local | default('N/A') }}</code></p>
-                                <p><i>Description: {{ img_info.description | default('N/A') }}</i></p>
-
-                                <p style="margin-top: 0.5em;">
-                                    <strong>Prompt Status:</strong> <span class="traffic-light" data-status="{{ img_info.prompt_status }}"></span> <code class="status-text">{{ img_info.prompt_status }}</code>
-                                    <button disabled style="font-size:0.8em; padding: 2px 5px;">Edit Prompt</button> {# Placeholder #}
-                                </p>
-                                <textarea readonly style="width: 95%; min-height: 60px; font-size: 0.85em; background-color: #f8f8f8; border: 1px dashed #ccc; padding: 5px; margin-bottom: 0.5em;">{{ img_info.prompt | default('No prompt defined.') }}</textarea>
-
-                                <p>
-                                    <strong>Assets Prepared (File Exists):</strong> <span class="traffic-light" data-status="{{ img_info.assets_prepared_status }}"></span> <code class="status-text">{{ img_info.assets_prepared_status }}</code>
-                                </p>
-                                <p>
-                                    <strong>Metadata Integrated (Alt & Caption):</strong> <span class="traffic-light" data-status="{{ img_info.metadata_integrated_status }}"></span> <code class="status-text">{{ img_info.metadata_integrated_status }}</code>
-                                    <button disabled style="font-size:0.8em; padding: 2px 5px;">Edit Meta</button> {# Placeholder #}
-                                     <small>(Alt: {{ img_info.alt | truncate(30) | default('N/A') }} | Caption: {{ img_info.blog_caption | truncate(30) | default('N/A') }})</small>
-                                </p>
-                                <p>
-                                    <strong>Watermarking Status:</strong> <span class="traffic-light" data-status="{{ img_info.watermarking_status }}"></span> <code class="status-text">{{ img_info.watermarking_status }}</code>
-                                     <button class="watermark-button" data-slug="{{ slug }}" data-image-id="{{ img_info.id }}"
-                                             {{ 'disabled' if img_info.assets_prepared_status != 'complete' }}
-                                             title="{{ 'Run watermarking for this image' if img_info.assets_prepared_status == 'complete' else 'Image file must exist first' }}">
-                                         Watermark This Image
-                                     </button>
-                                     <span class="help-trigger" data-help-id="watermark-help-{{ img_info.id }}" title="Help for Watermarking">?</span> {# Changed ID #}
-                                     <div class="help-content" id="watermark-help-{{ img_info.id }}">{% include 'help/watermark_help.njk' %}</div>
-                                </p>
-                                {% if img_info.notes %}
-                                <p><small>Notes: {{ img_info.notes }}</small></p>
-                                {% endif %}
+         <section id="workflow-stages">
+            <h2>Workflow Stages <span class="help-trigger" data-help-id="manage-posts-main-help" title="Help for Manage Posts Section">?</span></h2>
+             <div class="help-content" id="manage-posts-main-help">{% include 'help/manage_posts_help.njk' %}</div>
+    
+            {# --- Stage I: Conceptualisation --- #}
+            <details class="workflow-stage" data-stage-key="conceptualisation">
+                <summary>
+                    <span class="traffic-light" data-status="{{ status.stages.conceptualisation.status | default('pending') }}"></span>
+                    I. Conceptualisation
+                </summary>
+                <div class="stage-content">
+                    <p>Define the core idea, Title, Subtitle, and URL Slug.</p>
+                    <p>
+                        <strong>Status:</strong> <code class="status-text">{{ status.stages.conceptualisation.status | default('pending') }}</code>
+                        {% set current_status = status.stages.conceptualisation.status | default('pending') %}
+                        {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="conceptualisation" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
+                        {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="conceptualisation" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
+                    </p>
+                    <p>Notes: {{ status.stages.conceptualisation.notes | default('N/A') }}</p> {# Add textarea later #}
+                </div>
+            </details>
+    
+            {# --- Stage II: Authoring --- #}
+            <details class="workflow-stage" data-stage-key="authoring">
+                <summary>
+                    <span class="traffic-light" data-status="{{ status.stages.authoring.status | default('pending') }}"></span>
+                    II. Content Authoring & Structuring
+                </summary>
+                <div class="stage-content">
+                    <p>Generate/write, review, edit, structure, and format the text content (Summary, Sections, Conclusion) using HTML.</p>
+                    <p>
+                        <strong>Overall Status:</strong> <code class="status-text">{{ status.stages.authoring.status | default('pending') }}</code>
+                        {% set current_status = status.stages.authoring.status | default('pending') %}
+                        {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="authoring" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
+                        {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="authoring" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
+                    </p>
+                    <p><strong>HTML Formatting Status:</strong> <span class="traffic-light" data-status="{{ status.stages.authoring.text_format_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.authoring.text_format_status | default('pending') }}</code></p> {# Sub-status - no button for now #}
+                </div>
+            </details>
+    
+            {# --- Stage III: Metadata & File Setup --- #}
+            <details class="workflow-stage" data-stage-key="metadata">
+                <summary>
+                    <span class="traffic-light" data-status="{{ status.stages.metadata.status | default('pending') }}"></span>
+                    III. Metadata & File Setup
+                </summary>
+                <div class="stage-content">
+                    <p>Create the `.md` file and populate YAML front matter (Title, Subtitle, Description, Date, Author Key, Tags, Content Placeholders).</p>
+                    <p>
+                        <strong>Overall Status:</strong> <code class="status-text">{{ status.stages.metadata.status | default('pending') }}</code>
+                         {% set current_status = status.stages.metadata.status | default('pending') %}
+                         {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="metadata" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
+                         {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="metadata" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
+                    </p>
+                    <p><strong>Front Matter Populated:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.front_matter_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.front_matter_status | default('pending') }}</code></p>
+                    <p><strong>Tags Defined:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.tags_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.tags_status | default('pending') }}</code></p>
+                    <p><strong>Author Assigned:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.author_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.author_status | default('pending') }}</code></p>
+                    <hr>
+                     <p><i>Title: {{ metadata.title }}</i></p>
+                     <p><i>Author Key: {{ metadata.author }}</i></p>
+                     <p><i>Tags: {{ metadata.tags | join(', ') }}</i></p>
+                </div>
+            </details>
+    
+            {# --- Stage IV: Image Workflow --- #}
+            <details class="workflow-stage" data-stage-key="images">
+                <summary>
+                    <span class="traffic-light" data-status="{{ status.stages.images.status | default('pending') }}"></span>
+                    IV. Image Workflow
+                </summary>
+                <div class="stage-content">
+    
+                    {# Status line including NEW Watermark All button #}
+                    <div class="d-flex justify-content-between align-items-center p-2 mb-3 bg-light rounded flex-wrap"> {# Added flex-wrap #}
+                        <span class="me-3 mb-1 mb-md-0"> {# Margin end, margin bottom on small screens #}
+                            <strong>Status:</strong> <code class="status-text">{{ status.stages.images.status | default('pending') }}</code>
+                        </span>
+                        <span> {# Wrap buttons for better alignment #}
+                            {# NEW WATERMARK BUTTON #}
+                            <button class="watermark-all-button btn btn-sm btn-info ms-2" data-slug="{{ slug }}"
+                                    {{ 'disabled' if status.stages.images.assets_prepared_status != 'complete' }}
+                                    title="{{ 'Watermark all prepared images for this post' if status.stages.images.assets_prepared_status == 'complete' else 'All image assets must be prepared first' }}">
+                                <i class="bi bi-droplet-half"></i> Watermark Images
+                            </button>
+                            {# Existing Status Buttons #}
+                            {% set current_status = status.stages.images.status | default('pending') %}
+                            {% if current_status != 'complete' %}
+                                <button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="images" data-new-status="complete" title="Mark this stage as fully complete (Manual Override)">Mark Complete</button>
                             {% endif %}
-                        </li>
+                            {% if current_status != 'pending' %}
+                                <button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="images" data-new-status="pending" title="Reset status to pending">Mark Pending</button>
+                            {% endif %}
+                        </span>
+                    </div>
+    
+                    {# --- Loop through detailed image list passed from Flask --- #}
+                    {% if images_detailed %}
+                    <ul class="image-detail-list list-unstyled"> {# Added list-unstyled #}
+                    {% for img_info in images_detailed %}
+                    {# --- Start of individual image item --- #}
+                    <li class="mb-3 p-3 border rounded"> {# Card-like styling #}
+                        <div class="d-flex flex-column flex-md-row align-items-md-start"> {# Flex container #}
+    
+                            {# --- Left Column: Metadata --- #}
+                            <div class="flex-grow-1 me-md-3"> {# Takes up remaining space #}
+    
+                                {% if img_info.error %}
+                                    <p class="text-danger mb-0"><strong>Error:</strong> Image ID <code>{{ img_info.id }}</code> - {{ img_info.error }}</p>
+                                {% else %}
+                                    {# ID and Description - Dynamically Cleaned Up using split #}
+                                    <p class="mb-1">
+                                        <code>{{ img_info.id }}</code> :
+                                        {# Set the original description #}
+                                        {% set original_desc = img_info.description %}
+                                        {# Define potential separators #}
+                                        {% set sep_section = ' section image for ' %}
+                                        {% set sep_header = ' header image for ' %}
+                                        {% set sep_conclusion = ' conclusion image for ' %}
+    
+                                        {# Try splitting by each separator and take the first part if found #}
+                                        {% if sep_section in original_desc %}
+                                            {% set cleaned_desc = original_desc.split(sep_section, 1)[0] %}
+                                        {% elif sep_header in original_desc %}
+                                            {% set cleaned_desc = original_desc.split(sep_header, 1)[0] %}
+                                        {% elif sep_conclusion in original_desc %}
+                                            {% set cleaned_desc = original_desc.split(sep_conclusion, 1)[0] %}
+                                        {% else %}
+                                            {% set cleaned_desc = original_desc %} {# No separator found, use original #}
+                                        {% endif %}
+    
+                                        {# Display the cleaned description, trimmed and with a default #}
+                                        <strong>{{ cleaned_desc | trim | default('(No Description)') }}</strong>
+                                    </p>
+    
+                                    {# Filename #}
+                                    <p class="mb-1"><small>
+                                        <strong>Filename:</strong> <code>{{ img_info.filename_local | default('N/A') }}</code>
+                                        {% if img_info.filename_local %}
+                                            <a href="#" class="ms-1" onclick="navigator.clipboard.writeText('{{ img_info.filename_local }}'); alert('Filename copied!'); return false;" title="Copy Filename">
+                                                <i class="bi bi-clipboard small"></i>
+                                            </a>
+                                        {% endif %}
+                                    </small></p>
+    
+                                    {# Public URL (Assumed Structure) - Add mb-3 for space after <<>> #}
+                                    {% if img_info.filename_local %}
+                                        {% set public_url = "https://static.clan.com/media/blog/" + img_info.filename_local %} {# *** ASSUMPTION *** #}
+                                        <p class="mb-3"><small> {# << Increased margin here #}
+                                            <strong>URL:</strong> <a href="{{ public_url }}" target="_blank">{{ public_url }}</a>
+                                            <a href="#" class="ms-1" onclick="navigator.clipboard.writeText('{{ public_url }}'); alert('URL copied!'); return false;" title="Copy Public URL">
+                                                <i class="bi bi-clipboard small"></i>
+                                            </a>
+                                        </small></p>
+                                    {% else %}
+                                        <div class="mb-3"></div> {# Add space even if no URL #}
+                                    {% endif %}
+    
+                                    {# Prompt - Add mb-3 for space after <<>> #}
+                                    <div class="mb-3"> {# << Increased margin here #}
+                                        <p class="mb-1">
+                                            <strong>Prompt Status:</strong> <span class="traffic-light" data-status="{{ img_info.prompt_status }}"></span> <code class="status-text">{{ img_info.prompt_status }}</code>
+                                            <button class="btn btn-sm btn-outline-primary ms-2" disabled style="font-size:0.8em; padding: 2px 5px;">Edit...</button>
+                                        </p>
+                                        <textarea readonly class="form-control form-control-sm" style="min-height: 60px; font-size: 0.85em;">{{ img_info.prompt | default('No prompt defined.') }}</textarea>
+                                    </div>
+    
+                                    {# Meta Alt - Add mb-3 for space after <<>> #}
+                                    <div class="mb-3"> {# << Increased margin here #}
+                                         <p class="mb-1">
+                                            <strong>Meta Alt:</strong> <span class="traffic-light" data-status="{{ 'complete' if img_info.alt else 'pending' }}"></span> <code class="status-text">{{ 'complete' if img_info.alt else 'pending' }}</code>
+                                            <button class="btn btn-sm btn-outline-primary ms-2" disabled style="font-size:0.8em; padding: 2px 5px;">Edit...</button>
+                                         </p>
+                                         <textarea readonly class="form-control form-control-sm" style="min-height: 40px; font-size: 0.85em;">{{ img_info.alt | default('(No alt text)') }}</textarea>
+                                    </div>
+    
+                                    {# Caption - Add mb-3 for space after <<>> #}
+                                    <div class="mb-3"> {# << Increased margin here #}
+                                        <p class="mb-1">
+                                            <strong>Caption:</strong> <span class="traffic-light" data-status="{{ 'complete' if img_info.blog_caption else 'pending' }}"></span> <code class="status-text">{{ 'complete' if img_info.blog_caption else 'pending' }}</code>
+                                            <button class="btn btn-sm btn-outline-primary ms-2" disabled style="font-size:0.8em; padding: 2px 5px;">Edit...</button>
+                                        </p>
+                                        <textarea readonly class="form-control form-control-sm" style="min-height: 40px; font-size: 0.85em;">{{ img_info.blog_caption | default('(No caption)') }}</textarea>
+                                    </div>
+    
+                                    {# Watermarking line REMOVED from here #}
+    
+                                    {# Notes #}
+                                    {% if img_info.notes %}
+                                    <div class="mb-0"> {# Keep mb-0 here, space was added before #}
+                                        <p class="mb-1">
+                                            <strong>Notes:</strong>
+                                            <button class="btn btn-sm btn-outline-primary ms-2" disabled style="font-size:0.8em; padding: 2px 5px;">Edit...</button>
+                                        </p>
+                                         <textarea readonly class="form-control form-control-sm" style="min-height: 40px; font-size: 0.85em;">{{ img_info.notes }}</textarea>
+                                    </div>
+                                    {% endif %}
+    
+                                {% endif %} {# End of no error check #}
+                            </div> {# End Left Column #}
+    
+                            {# --- Right Column: Image Thumbnail/Placeholder --- #}
+                            <div class="flex-shrink-0 mt-3 mt-md-0" style="width: 250px; max-width: 100%;"> {# Width 250px #}
+                                 {% if img_info.assets_prepared_status == 'complete' and img_info.local_dir and img_info.filename_local %}
+                                    {% set img_src = '/' + img_info.local_dir.strip('/') + '/' + img_info.filename_local %}
+                                    <img src="{{ img_src }}" alt="Thumbnail for {{ img_info.id }}" class="img-thumbnail w-100" style="max-width: 250px;"> {# Max-width 250px #}
+                                 {% elif img_info.error %}
+                                    <div class="border rounded bg-light d-flex align-items-center justify-content-center text-muted w-100" style="min-height: 150px; aspect-ratio: 16 / 9; max-width: 250px;"> {# Max-width 250px #}
+                                        <span>Error Loading Image Info</span>
+                                    </div>
+                                 {% else %}
+                                    <div class="border rounded bg-light d-flex align-items-center justify-content-center text-muted w-100" style="min-height: 150px; aspect-ratio: 16 / 9; max-width: 250px;"> {# Max-width 250px #}
+                                        <span>Image Not Prepared</span>
+                                    </div>
+                                 {% endif %}
+                            </div> {# End Right Column #}
+    
+                        </div> {# End Flex Container #}
+                    </li> {# --- End of individual image item --- #}
                     {% endfor %}
                     </ul>
-                 {% else %}
+                    {% else %}
                     <p>No images referenced by this post.</p>
-                 {% endif %}
-                 {# --- END Image Loop --- #}
-            </div>
-        </details>
+                    {% endif %}
+                    {# --- END Image Loop Comment --- #}
+                </div>
+            </details>
+    
+            {# --- Stage V: Local Validation --- #}
+            <details class="workflow-stage" data-stage-key="validation">
+                <summary>
+                    <span class="traffic-light" data-status="{{ status.stages.validation.status | default('pending') }}"></span>
+                    V. Local Validation
+                </summary>
+                <div class="stage-content">
+                    <p>Run `npm start` and preview the post locally at `http://localhost:8080/{{ slug }}/`. Check everything thoroughly.</p>
+                    <p>
+                        <strong>Status:</strong> <code class="status-text">{{ status.stages.validation.status | default('pending') }}</code>
+                         {% set current_status = status.stages.validation.status | default('pending') %}
+                         {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="validation" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
+                         {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="validation" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
+                    </p>
+                    <p><strong>Last Preview OK:</strong> {{ 'Yes' if status.stages.validation.last_preview_ok else 'No / Not Yet Run' }}</p>
+                     <p class="mt-3">
+                         <a href="http://localhost:8080/{{ slug }}/" target="_blank" class="btn btn-sm btn-primary">Preview Locally Now</a>
+                         <span class="help-trigger" data-help-id="preview-help-{{ slug }}" title="Help for Preview Locally Link">?</span>
+                         <div class="help-content" id="preview-help-{{ slug }}">{% include 'help/preview_local_help.njk' %}</div>
+                     </p>
+                </div>
+            </details>
+    
+            {# --- Stage VI: Publishing (Clan.com) --- #}
+            <details class="workflow-stage" data-stage-key="publishing_clancom">
+                <summary>
+                    <span class="traffic-light" data-status="{{ status.stages.publishing_clancom.status | default('pending') }}"></span>
+                    VI. Publishing (Clan.com)
+                </summary>
+                <div class="stage-content">
+                    <p>Uses the interface button to run `post_to_clan.py` script.</p>
+                    <p>
+                        <strong>Status:</strong> <code class="status-text">{{ status.stages.publishing_clancom.status | default('pending') }}</code>
+                         {% if status.stages.publishing_clancom.status == 'complete' or status.stages.publishing_clancom.status == 'error' %}
+                             <button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="publishing_clancom" data-new-status="pending" title="Reset status to allow re-publishing">Mark Pending</button>
+                         {% endif %}
+                    </p>
+                    <p><strong>Clan.com Post ID:</strong> <code>{{ status.stages.publishing_clancom.post_id | default('N/A') }}</code></p>
+                    <p><strong>Last Attempt:</strong> {{ status.stages.publishing_clancom.last_publish_attempt | default('N/A') }}</p>
+                    <p><strong>Last Error:</strong> <code class="text-danger">{{ status.stages.publishing_clancom.last_error | default('None') }}</code></p> {# Use text-danger #}
+                    <p class="mt-3">
+                        {# Determine overall watermark status for ALL images #}
+                        {% set all_watermarked = true %}
+                        {% if not images_detailed %} {# If no images, consider watermarking done #}
+                            {% set all_watermarked = true %}
+                        {% else %}
+                            {% for img_info in images_detailed %}
+                                {% if img_info.watermarking_status != 'complete' %}
+                                    {% set all_watermarked = false %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+    
+                         {% set validation_status = status.stages.validation.status | default('pending') %}
+                         {% set validation_done = validation_status == 'complete' %}
+                         {% set ready_to_publish = all_watermarked and validation_done %}
+    
+                         <button class="publish-clan-button btn btn-success" data-slug="{{ slug }}" {# Use btn-success #}
+                                 {{ 'disabled' if not ready_to_publish }}
+                                 title="{{ 'Publish or Update post on Clan.com' if ready_to_publish else 'Complete Image Watermarking and Local Validation first' }}">
+                             <i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now
+                         </button>
+                         <span class="help-trigger" data-help-id="publish-help-{{ slug }}" title="Help for Publish/Update Clan.com Button">?</span>
+                         <div class="help-content" id="publish-help-{{ slug }}">{% include 'help/publish_clan_help.njk' %}</div>
+                         {# Display dependency status #}
+                         <small class="ms-2 d-block mt-1 text-muted">
+                             (Requires: Validation <span class="traffic-light" data-status="{{ validation_status }}"></span> |
+                             Watermarking <span class="traffic-light" data-status="{{ 'complete' if all_watermarked else 'pending' }}"></span>)
+                        </small>
+                    </p>
+                    {% if status.stages.publishing_clancom.post_id %}
+                        <p><a href="https://clan.com/blog/{{ slug }}.html" target="_blank">View Live Post (Check URL structure)</a></p> {# Adjust URL structure if needed #}
+                    {% endif %}
+                </div>
+            </details>
+    
+            {# --- Stage VII: Social Media Syndication (Future) --- #}
+            <details class="workflow-stage" data-stage-key="syndication">
+                <summary>
+                    <span class="traffic-light" data-status="{{ status.stages.syndication.status | default('pending') }}"></span>
+                    VII. Social Media Syndication (Future)
+                </summary>
+                <div class="stage-content">
+                    <p>Prepare platform-specific content and run the syndication script.</p>
+                    <p>
+                        <strong>Overall Status:</strong> <code class="status-text">{{ status.stages.syndication.status | default('pending') }}</code>
+                        {% set current_status = status.stages.syndication.status | default('pending') %}
+                        {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="syndication" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
+                        {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="syndication" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
+                    </p>
+                    <p><strong>Instagram:</strong> <span class="traffic-light" data-status="{{ status.stages.syndication.instagram.overall_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.syndication.instagram.overall_status | default('pending') }}</code></p>
+                    <p><strong>Facebook:</strong> <span class="traffic-light" data-status="{{ status.stages.syndication.facebook.overall_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.syndication.facebook.overall_status | default('pending') }}</code></p>
+                    <p class="mt-3">
+                        <button class="syndicate-button btn btn-sm btn-secondary" data-slug="{{ slug }}" data-platform="instagram" disabled title="Instagram syndication not yet implemented">Syndicate to Instagram</button>
+                        <button class="syndicate-button btn btn-sm btn-secondary" data-slug="{{ slug }}" data-platform="facebook" disabled title="Facebook syndication not yet implemented">Syndicate to Facebook</button>
+                        <span class="help-trigger" data-help-id="syndicate-help-{{ slug }}" title="Help for Syndication">?</span>
+                        <div class="help-content" id="syndicate-help-{{ slug }}">{% include 'help/syndicate_help.njk' %}</div>
+                    </p>
+                </div>
+            </details>
+    
+        </section>
 
-        {# --- Stage V: Local Validation --- #}
-        <details class="workflow-stage" data-stage-key="validation">
-            <summary>
-                <span class="traffic-light" data-status="{{ status.stages.validation.status | default('pending') }}"></span>
-                V. Local Validation
-            </summary>
-            <div class="stage-content">
-                <p>Run `npm start` and preview the post locally at `http://localhost:8080/{{ slug }}/`. Check everything thoroughly.</p>
-                <p>
-                    <strong>Status:</strong> <code class="status-text">{{ status.stages.validation.status | default('pending') }}</code>
-                     {% set current_status = status.stages.validation.status | default('pending') %}
-                     {% if current_status != 'complete' %}<button class="status-update-button" data-slug="{{ slug }}" data-stage="validation" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
-                     {% if current_status != 'pending' %}<button class="status-update-button" data-slug="{{ slug }}" data-stage="validation" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
-                </p>
-                <p><strong>Last Preview OK:</strong> {{ 'Yes' if status.stages.validation.last_preview_ok else 'No / Not Yet Run' }}</p>
-                 <p style="margin-top: 1em;">
-                     <a href="http://localhost:8080/{{ slug }}/" target="_blank">Preview Locally Now</a>
-                     <span class="help-trigger" data-help-id="preview-help-{{ slug }}" title="Help for Preview Locally Link">?</span>
-                     <div class="help-content" id="preview-help-{{ slug }}">{% include 'help/preview_local_help.njk' %}</div>
-                 </p>
-            </div>
-        </details>
+        <section id="log-section" style="margin-top: 30px;">
+            <h2>Action Log / Output</h2>
+            <pre id="log-output" class="bg-light border rounded p-2">(Action output will appear here)</pre> {# Use bg-light etc #}
+        </section>
 
-        {# --- Stage VI: Publishing (Clan.com) --- #}
-        <details class="workflow-stage" data-stage-key="publishing_clancom">
-            <summary>
-                <span class="traffic-light" data-status="{{ status.stages.publishing_clancom.status | default('pending') }}"></span>
-                VI. Publishing (Clan.com)
-            </summary>
-            <div class="stage-content">
-                <p>Uses the interface button to run `post_to_clan.py` script.</p>
-                <p>
-                    <strong>Status:</strong> <code class="status-text">{{ status.stages.publishing_clancom.status | default('pending') }}</code>
-                     {% if status.stages.publishing_clancom.status == 'complete' or status.stages.publishing_clancom.status == 'error' %}
-                         <button class="status-update-button" data-slug="{{ slug }}" data-stage="publishing_clancom" data-new-status="pending" title="Reset status to allow re-publishing">Mark Pending</button>
-                     {% endif %}
-                </p>
-                <p><strong>Clan.com Post ID:</strong> <code>{{ status.stages.publishing_clancom.post_id | default('N/A') }}</code></p>
-                <p><strong>Last Attempt:</strong> {{ status.stages.publishing_clancom.last_publish_attempt | default('N/A') }}</p>
-                <p><strong>Last Error:</strong> <code style="color: red;">{{ status.stages.publishing_clancom.last_error | default('None') }}</code></p>
-                <p style="margin-top: 1em;">
-                     {% set watermark_status = status.stages.images.watermarking_status | default('pending') %} {# Use default filter #}
-                     {% set validation_status = status.stages.validation.status | default('pending') %} {# Use default filter #}
-                     {% set watermark_done = watermark_status == 'complete' %}
-                     {% set validation_done = validation_status == 'complete' %}
-                     {% set ready_to_publish = watermark_done and validation_done %}
-                     <button class="publish-clan-button" data-slug="{{ slug }}"
-                             {{ 'disabled' if not ready_to_publish }}
-                             title="{{ 'Publish or Update post on Clan.com' if ready_to_publish else 'Complete Image Watermarking and Local Validation first' }}">
-                         Publish/Update Clan.com Now
-                     </button>
-                     <span class="help-trigger" data-help-id="publish-help-{{ slug }}" title="Help for Publish/Update Clan.com Button">?</span>
-                     <div class="help-content" id="publish-help-{{ slug }}">{% include 'help/publish_clan_help.njk' %}</div>
-                </p>
-                {% if status.stages.publishing_clancom.post_id %}
-                    <p><a href="https://clan.com/blog/{{ slug }}.html" target="_blank">View Live Post (Check URL structure)</a></p> {# Adjust URL structure if needed #}
-                {% endif %}
-            </div>
-        </details>
+    </div> {# End container #}
 
-        {# --- Stage VII: Social Media Syndication (Future) --- #}
-        <details class="workflow-stage" data-stage-key="syndication">
-            <summary>
-                <span class="traffic-light" data-status="{{ status.stages.syndication.status | default('pending') }}"></span>
-                VII. Social Media Syndication (Future)
-            </summary>
-            <div class="stage-content">
-                <p>Prepare platform-specific content and run the syndication script.</p>
-                <p>
-                    <strong>Overall Status:</strong> <code class="status-text">{{ status.stages.syndication.status | default('pending') }}</code>
-                    {% set current_status = status.stages.syndication.status | default('pending') %}
-                    {% if current_status != 'complete' %}<button class="status-update-button" data-slug="{{ slug }}" data-stage="syndication" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
-                    {% if current_status != 'pending' %}<button class="status-update-button" data-slug="{{ slug }}" data-stage="syndication" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
-                </p>
-                <p><strong>Instagram:</strong> <span class="traffic-light" data-status="{{ status.stages.syndication.instagram.overall_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.syndication.instagram.overall_status | default('pending') }}</code></p>
-                <p><strong>Facebook:</strong> <span class="traffic-light" data-status="{{ status.stages.syndication.facebook.overall_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.syndication.facebook.overall_status | default('pending') }}</code></p>
-                <p style="margin-top: 1em;">
-                    <button class="syndicate-button" data-slug="{{ slug }}" data-platform="instagram" disabled title="Instagram syndication not yet implemented">Syndicate to Instagram</button>
-                    <button class="syndicate-button" data-slug="{{ slug }}" data-platform="facebook" disabled title="Facebook syndication not yet implemented">Syndicate to Facebook</button>
-                    <span class="help-trigger" data-help-id="syndicate-help-{{ slug }}" title="Help for Syndication">?</span>
-                    <div class="help-content" id="syndicate-help-{{ slug }}">{% include 'help/syndicate_help.njk' %}</div>
-                </p>
-            </div>
-        </details>
-
-    </section>
-
-    <section id="log-section" style="margin-top: 30px;">
-        <h2>Action Log / Output</h2>
-        <pre id="log-output" style="border: 1px solid #eee; background-color: #f8f8f8; min-height: 100px; padding: 10px; white-space: pre-wrap; font-family: monospace; font-size: 0.9em; max-height: 300px; overflow-y: auto;">(Action output will appear here)</pre>
-    </section>
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- JavaScript for interactions -->
     <script>
         const logOutput = document.getElementById('log-output');
+
+        function logMessage(message, isError = false) {
+            const logEntry = document.createElement('div');
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            if (isError) {
+                logEntry.classList.add('log-error', 'text-danger'); // Add error class
+            }
+            // Prepend new messages
+            if (logOutput.firstChild && logOutput.firstChild.textContent === '(Action output will appear here)') {
+                 logOutput.removeChild(logOutput.firstChild); // Remove placeholder
+            }
+            logOutput.insertBefore(logEntry, logOutput.firstChild);
+        }
+
+
         // Use body for delegated listeners to catch clicks anywhere
         document.body.addEventListener('click', function(event) {
 
             // --- Handle Publish Button ---
             if (event.target.matches('.publish-clan-button')) {
-                const button = event.target; const slug = button.dataset.slug; if (!slug) { logMessage("Error: No slug found.", true); return; }
-                logMessage(`Starting Publish/Update job for '${slug}'...`); button.disabled = true; button.textContent = 'Processing...';
+                const button = event.target.closest('button'); // Ensure we get the button element if icon is clicked
+                const slug = button.dataset.slug;
+                if (!slug) { logMessage("Error: No slug found on publish button.", true); return; }
+                logMessage(`Starting Publish/Update job for '${slug}'...`);
+                button.disabled = true;
+                button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...'; // Add spinner
+
                 fetch(`/api/publish_clan/${slug}`, { method: 'POST' })
                 .then(response => { if (!response.ok) { throw new Error(`HTTP error ${response.status}`); } return response.json(); })
                 .then(data => {
-                    logMessage(`Job finished for '${slug}'. Success: ${data.success}`); logMessage("--- Script Output ---");
-                    const outputLines = data.output.split('\n'); outputLines.forEach(line => { const isErrorLine = /ERROR|Traceback|Failed/i.test(line); logMessage(line.trim(), isErrorLine); }); logMessage("--- End Script Output ---");
-                    if (!data.success) { alert(`Script failed for ${slug}. Check log.`); } else {
-                        button.textContent = 'Success!'; setTimeout(() => { button.disabled = false; button.textContent = 'Publish/Update Clan.com Now'; logMessage(`Action complete for ${slug}. Refresh page to see updated status.`); }, 2000); return;
+                    logMessage(`Job finished for '${slug}'. Success: ${data.success}`, !data.success); // Log error if not success
+                    logMessage("--- Script Output ---");
+                    const outputLines = data.output.split('\n');
+                    outputLines.forEach(line => {
+                        const isErrorLine = /ERROR|Traceback|Failed|Not Found/i.test(line); // Broader error check
+                        logMessage(line.trim(), isErrorLine);
+                    });
+                    logMessage("--- End Script Output ---");
+
+                    if (!data.success) {
+                        alert(`Script failed for ${slug}. Check log.`);
+                        button.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Failed'; // Indicate failure
+                        button.classList.remove('btn-success'); button.classList.add('btn-danger');
+                         // Re-enable after a delay so user sees failure
+                        setTimeout(() => {
+                            button.disabled = false;
+                            button.innerHTML = '<i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now';
+                            button.classList.remove('btn-danger'); button.classList.add('btn-success');
+                        }, 3000);
+                    } else {
+                        button.innerHTML = '<i class="bi bi-check-circle-fill"></i> Success!'; // Indicate success
+                        button.classList.remove('btn-danger'); button.classList.add('btn-success');
+                         // Re-enable after a delay
+                        setTimeout(() => {
+                            button.disabled = false;
+                            button.innerHTML = '<i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now';
+                            logMessage(`Action complete for ${slug}. Refresh page to see updated status.`);
+                            // Optionally reload after success: window.location.reload();
+                        }, 2000);
                     }
-                }).catch(error => { logMessage(`Error during fetch for '${slug}': ${error.message}`, true); console.error('Fetch Error:', error); })
-                .finally(() => { if (button.textContent !== 'Success!') { button.disabled = false; button.textContent = 'Publish/Update Clan.com Now'; } });
+                }).catch(error => {
+                    logMessage(`Error during fetch for '${slug}': ${error.message}`, true);
+                    console.error('Fetch Error:', error);
+                    alert(`Network or server error occurred for ${slug}. Check console and log.`);
+                    button.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Error';
+                    button.classList.remove('btn-success'); button.classList.add('btn-danger');
+                    // Re-enable after delay
+                    setTimeout(() => {
+                           button.disabled = false;
+                           button.innerHTML = '<i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now';
+                           button.classList.remove('btn-danger'); button.classList.add('btn-success');
+                     }, 3000);
+                });
             }
             // --- Handle Status Update Buttons ---
             else if (event.target.matches('.status-update-button')) {
-                const button = event.target; const slug = button.dataset.slug; const stageKey = button.dataset.stage; const newStatus = button.dataset.newStatus;
+                const button = event.target;
+                const slug = button.dataset.slug;
+                const stageKey = button.dataset.stage;
+                const newStatus = button.dataset.newStatus;
                 if (!slug || !stageKey || !newStatus) { logMessage("Error: Missing data on status button.", true); return; }
-                logMessage(`Updating status for '${slug}/${stageKey}' to '${newStatus}'...`); button.disabled = true;
-                fetch(`/api/update_status/${slug}/${stageKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: newStatus }) })
-                .then(response => { if (!response.ok) { throw new Error(`HTTP error ${response.status}`); } return response.json(); })
-                .then(data => { if (data.success) { logMessage(`Status updated for '${data.slug}/${data.stage}' to '${data.new_status}'. Reloading...`); window.location.reload(); } else { logMessage(`Error: ${data.message}`, true); alert(`Error: ${data.message}`); button.disabled = false; } })
-                .catch(error => { logMessage(`Error during status update fetch for '${slug}/${stageKey}': ${error.message}`, true); console.error('Fetch Error:', error); button.disabled = false; });
+
+                logMessage(`Updating status for '${slug}/${stageKey}' to '${newStatus}'...`);
+                // Disable *all* buttons for this stage temporarily
+                document.querySelectorAll(`.status-update-button[data-slug="${slug}"][data-stage="${stageKey}"]`).forEach(btn => btn.disabled = true);
+
+
+                fetch(`/api/update_status/${slug}/${stageKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                })
+                .then(response => {
+                    if (!response.ok) { throw new Error(`HTTP error ${response.status}`); }
+                    return response.json();
+                 })
+                .then(data => {
+                    if (data.success) {
+                        logMessage(`Status updated for '${data.slug}/${data.stage}' to '${data.new_status}'. Reloading...`);
+                        window.location.reload(); // Reload to reflect the new status everywhere
+                    } else {
+                        logMessage(`Error updating status: ${data.message}`, true);
+                        alert(`Error: ${data.message}`);
+                        // Re-enable buttons on failure
+                         document.querySelectorAll(`.status-update-button[data-slug="${slug}"][data-stage="${stageKey}"]`).forEach(btn => btn.disabled = false);
+                    }
+                 })
+                .catch(error => {
+                    logMessage(`Error during status update fetch for '${slug}/${stageKey}': ${error.message}`, true);
+                    console.error('Fetch Error:', error);
+                    alert(`Network or server error updating status for ${slug}/${stageKey}. Check console and log.`);
+                     // Re-enable buttons on failure
+                     document.querySelectorAll(`.status-update-button[data-slug="${slug}"][data-stage="${stageKey}"]`).forEach(btn => btn.disabled = false);
+                });
             }
              // --- Handle Help Trigger Clicks ---
              else if (event.target.matches('.help-trigger')) {
@@ -341,8 +545,83 @@
                        activeHelp.classList.remove('active');
                   });
              }
+             // --- Handle Watermark Button ---
+             // TODO: Add fetch call for watermarking API endpoint when created
+             else if (event.target.matches('.watermark-button')) {
+                  const button = event.target;
+                  const slug = button.dataset.slug;
+                  const imageId = button.dataset.imageId;
+                   logMessage(`Watermark requested for ${slug} - ${imageId} (Endpoint not yet implemented)`, true);
+                   alert("Watermarking functionality not yet implemented.");
+             }
+
+
+             // --- Handle Watermark All Button ---
+             else if (event.target.matches('.watermark-all-button')) {
+                  const button = event.target.closest('button'); // Get button if icon clicked
+                  const slug = button.dataset.slug;
+                  if (!slug) { logMessage("Error: No slug found on watermark button.", true); return; }
+
+                  if (!confirm(`This will attempt to watermark all referenced images for post '${slug}'.\nOriginals will be backed up (_raw suffix).\nWatermarked versions will be saved as JPGs.\nContinue?`)) {
+                       return; // User cancelled
+                  }
+
+                  logMessage(`Starting Watermark job for all images in '${slug}'...`);
+                  button.disabled = true;
+                  button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Watermarking...';
+
+                  fetch(`/api/watermark_all/${slug}`, { method: 'POST' })
+                  .then(response => { if (!response.ok) { throw new Error(`HTTP error ${response.status}`); } return response.json(); })
+                  .then(data => {
+                      logMessage(`Watermark job finished for '${slug}'. Success: ${data.success}`, !data.success);
+                      logMessage("--- Script Output ---");
+                      const outputLines = data.output.split('\n');
+                      outputLines.forEach(line => {
+                           const isErrorLine = /ERROR|Traceback|Failed|Not Found|Critical/i.test(line);
+                           logMessage(line.trim(), isErrorLine);
+                      });
+                      logMessage("--- End Script Output ---");
+
+                      if (!data.success) {
+                           alert(`Watermarking script failed or had errors for ${slug}. Check log.`);
+                           button.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Error';
+                           button.classList.remove('btn-info'); button.classList.add('btn-danger');
+                           // Re-enable after delay
+                           setTimeout(() => {
+                               button.disabled = false;
+                               button.innerHTML = '<i class="bi bi-droplet-half"></i> Watermark Images';
+                               button.classList.remove('btn-danger'); button.classList.add('btn-info');
+                            }, 3000);
+                      } else {
+                           button.innerHTML = '<i class="bi bi-check-circle-fill"></i> Success!';
+                           button.classList.remove('btn-danger'); button.classList.add('btn-info');
+                           // Re-enable after delay
+                           setTimeout(() => {
+                               button.disabled = false;
+                               button.innerHTML = '<i class="bi bi-droplet-half"></i> Watermark Images';
+                                logMessage(`Watermarking complete for ${slug}. Reload page to see updated status/filenames.`, false);
+                                alert(`Watermarking complete for ${slug}. Reload page to see updated status/filenames.`);
+                           }, 2000);
+                      }
+                  }).catch(error => {
+                       logMessage(`Network Error during watermark fetch for '${slug}': ${error.message}`, true);
+                       console.error('Fetch Error:', error);
+                       alert(`Network or server error occurred during watermarking for ${slug}. Check console and log.`);
+                       button.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Network Error';
+                       button.classList.remove('btn-info'); button.classList.add('btn-danger');
+                       // Re-enable after delay
+                       setTimeout(() => {
+                            button.disabled = false;
+                            button.innerHTML = '<i class="bi bi-droplet-half"></i> Watermark Images';
+                            button.classList.remove('btn-danger'); button.classList.add('btn-info');
+                       }, 3000);
+                  });
+             }
         });
-        console.log("Admin interface loaded.");
+
+        // Initial log message
+        logMessage("Admin interface loaded.");
+
     </script>
 
 </body>

@@ -1,169 +1,254 @@
+#!/usr/bin/env python3
+
 import os
-import sys
-from PIL import Image, ImageDraw, UnidentifiedImageError
-import argparse # Keep argparse just for the input directory
+import json
+import logging
+import argparse
+import shutil
+from pathlib import Path
+from PIL import Image, ImageDraw, ImageFont
 
 # --- Configuration ---
-# <<< --- EDIT THIS VARIABLE FOR THE TARGET DIRECTORY --- >>>
-DEFAULT_INPUT_DIRECTORY = "images/kilt-evolution" # Default if no argument provided
-# <<< --- OTHER FIXED SETTINGS --- >>>
-WATERMARK_PATH = "images/site/clan-watermark.png"
-TARGET_WATERMARK_WIDTH = 200  # Baked in: 250px
-OFFSET = 10                   # Baked in: 10px
-# Background settings
-ADD_BACKGROUND = True         # Set to False to disable background
-BACKGROUND_COLOR = (128, 128, 128) # RGB for grey
-BACKGROUND_OPACITY = 0.5      # 0.0 (transparent) to 1.0 (opaque) -> 50%
+# Find project base directory (assuming script is in BASE_DIR/scripts)
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "_data"
+IMAGE_LIBRARY_PATH = DATA_DIR / "image_library.json"
+WORKFLOW_STATUS_PATH = DATA_DIR / "workflow_status.json" # To update individual status
+DEFAULT_IMAGE_DIR = BASE_DIR / "images" / "posts" # Default if not specified in library
 
-# --- Internal Constants ---
-SUPPORTED_EXTENSIONS = ('.jpg', '.jpeg', '.png')
+# Watermark settings
+WATERMARK_TEXT = "© Clan.com"
+FONT_SIZE_RATIO = 0.04 # Adjust font size relative to image width
+FONT_PATH = "/System/Library/Fonts/Supplemental/Arial.ttf" # Adjust path as needed for your system
+TEXT_COLOR = (255, 255, 255, 100) # White with transparency
+BACKGROUND_COLOR = (0, 0, 0, 100) # Semi-transparent black background
+PADDING = 10 # Padding around text
 
-def add_watermark(image_path, watermark_path, output_path):
-    """
-    Adds a watermark (with optional background) to an image and saves it.
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-    Uses baked-in global constants for width, offset, background settings.
-
-    Args:
-        image_path (str): Path to the main image.
-        watermark_path (str): Path to the watermark image.
-        output_path (str): Path to save the watermarked image.
-
-    Returns:
-        bool: True if successful, False otherwise.
-    """
+# --- Helper Functions (from app.py, slightly adapted) ---
+def load_json_data(file_path: Path):
+    """Loads JSON data from the given absolute file path."""
+    logging.info(f"Attempting to load JSON data from: {file_path}")
+    if not file_path.is_file():
+        logging.warning(f"JSON data file not found: {file_path}. Returning empty data.")
+        return {}
     try:
-        # Use 'with' statement for automatic closing of files
-        with Image.open(image_path).convert("RGBA") as base_image, \
-             Image.open(watermark_path).convert("RGBA") as watermark_image:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        logging.info(f"Successfully loaded JSON data from {file_path.name}.")
+        return data
+    except json.JSONDecodeError:
+        logging.error(f"Error decoding JSON from {file_path}.")
+        return None
+    except Exception as e:
+        logging.error(f"Unexpected error loading JSON data from {file_path}: {e}")
+        return None
 
-            # --- Resize Watermark ---
-            wm_width, wm_height = watermark_image.size
-            if wm_width == 0 or wm_height == 0:
-                print(f"    Error: Watermark dimensions invalid for {watermark_path}")
-                return False
-
-            aspect_ratio = wm_height / wm_width
-            new_wm_height = int(TARGET_WATERMARK_WIDTH * aspect_ratio)
-            if new_wm_height == 0: new_wm_height = 1 # Ensure minimum height
-
-            try:
-                # Use Resampling.LANCZOS for high-quality resizing
-                watermark_resized = watermark_image.resize((TARGET_WATERMARK_WIDTH, new_wm_height), Image.Resampling.LANCZOS)
-            except AttributeError: # Fallback for older Pillow versions
-                 watermark_resized = watermark_image.resize((TARGET_WATERMARK_WIDTH, new_wm_height), Image.LANCZOS)
-
-            wm_resized_width, wm_resized_height = watermark_resized.size
-
-            # --- Calculate Position ---
-            base_width, base_height = base_image.size
-            # Ensure watermark + offset doesn't exceed image dimensions
-            pos_x = max(0, base_width - wm_resized_width - OFFSET)
-            pos_y = max(0, base_height - wm_resized_height - OFFSET)
-            position = (pos_x, pos_y)
-
-            # --- Create Composite Layer ---
-            # Start with a transparent layer the size of the base image
-            composite_layer = Image.new('RGBA', base_image.size, (0, 0, 0, 0))
-
-            # --- Draw Background (Optional) ---
-            if ADD_BACKGROUND:
-                draw = ImageDraw.Draw(composite_layer)
-                # Define the rectangle for the background
-                bg_rect_coords = [
-                    position[0], position[1], # Top-left corner
-                    position[0] + wm_resized_width, position[1] + wm_resized_height # Bottom-right corner
-                ]
-                # Calculate RGBA color for background
-                bg_fill_color = BACKGROUND_COLOR + (int(255 * BACKGROUND_OPACITY),)
-                # Draw the rectangle onto the composite layer
-                draw.rectangle(bg_rect_coords, fill=bg_fill_color)
-                # Delete draw object (good practice, though maybe not strictly needed here)
-                del draw
-
-            # --- Paste Watermark onto Composite Layer ---
-            # Paste the resized watermark over the background (if any) on the composite layer
-            composite_layer.paste(watermark_resized, position, watermark_resized) # Use mask for transparency
-
-            # --- Composite onto Base Image ---
-            watermarked_image = Image.alpha_composite(base_image, composite_layer)
-
-            # --- Save ---
-            # Handle different save formats
-            file_ext = os.path.splitext(output_path)[1].lower()
-            if file_ext in ['.jpg', '.jpeg']:
-                watermarked_image.convert('RGB').save(output_path, "JPEG", quality=95)
-            else:
-                watermarked_image.save(output_path)
-
-            return True
-
-    except FileNotFoundError:
-        print(f"    Error: File not found ({image_path} or {watermark_path})")
-        return False
-    except UnidentifiedImageError:
-        print(f"    Error: Cannot identify image file ({image_path})")
+def save_json_data(file_path: Path, data: dict):
+    """Saves the given dictionary as JSON to the specified absolute file path."""
+    logging.info(f"Attempting to save JSON data to: {file_path}")
+    try:
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=4)
+        logging.info(f"Successfully saved JSON data to {file_path.name}.")
+        return True
+    except IOError as e:
+        logging.error(f"IOError saving JSON data to {file_path}: {e}")
         return False
     except Exception as e:
-        print(f"    Error processing {image_path}: {e}")
+        logging.error(f"Unexpected error saving JSON data to {file_path}: {e}")
         return False
 
-def main():
-    parser = argparse.ArgumentParser(description="Add a watermark to images in a directory.")
-    # Only argument is the input directory, with a default
-    parser.add_argument("directory", nargs='?', default=DEFAULT_INPUT_DIRECTORY,
-                        help=f"Directory containing images to watermark (default: {DEFAULT_INPUT_DIRECTORY}).")
+def add_watermark(image_path, output_path):
+    """Adds a text watermark to an image and saves it."""
+    try:
+        img = Image.open(image_path).convert("RGBA") # Convert to RGBA for transparency
+        width, height = img.size
 
-    args = parser.parse_args()
-    input_directory = args.directory
+        # Calculate font size
+        font_size = max(12, int(width * FONT_SIZE_RATIO)) # Min size 12
+        try:
+            font = ImageFont.truetype(FONT_PATH, font_size)
+        except IOError:
+            logging.warning(f"Font not found at {FONT_PATH}. Using default font.")
+            font = ImageFont.load_default() # Fallback font
 
-    # --- Validate Inputs ---
-    if not os.path.isdir(input_directory):
-        print(f"Error: Input directory not found: {input_directory}")
-        sys.exit(1)
-    if not os.path.isfile(WATERMARK_PATH):
-        print(f"Error: Watermark file not found: {WATERMARK_PATH}")
-        sys.exit(1)
+        # Create drawing context
+        draw = ImageDraw.Draw(img)
 
-    # --- Calculate and Create Output Directory ---
-    output_directory = f"{input_directory}-watermarked"
-    if not os.path.exists(output_directory):
-         print(f"Output directory {output_directory} not found, creating it.")
-         os.makedirs(output_directory) # exist_ok=True is default in Python 3.2+
-    else:
-         print(f"Output directory {output_directory} already exists.")
+        # Calculate text size and position
+        # Use textbbox for more accurate sizing
+        bbox = draw.textbbox((0, 0), WATERMARK_TEXT, font=font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
 
+        # Position with padding (bottom right)
+        x = width - text_width - PADDING * 2
+        y = height - text_height - PADDING * 2
 
-    # --- Process Images ---
-    print(f"\nProcessing images in: {input_directory}")
-    print(f"Using watermark: {WATERMARK_PATH}")
-    print(f"Watermark target width: {TARGET_WATERMARK_WIDTH}px, Offset: {OFFSET}px")
-    if ADD_BACKGROUND:
-        print(f"Adding background: Color {BACKGROUND_COLOR}, Opacity {BACKGROUND_OPACITY*100:.0f}%")
-    print(f"Saving watermarked images to: {output_directory}")
-    print("-" * 30)
+        # Draw semi-transparent background rectangle
+        bg_rect_coords = [
+            (x - PADDING, y - PADDING),
+            (x + text_width + PADDING, y + text_height + PADDING)
+        ]
+        draw.rectangle(bg_rect_coords, fill=BACKGROUND_COLOR)
 
-    processed_count = 0
-    skipped_count = 0
+        # Draw the text
+        draw.text((x, y), WATERMARK_TEXT, fill=TEXT_COLOR, font=font)
 
-    for filename in os.listdir(input_directory):
-        # Check if it's a file and has a supported extension
-        file_path = os.path.join(input_directory, filename)
-        if os.path.isfile(file_path) and filename.lower().endswith(SUPPORTED_EXTENSIONS):
-            print(f"Processing {filename}...")
-            output_filename = os.path.join(output_directory, filename)
+        # Save as JPG (handle transparency by converting back to RGB with white background)
+        # Create a white background image
+        bg = Image.new("RGB", img.size, (255, 255, 255))
+        bg.paste(img, mask=img.split()[3]) # Paste using alpha channel as mask
 
-            if add_watermark(file_path, WATERMARK_PATH, output_filename):
-                processed_count += 1
-            else:
-                skipped_count += 1
-        elif os.path.isfile(file_path):
-             print(f"Skipping unsupported file: {filename}")
-        # else: it's a directory, skip silently
+        bg.save(output_path, "JPEG", quality=90) # Save as JPG
+        logging.info(f"Watermarked image saved to: {output_path}")
+        return True
 
+    except FileNotFoundError:
+        logging.error(f"Image file not found for watermarking: {image_path}")
+        return False
+    except Exception as e:
+        logging.error(f"Error applying watermark to {image_path}: {e}")
+        return False
 
-    print("-" * 30)
-    print(f"Finished. Processed: {processed_count}, Skipped/Errors: {skipped_count}")
-
+# --- Main Execution ---
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Watermark specific images for a blog post.")
+    parser.add_argument('--slug', required=True, help='The slug of the blog post.')
+    parser.add_argument('--image-id', action='append', required=True, help='Image ID to process. Can be specified multiple times.')
+    args = parser.parse_args()
+
+    post_slug = args.slug
+    image_ids_to_process = args.image_id
+
+    logging.info(f"--- Starting Watermarking for post: {post_slug} ---")
+    logging.info(f"Processing Image IDs: {', '.join(image_ids_to_process)}")
+
+    image_library = load_json_data(IMAGE_LIBRARY_PATH)
+    workflow_status = load_json_data(WORKFLOW_STATUS_PATH)
+    if image_library is None or workflow_status is None:
+        logging.critical("Failed to load essential data files (image library or workflow status). Aborting.")
+        exit(1)
+
+    # Ensure post entry exists in workflow status
+    if post_slug not in workflow_status:
+        workflow_status[post_slug] = {"stages": {}}
+    if 'stages' not in workflow_status[post_slug]:
+        workflow_status[post_slug]['stages'] = {}
+    if 'images' not in workflow_status[post_slug]['stages']:
+         workflow_status[post_slug]['stages']['images'] = {}
+    if 'watermarks' not in workflow_status[post_slug]['stages']['images']:
+        workflow_status[post_slug]['stages']['images']['watermarks'] = {}
+
+
+    all_successful = True
+    image_library_updated = False
+    workflow_status_updated = False
+
+    for img_id in image_ids_to_process:
+        logging.info(f"--- Processing Image ID: {img_id} ---")
+        img_details = image_library.get(img_id)
+
+        if not img_details:
+            logging.error(f"Image ID '{img_id}' not found in library {IMAGE_LIBRARY_PATH}. Skipping.")
+            all_successful = False
+            # Update status to error?
+            workflow_status[post_slug]['stages']['images']['watermarks'][img_id] = 'error'
+            workflow_status_updated = True
+            continue
+
+        source_details = img_details.get("source_details", {})
+        filename_local = source_details.get("filename_local")
+        local_dir_rel = source_details.get("local_dir", f"images/posts/{post_slug}") # Default path structure
+
+        if not filename_local:
+            logging.error(f"Missing 'filename_local' for image ID '{img_id}'. Skipping.")
+            all_successful = False
+            workflow_status[post_slug]['stages']['images']['watermarks'][img_id] = 'error'
+            workflow_status_updated = True
+            continue
+
+        input_path = BASE_DIR / local_dir_rel.strip('/') / filename_local
+        if not input_path.is_file():
+            logging.error(f"Input image file not found: {input_path}. Skipping.")
+            all_successful = False
+            workflow_status[post_slug]['stages']['images']['watermarks'][img_id] = 'error'
+            workflow_status_updated = True
+            continue
+
+        # Prepare paths
+        original_stem = input_path.stem
+        original_suffix = input_path.suffix
+        output_dir = input_path.parent
+        backup_filename = f"{original_stem}_raw{original_suffix}"
+        backup_path = output_dir / backup_filename
+        output_filename = f"{original_stem}.jpg" # Force JPG output
+        output_path = output_dir / output_filename
+
+        logging.info(f"Input: {input_path}")
+        logging.info(f"Backup: {backup_path}")
+        logging.info(f"Output: {output_path}")
+
+        # 1. Backup original (only if backup doesn't exist)
+        try:
+            if not backup_path.exists():
+                shutil.copy2(input_path, backup_path) # copy2 preserves metadata
+                logging.info(f"Original backed up to: {backup_path}")
+            else:
+                logging.info(f"Backup file already exists: {backup_path}")
+        except Exception as e:
+            logging.error(f"Failed to backup original file {input_path}: {e}")
+            all_successful = False
+            workflow_status[post_slug]['stages']['images']['watermarks'][img_id] = 'error'
+            workflow_status_updated = True
+            continue # Don't proceed without backup
+
+        # 2. Add watermark
+        if add_watermark(input_path, output_path):
+            logging.info(f"Successfully watermarked '{img_id}'")
+            workflow_status[post_slug]['stages']['images']['watermarks'][img_id] = 'complete'
+            workflow_status_updated = True
+
+            # 3. Update image library if suffix changed
+            if original_suffix.lower() != ".jpg":
+                logging.warning(f"Image '{img_id}' suffix changed from {original_suffix} to .jpg. Updating image library.")
+                try:
+                    image_library[img_id]['source_details']['filename_local'] = output_filename
+                    image_library_updated = True
+                    # Delete the old non-jpg file? Optional. For now, we leave it.
+                    # if input_path.exists() and input_path != output_path:
+                    #     input_path.unlink()
+                    #     logging.info(f"Deleted original non-JPG file: {input_path}")
+
+                except KeyError:
+                     logging.error(f"Could not update filename in image library for '{img_id}' - structure issue?")
+                     all_successful = False # Mark as failure if we can't update library
+                     workflow_status[post_slug]['stages']['images']['watermarks'][img_id] = 'error' # Downgrade status
+        else:
+            logging.error(f"Failed to apply watermark for '{img_id}'.")
+            all_successful = False
+            workflow_status[post_slug]['stages']['images']['watermarks'][img_id] = 'error'
+            workflow_status_updated = True
+
+
+    # --- Save updated JSON files (if changes were made) ---
+    if image_library_updated:
+        if not save_json_data(IMAGE_LIBRARY_PATH, image_library):
+            logging.critical("Failed to save updated image library!")
+            all_successful = False # Critical failure
+
+    if workflow_status_updated:
+        if not save_json_data(WORKFLOW_STATUS_PATH, workflow_status):
+            logging.critical("Failed to save updated workflow status!")
+            all_successful = False # Critical failure
+
+    logging.info(f"--- Watermarking finished for post: {post_slug} ---")
+
+    if all_successful:
+        logging.info("All requested images processed successfully (or skipped non-errors).")
+        exit(0)
+    else:
+        logging.error("One or more errors occurred during watermarking.")
+        exit(1)

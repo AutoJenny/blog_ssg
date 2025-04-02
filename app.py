@@ -1,6 +1,6 @@
 # /Users/nickfiddes/Code/projects/blog_ssg/app.py
 
-from flask import Flask, render_template, jsonify, request, url_for
+from flask import Flask, render_template, jsonify, request, url_for, send_from_directory
 import os
 import json
 from pathlib import Path
@@ -24,6 +24,14 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # --- Flask App Initialization ---
 app = Flask(__name__)
 app.config['BASE_DIR_STR'] = str(BASE_DIR) # Make base dir accessible in templates if needed via config
+
+# --- Add Static Route for Images (Development Only) ---
+# Serve files from the 'images' directory at the '/images' URL path
+IMAGES_DIR = BASE_DIR / 'images' # Define the images directory path
+@app.route('/images/<path:filename>')
+def serve_images(filename):
+    logging.debug(f"Serving image: {filename} from {IMAGES_DIR}")
+    return send_from_directory(IMAGES_DIR, filename)
 
 # --- Helper Functions ---
 
@@ -283,6 +291,75 @@ def view_post_detail(slug):
         config=app.config
     )
 
+# --- NEW API Endpoint for Watermarking All Images ---
+@app.route('/api/watermark_all/<string:slug>', methods=['POST'])
+def watermark_all_api(slug):
+    """
+    Triggers the watermark_images.py script for all referenced images in a post.
+    """
+    logging.info(f"Received request to watermark all images for slug: {slug}")
+
+    # 1. Find referenced image IDs (similar logic to view_post_detail)
+    md_file_path = BASE_DIR / POSTS_DIR_NAME / f"{slug}.md"
+    referenced_image_ids = []
+    if md_file_path.exists():
+        try:
+            post_fm = frontmatter.load(md_file_path)
+            metadata = post_fm.metadata
+            if 'headerImageId' in metadata:
+                referenced_image_ids.append(metadata['headerImageId'])
+            for section in metadata.get('sections', []):
+                if section.get('imageId'):
+                    referenced_image_ids.append(section['imageId'])
+            if metadata.get('conclusion', {}).get('imageId'):
+                 referenced_image_ids.append(metadata['conclusion']['imageId'])
+            referenced_image_ids = list(dict.fromkeys(referenced_image_ids)) # Unique IDs
+            logging.info(f"Found {len(referenced_image_ids)} unique image IDs to watermark for '{slug}'.")
+        except Exception as e:
+            error_msg = f"Error loading front matter to get image IDs for '{slug}': {e}"
+            logging.error(error_msg)
+            return jsonify({"success": False, "output": error_msg, "slug": slug}), 500
+    else:
+        error_msg = f"Markdown file not found for slug '{slug}': {md_file_path}"
+        logging.error(error_msg)
+        return jsonify({"success": False, "output": error_msg, "slug": slug}), 404
+
+    if not referenced_image_ids:
+        return jsonify({"success": True, "output": "No images referenced in post, nothing to watermark.", "slug": slug})
+
+    # 2. Construct command for the script
+    script_path = str(BASE_DIR / 'scripts' / 'watermark_images.py')
+    # Pass slug and image IDs as arguments
+    command = [ sys.executable, script_path, '--slug', slug ]
+    for img_id in referenced_image_ids:
+        command.extend(['--image-id', img_id])
+
+    logging.info(f"Executing command: {' '.join(command)}")
+
+    # 3. Run the script
+    try:
+        # Run script from BASE_DIR so its relative paths work
+        result = subprocess.run(command, capture_output=True, text=True, check=False, cwd=BASE_DIR)
+        output_log = f"--- Watermark Script STDOUT ---\n{result.stdout}\n--- Watermark Script STDERR ---\n{result.stderr}"
+        success = result.returncode == 0
+        if success:
+            logging.info(f"Watermark script for slug '{slug}' completed successfully.")
+            # Optionally: Update the *overall* images stage status to 'partial' or check individual statuses?
+            # For simplicity, we'll rely on the user reloading to see updated individual statuses set by the script.
+        else:
+            logging.error(f"Watermark script for slug '{slug}' failed with return code {result.returncode}.")
+
+        return jsonify({"success": success, "output": output_log, "slug": slug})
+
+    except FileNotFoundError:
+        error_msg = f"Error: '{sys.executable}' or script '{script_path}' not found."
+        logging.error(error_msg)
+        return jsonify({"success": False, "output": error_msg, "slug": slug}), 500
+    except Exception as e:
+        error_msg = f"An unexpected error occurred while running the watermark script: {e}"
+        logging.error(error_msg)
+        return jsonify({"success": False, "output": error_msg, "slug": slug}), 500
+        
 
 @app.route('/api/publish_clan/<string:slug>', methods=['POST'])
 def publish_to_clan_api(slug):

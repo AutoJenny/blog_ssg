@@ -158,6 +158,57 @@ def publish_to_clan_api(slug):
     except FileNotFoundError: error_msg = f"Error: '{sys.executable}' or script '{script_path}' not found."; logging.error(error_msg); return jsonify({"success": False, "output": error_msg, "slug": slug}), 500
     except Exception as e: error_msg = f"An unexpected error occurred while running the script: {e}"; logging.error(error_msg); return jsonify({"success": False, "output": error_msg, "slug": slug}), 500
 
+# --- NEW API Endpoint for Status Updates ---
+@app.route('/api/update_status/<string:slug>/<string:stage_key>', methods=['POST'])
+def update_status_api(slug, stage_key):
+    """Updates the status for a specific stage of a post."""
+    logging.info(f"Received request to update status for slug: {slug}, stage: {stage_key}")
+
+    # Get the new status from the incoming JSON request body
+    data = request.get_json()
+    if not data or 'status' not in data:
+        logging.error("Missing 'status' in request body.")
+        return jsonify({"success": False, "message": "Missing 'status' in request body"}), 400
+    new_status = data['status']
+    # TODO: Validate new_status against allowed values ('pending', 'partial', 'complete', 'error')?
+
+    data_file_abs_path = BASE_DIR / SYNDICATION_DATA_FILE
+    workflow_data = load_syndication_data(data_file_abs_path)
+
+    if workflow_data is None:
+        return jsonify({"success": False, "message": f"Error loading data file {SYNDICATION_DATA_FILE}"}), 500
+    if slug not in workflow_data:
+         return jsonify({"success": False, "message": f"Slug '{slug}' not found in workflow data."}), 404
+    if 'stages' not in workflow_data[slug] or stage_key not in workflow_data[slug]['stages']:
+         # Initialize if missing (optional, depends on desired strictness)
+         if 'stages' not in workflow_data[slug]: workflow_data[slug]['stages'] = {}
+         if stage_key not in workflow_data[slug]['stages']: workflow_data[slug]['stages'][stage_key] = {}
+         logging.warning(f"Initialized missing stage '{stage_key}' for slug '{slug}'.")
+         # return jsonify({"success": False, "message": f"Stage '{stage_key}' not found for slug '{slug}'."}), 404
+
+    # Update the status
+    workflow_data[slug]['stages'][stage_key]['status'] = new_status
+    workflow_data[slug]['last_updated'] = datetime.datetime.now(datetime.timezone.utc).isoformat() # Update timestamp
+    logging.info(f"Updating status for '{slug}/{stage_key}' to '{new_status}'.")
+
+    # Save the updated data
+    if save_syndication_data(data_file_abs_path, workflow_data):
+        return jsonify({
+            "success": True,
+            "slug": slug,
+            "stage": stage_key,
+            "new_status": new_status
+        })
+    else:
+        return jsonify({"success": False, "message": "Failed to save updated workflow data."}), 500
+
+# Make sure to import datetime at the top of app.py
+import datetime
+
+# --- Run the App --- (remains the same)
+if __name__ == '__main__':
+    app.run(debug=True, port=5001)
+    
 # --- Run the App ---
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

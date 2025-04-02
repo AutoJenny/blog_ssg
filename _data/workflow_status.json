@@ -5,10 +5,17 @@
         "conceptualisation": { "status": "complete", "notes": null },
         "authoring": { "status": "complete", "text_format_status": "complete" },
         "metadata": { "status": "complete", "front_matter_status": "complete", "tags_status": "complete", "author_status": "complete" },
-        "images": { "status": "complete", "prompts_defined_status": "complete", "generation_status": "complete", "assets_prepared_status": "complete", "metadata_integrated_status": "complete" },
+        "images": {
+          "status": "complete",
+          "prompts_defined_status": "complete",
+          "generation_status": "complete",
+          "assets_prepared_status": "complete",
+          "metadata_integrated_status": "complete",
+          "watermarking_status": "pending",
+          "watermarking_used_in_publish": false
+        },
         "validation": { "status": "complete", "last_preview_ok": true },
         "publishing_clancom": { "status": "complete", "post_id": 333, "last_publish_attempt": "2025-04-01T10:13:21Z", "last_error": null },
-        "watermarking": { "status": "pending", "used_in_publish": false },
         "syndication": { "status": "pending", "instagram": {"overall_status":"pending"}, "facebook": {"overall_status":"pending"} }
       }
     },
@@ -18,10 +25,17 @@
         "conceptualisation": { "status": "complete", "notes": null },
         "authoring": { "status": "complete", "text_format_status": "complete"},
         "metadata": { "status": "complete", "front_matter_status": "complete", "tags_status":"complete", "author_status":"complete"},
-        "images": { "status": "pending", "prompts_defined_status": "complete", "generation_status": "pending", "assets_prepared_status": "pending", "metadata_integrated_status":"pending" },
+        "images": {
+          "status": "pending",
+          "prompts_defined_status": "complete",
+          "generation_status": "pending",
+          "assets_prepared_status": "pending",
+          "metadata_integrated_status":"pending",
+          "watermarking_status": "pending",
+          "watermarking_used_in_publish": false
+        },
         "validation": { "status": "pending", "last_preview_ok": false },
         "publishing_clancom": { "status": "complete", "post_id": 334, "last_publish_attempt": "2025-04-01T18:07:06Z", "last_error": null },
-        "watermarking": { "status": "pending", "used_in_publish": false },
         "syndication": { "status": "pending", "instagram": {"overall_status":"pending"}, "facebook": {"overall_status":"pending"}}
       }
     }

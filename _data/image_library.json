@@ -1,0 +1,554 @@
+{
+    "IMG00001": {
+      "description": "Header image for Kilt Evolution post",
+      "status": "approved",
+      "prompt_status": "complete",
+      "generation_status": "complete",
+      "watermark_status": "pending",
+      "prompt": "Collage representing the evolution of the Scottish kilt through centuries, showing styles from early wraps to modern tailored kilts. Blend historical illustrations and photographic elements. Aspect ratio 16:9.",
+      "source_details": {
+        "filename_local": "kilt-evolution_header.jpg",
+        "post_slug": "kilt-evolution",
+        "local_dir": "/images/posts/kilt-evolution/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "Collage of kilt styles over the centuries.",
+        "blog_caption": "The kilt has evolved constantly from its earliest origins."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "From battlefield necessity to global fashion icon! ✨ Explore the incredible journey of the Scottish kilt through the ages. #KiltHistory #ScottishFashion #Tartan #HighlandWear #Scotland #CelticStyle #MenswearEvolution", "hashtags": ["KiltHistory", "ScottishFashion", "Tartan", "HighlandWear", "Scotland", "CelticStyle", "MenswearEvolution"] },
+        "facebook": { "status": "pending", "caption": "Did you know the kilt evolved significantly over centuries? From the practical 'féileadh mòr' of the Highlands to a symbol of identity and even high fashion, its story is fascinating. Learn more about the evolution of this iconic garment on the blog! [Link Placeholder]" }
+      },
+      "notes": "Initial header concept."
+    },
+    "IMG00002": {
+      "description": "Early Forms of Highland Dress section image for Kilt Evolution",
+      "status": "approved",
+      "prompt_status": "complete",
+      "generation_status": "complete",
+      "watermark_status": "pending",
+      "prompt": "Illustration of an early Highlander (Pict or Gael) pre-16th century, wearing a simple woollen tunic ('léine') and brat cloak fastened with a brooch, standing in a rugged Highland landscape. Focus on practical, layered clothing. Historically accurate. Aspect ratio 16:9.",
+      "source_details": {
+        "filename_local": "kilt-evolution_early-highland-dress.jpg",
+        "post_slug": "kilt-evolution",
+        "local_dir": "/images/posts/kilt-evolution/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "Pictish warrior in tunic and brat cloak on a cliff with standing stones.",
+        "blog_caption": "Early Highland attire: A Pictish warrior embodying resilience in practical woollen tunic and cloak."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "Before the familiar kilt: Early Highland dress prioritized practicality for rugged terrain. Think layered woollen tunics & cloaks! #HighlandHistory #AncientScotland #Picts #Gaels #ScottishClothing #CelticHistory", "hashtags": ["HighlandHistory", "AncientScotland", "Picts", "Gaels", "ScottishClothing", "CelticHistory"] },
+        "facebook": { "status": "pending", "caption": "Journey back before the 16th century! Early Highland attire focused on survival in rugged landscapes, featuring practical woollen tunics (léine) and cloaks (brat). These garments laid the groundwork for later iconic styles. #ScottishHistory #CelticFashion" }
+      },
+      "notes": null
+    },
+    "IMG00003": {
+      "description": "Origins of the Great Kilt section image for Kilt Evolution",
+      "status": "approved",
+      "prompt_status": "complete",
+      "generation_status": "complete",
+      "watermark_status": "pending",
+      "prompt": "A 16th-century Highlander in a realistic setting, demonstrating how to pleat and belt the large 'féileadh mòr' (great kilt) made of several yards of tartan cloth. Focus on the process and the versatile nature of the garment. Historical accuracy in clothing and environment. Aspect ratio 16:9.",
+      "source_details": {
+        "filename_local": "kilt-evolution_great-kilt-origins.jpg",
+        "post_slug": "kilt-evolution",
+        "local_dir": "/images/posts/kilt-evolution/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "16th-century Highlander pleating and belting a large féileadh mòr tartan wrap.",
+        "blog_caption": "The versatile féileadh mòr: A 16th-century Highlander dons the great kilt for protection and practicality."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "Meet the Féileadh Mòr! The 16th-century 'great kilt' was a versatile marvel – cloak by day, blanket by night. #GreatKilt #FeileadhMor #ScottishHistory #TartanTuesday #HighlandDress #Kilt", "hashtags": ["GreatKilt", "FeileadhMor", "ScottishHistory", "TartanTuesday", "HighlandDress", "Kilt"] },
+        "facebook": { "status": "pending", "caption": "The original 'Great Kilt' or Féileadh Mòr emerged in the 16th century. This single large piece of tartan was skillfully pleated and belted, serving multiple practical purposes for Highlanders. #ScottishHeritage #KiltEvolution #FeileadhMor" }
+      },
+      "notes": null
+    },
+    "IMG00004": {
+      "description": "Cultural Significance of the Great Kilt section image for Kilt Evolution",
+      "status": "approved",
+      "prompt_status": "complete",
+      "generation_status": "complete",
+      "watermark_status": "pending",
+      "prompt": "Illustration depicting a 17th-century Highland clan chief, perhaps MacDonald or Campbell, distributing specific tartan plaids (féileadh mòr) to his loyal clansmen during an outdoor gathering. Emphasize the tartan patterns as symbols of identity and allegiance. Detailed historical attire and setting. Aspect ratio 16:9.",
+      "source_details": {
+        "filename_local": "kilt-evolution_great-kilt-significance.jpg",
+        "post_slug": "kilt-evolution",
+        "local_dir": "/images/posts/kilt-evolution/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "17th-century MacLeod chief distributing tartan plaids to clansmen during a gathering.",
+        "blog_caption": "Tartan as identity: A 17th-century clan chief reinforces kinship through the distribution of plaids."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "Tartan wasn't just fabric; it was identity! In the 17th century, specific patterns signified clan allegiance, like visual badges of honour. #ClanTartan #ScottishClans #HighlandCulture #TartanHistory #ScotlandIsNow", "hashtags": ["ClanTartan", "ScottishClans", "HighlandCulture", "TartanHistory", "ScotlandIsNow"] },
+        "facebook": { "status": "pending", "caption": "By the 17th century, tartan evolved into a powerful symbol of clan identity and loyalty. Chiefs distributed specific patterns, reinforcing kinship and social structure within the Highlands. #ScottishHistory #Tartan #ClanLife" }
+      },
+      "notes": null
+    },
+    "IMG00005": {
+      "description": "Adaptations for Practicality section image for Kilt Evolution",
+      "status": "approved",
+      "prompt_status": "complete",
+      "generation_status": "complete",
+      "watermark_status": "pending",
+      "prompt": "Realistic depiction of a Highland hunter or soldier around the late 17th/early 18th century, actively tucking the upper shoulder plaid part of his féileadh mòr into his belt to create a more practical, skirt-like lower half for better movement. Show action or purpose (hunting/marching). Accurate historical detail. Aspect ratio 16:9.",
+      "source_details": {
+        "filename_local": "kilt-evolution_kilt-adaptations-practicality.jpg",
+        "post_slug": "kilt-evolution",
+        "local_dir": "/images/posts/kilt-evolution/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "Highland hunter around 1700 tucking the upper part of his féileadh mòr into his belt.",
+        "blog_caption": "Adapting for action: A Highland hunter modifies the great kilt for greater freedom of movement circa 1700."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "Adapting for action! Late 17th-century Highlanders started tucking away the top plaid of the great kilt for practicality, paving the way for the modern kilt form. #KiltEvolution #HighlandLife #ScottishHistory #Adaptation #FeileadhMor", "hashtags": ["KiltEvolution", "HighlandLife", "ScottishHistory", "Adaptation", "FeileadhMor"] },
+        "facebook": { "status": "pending", "caption": "Practicality drives change! As life demanded more dynamic movement, Highlanders began adapting the bulky Féileadh Mòr by tucking the upper plaid, a key step towards the 'small kilt' we know today. #ScottishInnovation #KiltHistory #HighlandDress" }
+      },
+      "notes": null
+    },
+    "IMG00006": {
+      "description": "Emergence of the Small Kilt section image for Kilt Evolution",
+      "status": "approved",
+      "prompt_status": "complete",
+      "generation_status": "complete",
+      "watermark_status": "pending",
+      "prompt": "Scene in an early 18th-century Highland ironworks (around 1720s), showing workers wearing the newly developed 'féileadh beag' (small kilt) – the pre-pleated, knee-length skirt without the shoulder plaid. Focus on the practicality for industrial work, perhaps near a forge or furnace. Link to Thomas Rawlinson's innovation. Aspect ratio 16:9.",
+      "source_details": {
+        "filename_local": "kilt-evolution_small-kilt-emergence.jpg",
+        "post_slug": "kilt-evolution",
+        "local_dir": "/images/posts/kilt-evolution/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "18th-century ironworker wearing the knee-length féileadh beag (small kilt) while working at a forge.",
+        "blog_caption": "The birth of the modern kilt: An ironworker demonstrates the practicality of the féileadh beag around 1720."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "The modern kilt takes shape! Around 1720, the 'Féileadh Beag' or small kilt emerged, separating the pleated skirt from the shoulder plaid – a practical evolution for workers and soldiers. #SmallKilt #FeileadhBeag #KiltHistory #ScottishInnovation #18thCentury", "hashtags": ["SmallKilt", "FeileadhBeag", "KiltHistory", "ScottishInnovation", "18thCentury"] },
+        "facebook": { "status": "pending", "caption": "Innovation corner: The early 18th century saw the emergence of the 'Féileadh Beag' (small kilt). Often credited to industrialist Thomas Rawlinson, this separated skirt design offered greater practicality, influencing kilt design forever. #KiltFacts #ScottishHeritage #IndustrialHistory" }
+      },
+      "notes": null
+    },
+    "IMG00007": {
+      "description": "Suppression of Highland Dress section image for Kilt Evolution",
+      "status": "approved",
+      "prompt_status": "complete",
+      "generation_status": "complete",
+      "watermark_status": "pending",
+      "prompt": "Atmospheric, slightly clandestine scene inside a dimly lit Highland cottage, circa 1760. A determined Highland woman secretly weaves tartan on a small loom by candlelight, while the shadow of a patrolling Redcoat soldier is visible outside the window. Convey resilience and cultural defiance during the Dress Act (1746-1782). Aspect ratio 16:9.",
+      "source_details": {
+        "filename_local": "kilt-evolution_highland-dress-suppression.jpg",
+        "post_slug": "kilt-evolution",
+        "local_dir": "/images/posts/kilt-evolution/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "Highland woman secretly weaving tartan by candlelight while Redcoats patrol outside, circa 1760.",
+        "blog_caption": "Defiance in the shadows: Secretly weaving banned tartan during the Dress Act suppression (1746-1782)."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "A symbol forbidden! After Culloden, the Dress Act of 1746 banned tartan & kilts. But Highland culture persisted in secret acts of defiance, like weaving by candlelight. #DressAct #HighlandHistory #ScottishResilience #Tartan #Jacobite #ForbiddenFashion", "hashtags": ["DressAct", "HighlandHistory", "ScottishResilience", "Tartan", "Jacobite", "ForbiddenFashion"] },
+        "facebook": { "status": "pending", "caption": "A dark chapter: The Dress Act (1746-1782) aimed to suppress Highland culture by banning tartan and the kilt following the Jacobite rising. Yet, the spirit endured through acts of quiet defiance and cultural preservation. #WearWhatYouWant #ScottishHistory #CulturalSuppression #Resilience" }
+      },
+      "notes": null
+    },
+    "IMG00008": {
+      "description": "Romantic Revival and Cultural Renaissance section image for Kilt Evolution",
+      "status": "approved",
+      "prompt_status": "complete",
+      "generation_status": "complete",
+      "watermark_status": "pending",
+      "prompt": "Grand, celebratory scene depicting Sir Walter Scott, adorned in prominent Royal Stewart tartan, orchestrating the 1822 visit of King George IV to Edinburgh. Show Lowland nobles, previously dismissive, now wearing kilts and tartan. Highlight the pageantry and romanticism transforming the kilt's image. Accurate depiction of Holyrood Palace or Edinburgh setting. Aspect ratio 16:9.",
+      "source_details": {
+        "filename_local": "kilt-evolution_romantic-revival-renaissance.jpg",
+        "post_slug": "kilt-evolution",
+        "local_dir": "/images/posts/kilt-evolution/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "Sir Walter Scott in Royal Stewart tartan leading nobles during King George IV's 1822 Edinburgh visit.",
+        "blog_caption": "Romantic revival: Sir Walter Scott orchestrates a tartan spectacle for King George IV in 1822 Edinburgh."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "Tartan's big comeback! Thanks to Sir Walter Scott & King George IV's 1822 visit, the kilt was reborn in a wave of romantic revival, transforming into a symbol of Scottish identity & pageantry. #TartanRevival #SirWalterScott #RoyalVisit #ScottishRomanticism #KiltStyle", "hashtags": ["TartanRevival", "SirWalterScott", "RoyalVisit", "ScottishRomanticism", "KiltStyle", "19thCentury"] },
+        "facebook": { "status": "pending", "caption": "From suppression to spectacle! The late 18th and 19th centuries saw a Romantic revival of Highland culture, heavily influenced by writers like Sir Walter Scott and cemented by King George IV's famous 1822 visit to Edinburgh, where tartan took centre stage. #ScottishRenaissance #KiltHistory #Romanticism #WalterScott" }
+      },
+      "notes": null
+    },
+    "IMG00009": {
+      "description": "Military Adoption and Global Influence section image for Kilt Evolution",
+      "status": "approved",
+      "prompt_status": "complete",
+      "generation_status": "complete",
+      "watermark_status": "pending",
+      "prompt": "Dynamic, gritty scene from a World War I battlefield (e.g., Western Front). A determined Black Watch soldier in his dark Government Sett kilt advances, perhaps alongside a piper. Convey the juxtaposition of traditional Highland dress in modern warfare, emphasizing bravery and regimental pride. Aspect ratio 16:9.",
+      "source_details": {
+        "filename_local": "kilt-evolution_military-adoption-influence.jpg",
+        "post_slug": "kilt-evolution",
+        "local_dir": "/images/posts/kilt-evolution/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "Black Watch soldier in government sett kilt charging across a WWI battlefield with a bagpiper.",
+        "blog_caption": "Courage in tartan: A Black Watch soldier embodies the kilt's military legacy during World War I."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "Courage in tartan! Highland regiments like the Black Watch famously wore kilts into battle, becoming global symbols of Scottish bravery and identity, even on WW1 fields. #HighlandRegiment #BlackWatch #MilitaryKilt #ScottishSoldier #WWI #Courage", "hashtags": ["HighlandRegiment", "BlackWatch", "MilitaryKilt", "ScottishSoldier", "WWI", "Courage"] },
+        "facebook": { "status": "pending", "caption": "The kilt went global largely thanks to its adoption by the British Army's Highland regiments. Their distinct tartans and battlefield bravery, from Napoleonic Wars to WWI, made the kilt an internationally recognized symbol. #MilitaryHistory #ScottishRegiments #Kilt #Tartan" }
+      },
+      "notes": null
+    },
+    "IMG00010": {
+      "description": "Kilts in Formal and Everyday Attire section image for Kilt Evolution",
+      "status": "approved",
+      "prompt_status": "complete",
+      "generation_status": "complete",
+      "watermark_status": "pending",
+      "prompt": "Joyful, slightly nostalgic scene of a Scottish wedding reception or ceilidh in the 1950s/60s. Focus on guests wearing kilts (e.g., Prince Charlie outfits) for formal celebration, dancing, and socializing. Capture the post-war popularization of the kilt for non-military formal events. Aspect ratio 16:9.",
+      "source_details": {
+        "filename_local": "kilt-evolution_formal-everyday-attire.jpg",
+        "post_slug": "kilt-evolution",
+        "local_dir": "/images/posts/kilt-evolution/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "1950s Scottish wedding scene with groom in Prince Charlie kilt outfit and guests dancing a ceilidh.",
+        "blog_caption": "From battlefield to ballroom: Kilts become central to 20th-century formal and celebratory wear."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "From battlefield to ballroom! Post-WWII, the kilt became a staple of formal wear for weddings, ceilidhs, and celebrations, solidifying its place in 20th-century Scottish social life. #KiltOutfit #Ceilidh #ScottishWedding #FormalWear #VintageScotland #PrinceCharlie", "hashtags": ["KiltOutfit", "Ceilidh", "ScottishWedding", "FormalWear", "VintageScotland", "PrinceCharlie"] },
+        "facebook": { "status": "pending", "caption": "The 20th century saw the kilt firmly established as celebratory wear. Popularised by returning soldiers and embraced by the diaspora, it became synonymous with Scottish weddings, formal events, and cultural pride. #ScottishCulture #KiltStyle #20thCenturyFashion" }
+      },
+      "notes": null
+    },
+    "IMG00011": {
+      "description": "Modern Innovations and Fashion Trends section image for Kilt Evolution",
+      "status": "approved",
+      "prompt_status": "complete",
+      "generation_status": "complete",
+      "watermark_status": "pending",
+      "prompt": "High-fashion runway scene featuring a model (could be gender-fluid) wearing a modern, avant-garde kilt interpretation. Think unconventional materials (leather, denim, tech fabrics), deconstructed design, or bold contemporary tartan patterns. Emphasize the fusion of tradition and modern fashion trends, challenging norms. Dynamic lighting and runway setting. Aspect ratio 16:9.",
+      "source_details": {
+        "filename_local": "kilt-evolution_modern-innovations-fashion.jpg",
+        "post_slug": "kilt-evolution",
+        "local_dir": "/images/posts/kilt-evolution/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "Gender-fluid model on a neon runway wearing a deconstructed, futuristic tartan kilt.",
+        "blog_caption": "The kilt reimagined: 21st-century fashion fuses tartan tradition with avant-garde and inclusive design."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "The kilt, but make it fashion! ⚡️ Today's designers reimagine tartan and the kilt form with modern materials, cuts, and a challenge to traditional norms. Tradition meets runway! #ModernKilt #TartanFashion #AvantGarde #ScottishDesign #FashionForward #Inclusivity", "hashtags": ["ModernKilt", "TartanFashion", "AvantGarde", "ScottishDesign", "FashionForward", "Inclusivity", "RunwayStyle"] },
+        "facebook": { "status": "pending", "caption": "The kilt continues to evolve! 21st-century fashion embraces the kilt, experimenting with new materials, challenging gender norms, and blending streetwear influences with heritage. What do you think of modern kilt designs? #Kilt #FashionTrends #ScottishStyle #ContemporaryDesign" }
+      },
+      "notes": null
+    },
+    "IMG00012": {
+      "description": "Header image for Quaich Traditions post",
+      "status": "pending_review",
+      "prompt_status": "complete",
+      "generation_status": "pending",
+      "watermark_status": "pending",
+      "prompt": "A collection of various Scottish quaichs from different eras – wood, pewter, silver – arranged artistically on a background of subtle tartan, representing the scope of the article. Soft, inviting lighting. Aspect ratio 16:9.",
+      "source_details": {
+        "filename_local": "quaich-traditions_header-collage.png",
+        "post_slug": "quaich-traditions",
+        "local_dir": "/images/posts/quaich-traditions/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "A collection of various Scottish quaichs from different eras - NEEDS FINAL IMAGE",
+        "blog_caption": "The Scottish Quaich: A journey through history, tradition, and symbolism."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "Slàinte! Exploring the rich history of the Scottish Quaich, the 'cup of friendship'. From clans to kings to modern weddings. #Quaich #ScottishTradition #CupOfFriendship #Celtic #Scotland #History", "hashtags": ["Quaich", "ScottishTradition", "CupOfFriendship", "Celtic", "Scotland", "History", "Pewter", "Silver"] },
+        "facebook": { "status": "pending", "caption": "What is a Quaich? Discover the story behind Scotland's traditional two-handled 'cup of friendship', a symbol of hospitality and trust for centuries. Learn more on the blog! [Link Placeholder]" }
+      },
+      "notes": "Needs final image generation."
+    },
+    "IMG00013": {
+      "description": "Early Origins section image for Quaich Traditions",
+      "status": "pending_review",
+      "prompt_status": "complete",
+      "generation_status": "pending",
+      "watermark_status": "pending",
+      "prompt": "A rustic medieval Scottish setting depicting a simple, hand-carved wooden quaich resting on a rough wooden table near a warm, stone-built hearth. Early Scottish Highlanders gather around in traditional tartan cloaks, symbolically exchanging the quaich to represent friendship, trust, and peace. Include warm, candlelit tones and accurate historical details of Highland clothing and furnishings.",
+      "source_details": {
+        "filename_local": "quaich-traditions_early-origins-wooden.png",
+        "post_slug": "quaich-traditions",
+        "local_dir": "/images/posts/quaich-traditions/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "Early hand-carved wooden quaich by a hearth - NEEDS FINAL IMAGE",
+        "blog_caption": "A simple wooden quaich reflects early Highland values of peace and trust."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "Back to basics! Early Scottish quaichs were often carved from wood, symbolising peace & trust. The two handles meant no hidden weapons! #Quaich #MedievalScotland #Woodworking #CelticHistory #ScottishCraft", "hashtags": ["Quaich", "MedievalScotland", "Woodworking", "CelticHistory", "ScottishCraft"] },
+        "facebook": { "status": "pending", "caption": "The origins of the Quaich lie in medieval Scotland, often crafted from simple wood or horn. Its unique two-handled design was practical - promoting trust during shared drinks. #ScottishHistory #QuaichFacts #CelticTradition" }
+      },
+      "notes": "Needs final image generation."
+    },
+    "IMG00014": {
+      "description": "Clan Unity and Hospitality section image for Quaich Traditions",
+      "status": "pending_review",
+      "prompt_status": "complete",
+      "generation_status": "pending",
+      "watermark_status": "pending",
+      "prompt": "A vibrant scene at a Scottish Highland clan gathering in the 17th century. At its center, a clan chieftain raises an ornately carved wooden quaich in a ceremonial toast surrounded by warriors, elders, and clansfolk in historically accurate clan tartans. Emphasize expressions of unity, pride, and camaraderie, with detailed Highland attire, symbolic banners, and traditional Celtic decor.",
+      "source_details": {
+        "filename_local": "quaich-traditions_clan-unity-hospitality.png",
+        "post_slug": "quaich-traditions",
+        "local_dir": "/images/posts/quaich-traditions/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "Clan chieftain toasts with a quaich at a 17th-century Highland gathering - NEEDS FINAL IMAGE",
+        "blog_caption": "The quaich: central to clan gatherings, fostering unity and hospitality."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "A symbol of unity! The quaich was essential at Highland clan gatherings, shared to build trust and celebrate together. #ClanLife #ScottishGathering #Quaich #HighlandCulture #Scotland", "hashtags": ["ClanLife", "ScottishGathering", "Quaich", "HighlandCulture", "Scotland", "Hospitality"] },
+        "facebook": { "status": "pending", "caption": "More than just a cup! In clan gatherings, sharing the quaich was a powerful ritual signifying mutual respect, resolving conflicts, and celebrating together. #ScottishTradition #ClanUnity #QuaichHistory" }
+      },
+      "notes": "Needs final image generation."
+    },
+    "IMG00015": {
+      "description": "Evolution of Design section image for Quaich Traditions",
+      "status": "pending_review",
+      "prompt_status": "complete",
+      "generation_status": "pending",
+      "watermark_status": "pending",
+      "prompt": "A beautifully detailed illustration showcasing the historical progression of Scottish quaich designs from simple wooden and horn quaichs to intricately crafted silver and pewter versions. Depict various examples arranged chronologically on an antique Scottish tartan cloth, clearly highlighting evolving craftsmanship, materials, decorative Celtic motifs, and engraved patterns.",
+      "source_details": {
+        "filename_local": "quaich-traditions_design-evolution.png",
+        "post_slug": "quaich-traditions",
+        "local_dir": "/images/posts/quaich-traditions/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "Collection showing quaich evolution from wood to ornate silver - NEEDS FINAL IMAGE",
+        "blog_caption": "From simple wood to intricate silver: the evolution of quaich craftsmanship."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "Watch the quaich evolve! From humble wood & horn to elegant pewter & stunning silver adorned with Celtic designs. Scottish craftsmanship through the ages. #ScottishCraftsmanship #Quaich #DesignHistory #CelticArt #Pewter #Silver #Scotland", "hashtags": ["ScottishCraftsmanship", "Quaich", "DesignHistory", "CelticArt", "Pewter", "Silver", "Scotland", "Antiques"] },
+        "facebook": { "status": "pending", "caption": "The design of the quaich tells a story of evolving craftsmanship. Starting with wood, techniques like stave-building emerged, followed by luxurious silver and popular pewter versions, often featuring beautiful Celtic details. #QuaichDesign #ScottishArtisans #CelticDesign" }
+      },
+      "notes": "Needs final image generation."
+    },
+    "IMG00016": {
+      "description": "The Quaich in Ceremony and Celebration section image for Quaich Traditions",
+      "status": "pending_review",
+      "prompt_status": "complete",
+      "generation_status": "pending",
+      "watermark_status": "pending",
+      "prompt": "A warmly lit, intimate depiction of a traditional Scottish wedding ceremony set in a rustic Highland chapel or castle. A bride and groom in traditional Scottish wedding attire (kilt and dress) joyfully share whisky from an ornate silver quaich. Family and friends surround them, smiling and celebrating, highlighting the quaich’s role as a symbol of shared joy and commitment.",
+      "source_details": {
+        "filename_local": "quaich-traditions_wedding-ceremony.png",
+        "post_slug": "quaich-traditions",
+        "local_dir": "/images/posts/quaich-traditions/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "Couple sharing whisky from a quaich during their Scottish wedding - NEEDS FINAL IMAGE",
+        "blog_caption": "A central part of Scottish weddings, the quaich seals the couple's commitment."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "Sealing the vows with a sip! The quaich is a beautiful tradition in Scottish weddings, symbolizing the couple's commitment to share life's journey together. ❤️ #ScottishWedding #WeddingTradition #QuaichCeremony #CupOfFriendship #LoveAndWhisky", "hashtags": ["ScottishWedding", "WeddingTradition", "QuaichCeremony", "CupOfFriendship", "LoveAndWhisky", "CelticWedding"] },
+        "facebook": { "status": "pending", "caption": "From weddings and births to farewells, the quaich has long marked significant life events in Scotland, symbolizing shared moments and collective memory. The wedding ceremony is a particularly cherished tradition. #ScottishCustoms #Quaich #LifeEvents #WeddingIdeas" }
+      },
+      "notes": "Needs final image generation."
+    },
+    "IMG00017": {
+      "description": "Quaich and Royal Connections section image for Quaich Traditions",
+      "status": "pending_review",
+      "prompt_status": "complete",
+      "generation_status": "pending",
+      "watermark_status": "pending",
+      "prompt": "A historically accurate and majestic scene from the Scottish royal court in the late 16th century, showing King James VI presenting a luxurious, intricately decorated silver quaich as a diplomatic gift to a visiting dignitary. Include richly detailed period costumes, royal regalia, ornate throne setting, and realistic expressions conveying goodwill and diplomacy.",
+      "source_details": {
+        "filename_local": "quaich-traditions_royal-gift.png",
+        "post_slug": "quaich-traditions",
+        "local_dir": "/images/posts/quaich-traditions/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "King James VI presenting an ornate silver quaich as a gift - NEEDS FINAL IMAGE",
+        "blog_caption": "Royal approval: King James VI gifting a quaich highlights its diplomatic importance."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "Fit for a king! 👑 Scottish monarchs like James VI used the quaich as a significant gift, cementing alliances and showcasing Scottish hospitality to royalty and dignitaries. #RoyalScotland #KingJamesVI #Quaich #DiplomaticGift #ScottishHistory #Silverware", "hashtags": ["RoyalScotland", "KingJamesVI", "Quaich", "DiplomaticGift", "ScottishHistory", "Silverware", "16thCentury"] },
+        "facebook": { "status": "pending", "caption": "The quaich's influence reached the highest courts. King James VI famously gifted quaichs, and later royal visits by Queen Victoria helped solidify its status as a treasured symbol of Scottish heritage recognised by royalty. #ScottishRoyalty #QuaichHistory #HistoricalObjects" }
+      },
+      "notes": "Needs final image generation."
+    },
+    "IMG00018": {
+      "description": "Quaich Traditions and Whisky section image for Quaich Traditions",
+      "status": "pending_review",
+      "prompt_status": "complete",
+      "generation_status": "pending",
+      "watermark_status": "pending",
+      "prompt": "A cozy, authentic Scottish scene inside a historical whisky distillery tasting room. A polished pewter quaich, prominently placed on an oak barrel, holds golden whisky illuminated warmly by natural window light. Surround it with whisky bottles, barley sheaves, and rustic distillery equipment, highlighting the timeless Scottish pairing of quaich and whisky.",
+      "source_details": {
+        "filename_local": "quaich-traditions_whisky-pairing.png",
+        "post_slug": "quaich-traditions",
+        "local_dir": "/images/posts/quaich-traditions/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "Pewter quaich filled with whisky resting on an oak barrel - NEEDS FINAL IMAGE",
+        "blog_caption": "A perfect pairing: The quaich often held whisky, Scotland's famous spirit."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "Name a more iconic duo... 😉 The quaich and Scotch whisky! Sharing a dram from the 'cup of friendship' is a cornerstone of Scottish hospitality. Slàinte! 🥃 #QuaichAndWhisky #ScotchWhisky #ScottishHospitality #WhiskyTasting #Slainte #Scotland #Distillery", "hashtags": ["QuaichAndWhisky", "ScotchWhisky", "ScottishHospitality", "WhiskyTasting", "Slainte", "Scotland", "Distillery", "Pewter"] },
+        "facebook": { "status": "pending", "caption": "What's traditionally served in a quaich? Often, it's Scotland's national drink – whisky! This pairing enhances the symbolism of warmth and welcome, a tradition often kept alive in distilleries today. #WhiskyFacts #Quaich #ScottishDrinks #Hospitality" }
+      },
+      "notes": "Needs final image generation."
+    },
+    "IMG00019": {
+      "description": "Cultural Decline and Revival section image for Quaich Traditions",
+      "status": "pending_review",
+      "prompt_status": "complete",
+      "generation_status": "pending",
+      "watermark_status": "pending",
+      "prompt": "An evocative illustration symbolizing both cultural decline and revival. On one side, a shadowed Scottish Highland cottage interior with a simple wooden quaich stored carefully on a shelf, symbolizing suppressed cultural traditions during the 18th-century Highland Clearances. On the other, bright revival imagery showcasing Scottish pride with restored quaich traditions amid Highland festivals and celebrations in vivid tartan colors.",
+      "source_details": {
+        "filename_local": "quaich-traditions_decline-revival.png",
+        "post_slug": "quaich-traditions",
+        "local_dir": "/images/posts/quaich-traditions/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "Split image showing a stored quaich vs. one used in a modern festival - NEEDS FINAL IMAGE",
+        "blog_caption": "From quiet preservation during decline to vibrant celebration in its revival."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "A story of resilience! 🔥 Though Highland culture faced suppression, traditions like the quaich persisted quietly, ready for a vibrant revival in later centuries. #CulturalRevival #ScottishResilience #Quaich #HighlandHistory #Jacobite #ScotlandStrong", "hashtags": ["CulturalRevival", "ScottishResilience", "Quaich", "HighlandHistory", "Jacobite", "ScotlandStrong"] },
+        "facebook": { "status": "pending", "caption": "Like many aspects of Highland culture, the quaich faced decline during periods of upheaval. But the tradition was preserved and saw a strong revival, becoming a cherished national symbol once again. #ScottishHeritage #CulturalHistory #Revival" }
+      },
+      "notes": "Needs final image generation."
+    },
+    "IMG00020": {
+      "description": "The Quaich in Contemporary Scottish Culture section image for Quaich Traditions",
+      "status": "pending_review",
+      "prompt_status": "complete",
+      "generation_status": "pending",
+      "watermark_status": "pending",
+      "prompt": "A cheerful, contemporary Scottish wedding reception scene in a modern venue with subtle traditional touches. A couple dressed in modern formal attire joyfully holds a sleek, polished silver quaich, capturing a modern continuation of the ancient tradition. Guests celebrate in the background, showing the quaich’s enduring symbolism of unity and friendship.",
+      "source_details": {
+        "filename_local": "quaich-traditions_contemporary-culture.png",
+        "post_slug": "quaich-traditions",
+        "local_dir": "/images/posts/quaich-traditions/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "Modern couple celebrating with a silver quaich at their wedding - NEEDS FINAL IMAGE",
+        "blog_caption": "The quaich tradition lives on in contemporary Scottish celebrations like weddings."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "Tradition endures! The quaich remains a beloved part of modern Scottish life, especially at weddings, anniversaries, and as meaningful gifts connecting Scots worldwide to their heritage. #ModernScotland #ScottishTradition #Quaich #WeddingGift #Heritage #FamilyHeirloom", "hashtags": ["ModernScotland", "ScottishTradition", "Quaich", "WeddingGift", "Heritage", "FamilyHeirloom", "Diaspora"] },
+        "facebook": { "status": "pending", "caption": "The quaich isn't just history! It's actively used in contemporary Scottish culture, especially weddings, and cherished as gifts and connections to ancestry by Scots around the globe. #LivingTradition #ScottishCultureToday #QuaichLove" }
+      },
+      "notes": "Needs final image generation."
+    },
+    "IMG00021": {
+      "description": "Quaich as a Modern Symbol of Friendship and Diplomacy section image for Quaich Traditions",
+      "status": "pending_review",
+      "prompt_status": "complete",
+      "generation_status": "pending",
+      "watermark_status": "pending",
+      "prompt": "A formal diplomatic ceremony at a modern Scottish government building or historic site, showing a Scottish official warmly presenting a gleaming, engraved quaich to an international representative. Capture respectful, friendly interactions, modern business attire, official flags, and expressions conveying genuine goodwill, emphasizing the quaich’s role in contemporary diplomacy.",
+      "source_details": {
+        "filename_local": "quaich-traditions_modern-diplomacy.png",
+        "post_slug": "quaich-traditions",
+        "local_dir": "/images/posts/quaich-traditions/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "Scottish official presenting an engraved quaich to a diplomat - NEEDS FINAL IMAGE",
+        "blog_caption": "A modern symbol of goodwill: The quaich used in international diplomacy."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "Scotland's cup of friendship goes global! 🤝 Today, the quaich is often presented as a diplomatic gift, symbolising goodwill, mutual respect, and partnership on the international stage. #ScottishDiplomacy #Quaich #FriendshipCup #InternationalRelations #ScotlandTheWorld", "hashtags": ["ScottishDiplomacy", "Quaich", "FriendshipCup", "InternationalRelations", "ScotlandTheWorld", "GlobalScot"] },
+        "facebook": { "status": "pending", "caption": "From clan symbol to international gesture! The quaich is now frequently used in modern diplomacy by Scottish leaders to represent friendship and build connections across borders. #Symbolism #ScotlandOnTheWorldStage #Diplomacy" }
+      },
+      "notes": "Needs final image generation."
+    },
+    "IMG00022": {
+      "description": "Collecting Quaichs section image for Quaich Traditions",
+      "status": "pending_review",
+      "prompt_status": "complete",
+      "generation_status": "pending",
+      "watermark_status": "pending",
+      "prompt": "A museum-quality display illustrating various antique and modern quaichs arranged meticulously within a glass showcase in a Scottish cultural heritage museum. Quaichs range from antique silver pieces adorned with intricate Celtic engraving to contemporary minimalist designs, accurately reflecting different historical periods. Include subtle museum lighting to emphasize craftsmanship and cultural value.",
+      "source_details": {
+        "filename_local": "quaich-traditions_collecting-quaichs.png",
+        "post_slug": "quaich-traditions",
+        "local_dir": "/images/posts/quaich-traditions/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "Museum display showing a collection of antique and modern quaichs - NEEDS FINAL IMAGE",
+        "blog_caption": "Prized by collectors: Antique and modern quaichs displayed in a museum setting."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "Collecting history! Antique silver quaichs are highly sought after, while modern artisans keep the tradition alive with new designs. A beautiful blend of heritage and craft. #QuaichCollecting #AntiqueSilver #ScottishAntiques #ModernCraft #MuseumDisplay #Collectible", "hashtags": ["QuaichCollecting", "AntiqueSilver", "ScottishAntiques", "ModernCraft", "MuseumDisplay", "Collectible", "CelticArt"] },
+        "facebook": { "status": "pending", "caption": "Quaichs are not just functional; they're collectible works of art! From historic silver pieces to contemporary designs, they represent centuries of Scottish craftsmanship and culture. #ScottishCollectibles #Quaich #ArtHistory #Craftsmanship" }
+      },
+      "notes": "Needs final image generation."
+    },
+    "IMG00023": {
+      "description": "Conclusion section image for Quaich Traditions",
+      "status": "pending_review",
+      "prompt_status": "complete",
+      "generation_status": "pending",
+      "watermark_status": "pending",
+      "prompt": "A visually poetic image symbolizing the enduring legacy and cultural power of the quaich, featuring an elegant silver quaich gently held by hands of different generations—a child’s hand alongside an older adult’s—set against a softly blurred backdrop of Scottish Highlands scenery. This serene image highlights unity, heritage, and continuity through generations.",
+      "source_details": {
+        "filename_local": "quaich-traditions_enduring-legacy.png",
+        "post_slug": "quaich-traditions",
+        "local_dir": "/images/posts/quaich-traditions/",
+        "public_url": null,
+        "uploaded_path_relative": null
+      },
+      "metadata": {
+        "alt": "Hands of different generations holding a silver quaich against Highland scenery - NEEDS FINAL IMAGE",
+        "blog_caption": "The enduring power of the quaich, passed through generations."
+      },
+      "syndication": {
+        "instagram": { "status": "pending", "caption": "Generations united by tradition. The Scottish quaich endures as a powerful symbol of friendship, hospitality, and cultural continuity. A legacy held in hand. #EnduringLegacy #ScottishHeritage #Quaich #FamilyTradition #Generations #Scotland", "hashtags": ["EnduringLegacy", "ScottishHeritage", "Quaich", "FamilyTradition", "Generations", "Scotland", "Symbol"] },
+        "facebook": { "status": "pending", "caption": "The quaich's journey reflects Scotland's own story. From practical cup to cherished emblem, it continues to connect generations through its simple, powerful message of unity and goodwill. #ScottishTradition #Quaich #Legacy #Friendship" }
+      },
+      "notes": "Needs final image generation for conclusion."
+    }
+  }

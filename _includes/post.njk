@@ -5,7 +5,7 @@
 
     {# Optional: Back navigation link #}
     <nav class="post-navigation-top">
-        <a href="{{ '/' | url }}">← Back to Blog Index</a>
+        <a href="{{ '/blog/' | url }}">← Back to Blog Index</a>
     </nav>
 
     <header class="blog-post__header">
@@ -14,24 +14,11 @@
         <p class="blog-post__subtitle">{{ subtitle }}</p>
         {% endif %}
 
-        {# --- Post Meta: Date and Author Lookup --- #}
+        {# Post Meta: Date and Author Lookup #}
         <div class="post-meta">
-            {% if date %}
-               <span class="post-meta__date">
-                   Published on <time datetime="{{ date | htmlDateString }}">{{ date | readableDate }}</time>
-               </span>
-            {% endif %}
-            {# UPDATED: Check if author key exists AND in global authors data #}
-            {% if author and authors[author] %} {# Use 'author' directly here #}
-               <span class="post-meta__separator"> | </span>
-               <span class="post-meta__author">
-                    {# UPDATED: Look up name from global authors data #}
-                   By {{ authors[author].name }}
-                   {# Example future link: <a href="{{ authors[author].bioPageUrl | url }}">{{ authors[author].name }}</a> #}
-               </span>
-            {% endif %}
+            {% if date %}<span class="post-meta__date">Published on <time datetime="{{ date | htmlDateString }}">{{ date | readableDate }}</time></span>{% endif %}
+            {% if author and authors[author] %}<span class="post-meta__separator"> | </span><span class="post-meta__author">By {{ authors[author].name }}</span>{% endif %}
         </div>
-        {# --- End Post Meta --- #}
 
         {# Summary #}
         {% if summary %}
@@ -40,15 +27,28 @@
         </div>
         {% endif %}
 
-        {# Header Image #}
-        {% if headerImage and headerImage.src %}
-        <figure class="section-image">
-            <img src="{{ headerImage.src | url }}" alt="{{ headerImage.alt or '' }}">
-            {% if headerImage.caption %}
-            <figcaption>{{ headerImage.caption }}</figcaption>
-            {% endif %}
-        </figure>
+        {# --- UPDATED Header Image Rendering --- #}
+        {# Check if ID exists and if lookup in image_library is successful #}
+        {% if headerImageId and image_library[headerImageId] %}
+            {% set imgData = image_library[headerImageId] %}
+            <figure class="section-image">
+                {# Construct LOCAL path for PREVIEW src from image_library details #}
+                <img src="{{ (imgData.source_details.local_dir + imgData.source_details.filename_local) | url }}"
+                     alt="{{ imgData.metadata.alt or 'Header Image' }}"> {# Use alt from library, fallback #}
+                {% if imgData.metadata.blog_caption %}
+                    <figcaption>{{ imgData.metadata.blog_caption }}</figcaption> {# Use caption from library #}
+                {% endif %}
+            </figure>
+        {% elif headerImage and headerImage.src %} {# Fallback for older posts maybe? Remove if not needed #}
+             <figure class="section-image">
+                <img src="{{ headerImage.src | url }}" alt="{{ headerImage.alt or '' }}">
+                {% if headerImage.caption %}
+                    <figcaption>{{ headerImage.caption }}</figcaption>
+                {% endif %}
+            </figure>
         {% endif %}
+        {# --- END Header Image Rendering --- #}
+
     </header>
 
     {# --- Main Content Sections --- #}
@@ -66,32 +66,44 @@
             </div>
             {% endif %}
 
-            {% if section.image and section.image.src %}
-            <figure class="section-image">
-                <img src="{{ section.image.src | url }}" alt="{{ section.image.alt or '' }}">
-                {% if section.image.caption %}
-                <figcaption>{{ section.image.caption }}</figcaption>
-                {% endif %}
-            </figure>
-            {% endif %}
+            {# --- UPDATED Section Image Rendering --- #}
+            {# Check if ID exists and if lookup in image_library is successful #}
+            {% if section.imageId and image_library[section.imageId] %}
+                 {% set imgData = image_library[section.imageId] %}
+                 <figure class="section-image">
+                     {# Construct LOCAL path for PREVIEW src from image_library details #}
+                     <img src="{{ (imgData.source_details.local_dir + imgData.source_details.filename_local) | url }}"
+                          alt="{{ imgData.metadata.alt or 'Section Image for ' + section.heading }}"> {# Use alt from library, fallback #}
+                     {% if imgData.metadata.blog_caption %}
+                         <figcaption>{{ imgData.metadata.blog_caption }}</figcaption> {# Use caption from library #}
+                     {% endif %}
+                 </figure>
+             {% elif section.image and section.image.src %} {# Fallback for older posts maybe? Remove if not needed #}
+                 <figure class="section-image">
+                    <img src="{{ section.image.src | url }}" alt="{{ section.image.alt or '' }}">
+                    {% if section.image.caption %}
+                        <figcaption>{{ section.image.caption }}</figcaption>
+                    {% endif %}
+                </figure>
+             {% endif %}
+            {# --- END Section Image Rendering --- #}
+
         </section>
         {% endfor %}
 
         {# Conclusion Section #}
-        {% if conclusion and conclusion.heading %}
+        {% if conclusion %} {# Check if conclusion object exists #}
           <section class="blog-section blog-section--conclusion" id="section-conclusion">
-              <h2>{{ conclusion.heading }}</h2>
-              {% if conclusion.text %}
-              <div class="section-text">
-                {{ conclusion.text | safe }}
-              </div>
-              {% endif %}
+              {% if conclusion.heading %}<h2>{{ conclusion.heading }}</h2>{% endif %}
+              {% if conclusion.text %}<div class="section-text">{{ conclusion.text | safe }}</div>{% endif %}
+              {# Optional: Add conclusion image lookup using conclusion.imageId if you add it later #}
           </section>
         {% endif %}
 
     </div> <!-- /.blog-sections -->
     {% endif %}
     {# --- End Main Content Sections --- #}
+
 
     {# --- Post Footer: Tags --- #}
     {% if tags %}
@@ -101,17 +113,13 @@
                 {% set tagsToShow = tagsToShow.concat([tag]) %}
             {% endif %}
         {% endfor %}
-
         {% if tagsToShow.length > 0 %}
             <footer class="post-footer">
                 <div class="post-tags">
                     <strong>Tags:</strong>
                     <ul>
                     {% for tag in tagsToShow %}
-                        <li>
-                            {# Later: <a href="/tags/{{ tag | slugify }}/">{{ tag }}</a> #}
-                            {{ tag }}
-                        </li>
+                        <li>{# Later: <a href="/tags/{{ tag | slugify }}/">{{ tag }}</a> #} {{ tag }}</li>
                     {% endfor %}
                     </ul>
                 </div>

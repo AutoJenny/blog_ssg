@@ -1,116 +1,139 @@
-<h1>Technical Briefing: AutoJenny/blog_ssg Project</h1>
+<h1>Technical Briefing: AutoJenny/blog_ssg Project (Updated)</h1>
 <h2>1. Overview</h2>
-<p>This document provides a technical overview of the <code>AutoJenny/blog_ssg</code> GitHub repository. The project is a static site generator (SSG) setup for building and deploying a blog, intended for the website <code>clan.com</code>. It utilizes Eleventy (11ty) as its core engine, supplemented by Python scripts for auxiliary tasks like deployment and image processing, and includes a local Flask-based admin interface for viewing site data.</p>
+<p>This document provides a technical overview of the <code>AutoJenny/blog_ssg</code> GitHub repository. The project is a static site generator (SSG) setup for building and deploying a blog, intended for the website <code>clan.com</code>. It utilizes Eleventy (11ty) as its core engine. It is supplemented by Python scripts for auxiliary tasks (deployment, image processing) and includes a local <strong>Flask-based admin interface (<code>app.py</code>)</strong> for monitoring content status, viewing post details, and managing workflow stages (via API).</p>
 <h2>2. Technology Stack</h2>
 <ul>
 <li><strong>Core SSG:</strong> Node.js, Eleventy (11ty)</li>
 <li><strong>Configuration:</strong> JavaScript (<code>.eleventy.js</code>)</li>
 <li><strong>Templating:</strong> Nunjucks (<code>.njk</code>), Markdown (<code>.md</code>)</li>
 <li><strong>Content:</strong> Markdown files with YAML Front Matter</li>
-<li><strong>Data Management:</strong> JSON (<code>_data/</code>), JavaScript (<code>*.11tydata.js</code>)</li>
+<li><strong>Data Management:</strong> JSON (<code>_data/</code>, specifically <code>image_library.json</code>, <code>workflow_status.json</code>), JavaScript (<code>*.11tydata.js</code>)</li>
 <li><strong>Styling:</strong> CSS (<code>css/</code>)</li>
 <li><strong>Node.js Dependencies:</strong> Managed via <code>package.json</code> / <code>package-lock.json</code> (e.g., <code>@11ty/eleventy</code>, <code>luxon</code>, <code>markdown-it</code>, <code>@11ty/eleventy-img</code>)</li>
+<li><strong>Admin Interface &amp; API:</strong> Python 3, Flask</li>
 <li><strong>Auxiliary Scripting:</strong> Python 3</li>
-<li><strong>Admin Interface:</strong> Python 3, Flask</li>
-<li><strong>Python Dependencies (for scripts/app):</strong> Pillow (watermarking), Paramiko (SFTP), Requests, Flask, python-frontmatter (likely required based on usage).</li>
+<li><strong>Python Dependencies (for scripts/app):</strong> Flask, python-frontmatter, Pillow (for watermarking), Paramiko (for SFTP), Requests.</li>
 </ul>
 <h2>3. Project Structure Highlights</h2>
 <ul>
 <li><code>.eleventy.js</code>: <strong>Central Eleventy configuration file.</strong> Defines build behaviour, plugins, collections, filters, shortcodes, and asset handling.</li>
-<li><code>_data/</code>: Global JSON data files (e.g., <code>authors.json</code>, <code>image_library.json</code>, <code>syndication.json</code>).</li>
+<li><code>_data/</code>: Contains global and workflow JSON data files:
+<ul>
+<li><code>image_library.json</code>: Stores metadata and source details for reusable images.</li>
+<li><code>workflow_status.json</code>: <strong>Tracks the status of various stages (images, writing, publishing) for each post slug.</strong> Includes detailed <strong>per-image watermarking status</strong>.</li>
+<li>Other potential JSON files (e.g., <code>authors.json</code>).</li>
+</ul>
+</li>
 <li><code>_includes/</code>: Reusable Nunjucks template partials (e.g., <code>base.njk</code>, <code>post.njk</code>).</li>
 <li><code>_site/</code>: <strong>Output directory</strong> for the generated static site (specified in <code>.gitignore</code>).</li>
 <li><code>css/</code>: Source CSS files. Copied directly to <code>_site/css/</code> via passthrough rules.</li>
 <li><code>docs/</code>: Markdown files containing project planning and documentation. Copied to <code>_site/docs/</code>.</li>
-<li><code>images/</code>: Source image assets. Copied directly to <code>_site/images/</code> via passthrough rules. Also processed by the <code>image</code> shortcode.</li>
+<li><code>images/</code>: Source image assets. Copied directly to <code>_site/images/</code> via passthrough rules. Referenced by <code>image_library.json</code> and processed by the <code>image</code> shortcode during Eleventy build.</li>
 <li><code>posts/</code>: Blog post content (Markdown <code>.md</code> files) and associated Eleventy data files (<code>*.11tydata.js/.json</code>).</li>
-<li><code>scripts/</code>: Contains auxiliary Python scripts (<code>watermark_images.py</code>, <code>post_to_clan.py</code>).</li>
+<li><code>scripts/</code>: Contains auxiliary Python scripts:
+<ul>
+<li><code>watermark_images.py</code>: Adds watermarks to source images (manual process).</li>
+<li><code>post_to_clan.py</code>: Deploys the built site (<code>_site/</code>) via SFTP.</li>
+</ul>
+</li>
 <li><code>templates/</code>: Contains Nunjucks templates, including those used by the Flask admin app (<code>admin_index.html</code>, <code>admin_post_detail.html</code>). Copied to <code>_site/</code>.</li>
-<li><code>app.py</code>: A Flask application providing a local admin interface.</li>
-<li><code>index.njk</code>: Nunjucks template for the site's homepage.</li>
+<li><code>app.py</code>: <strong>Flask application</strong> providing the local admin web interface and supporting API endpoints. Contains significant logic for loading data, calculating statuses, and interacting with workflow data.</li>
+<li><code>index.njk</code>: Nunjucks template for the site's homepage (Eleventy build).</li>
 <li><code>package.json</code>: Node.js project definition, dependencies, and run scripts (<code>start</code>, <code>build</code>).</li>
 <li><code>.gitignore</code>: Specifies files/directories ignored by Git (e.g., <code>node_modules/</code>, <code>_site/</code>).</li>
 </ul>
 <h2>4. Core Build Process (Eleventy via <code>.eleventy.js</code>)</h2>
 <ul>
+<li><em>(This section remains largely unchanged from the previous briefing, describing the Eleventy build)</em></li>
 <li><strong>Configuration:</strong> Centralized in <code>.eleventy.js</code>.</li>
 <li><strong>Input/Output:</strong> Reads from root (<code>./</code>), outputs to <code>_site/</code>.</li>
 <li><strong>Passthrough Copy:</strong> Copies <code>images/</code>, <code>css/</code>, <code>docs/</code>, <code>templates/admin*</code>, <code>syndication_plan/index.html</code> directly to the <code>_site</code> directory.</li>
 <li><strong>Template Engines:</strong> Processes <code>.njk</code> (Nunjucks) and <code>.md</code> (Markdown) files.</li>
 <li><strong>Markdown:</strong> Uses <code>markdown-it</code> with HTML enabled and <code>markdown-it-anchor</code> for heading links.</li>
-<li><strong>Collections:</strong>
+<li><strong>Collections:</strong> <code>posts</code> (sorted by date), <code>tagList</code>.</li>
+<li><strong>Filters:</strong> <code>readableDate</code>, <code>htmlDateString</code>, <code>head</code>, <code>syndicationLinks</code> (placeholder).</li>
+<li><strong>Shortcodes:</strong> <code>image</code> (using <code>@11ty/eleventy-img</code> for responsive images).</li>
+<li><strong>Environment:</strong> Uses <code>process.env.ELEVENTY_ENV</code>.</li>
+</ul>
+<h2>5. Auxiliary Components &amp; Workflows (Updated)</h2>
 <ul>
-<li><code>posts</code>: Creates a date-sorted (desc) array of all items tagged <code>posts</code>.</li>
-<li><code>tagList</code>: Creates a unique, sorted list of all tags used.</li>
+<li>
+<p><strong>Admin Interface (<code>app.py</code> &amp; <code>templates/admin*.html</code>):</strong></p>
+<ul>
+<li>A <strong>Flask application</strong> providing a local web interface (<code>http://127.0.0.1:5001</code> typically). Run via <code>python app.py</code>.</li>
+<li><strong>Dashboard (<code>/</code>):</strong> Displays a list of posts and their publishing status (read from <code>workflow_status.json</code>).</li>
+<li><strong>Post Detail View (<code>/admin/post/&lt;slug&gt;</code>):</strong>
+<ul>
+<li>Displays detailed metadata loaded from the post's Markdown front matter.</li>
+<li>Shows the status of various workflow stages (images, writing, etc.) loaded from <code>workflow_status.json</code>.</li>
+<li><strong>Image Workflow Section:</strong> Displays images referenced in the post's front matter.
+<ul>
+<li>Fetches image details from <code>image_library.json</code>.</li>
+<li>Displays the source image preview.</li>
+<li>Calculates and displays the status of image sub-tasks (prompt defined, assets prepared, metadata integrated) based on <code>image_library.json</code> content and file existence checks.</li>
+<li>Displays the <strong>individual watermarking status</strong> for each image, loaded from the post's entry in <code>workflow_status.json</code>.</li>
 </ul>
 </li>
-<li><strong>Filters:</strong>
-<ul>
-<li><code>readableDate</code>: User-friendly date format (e.g., &quot;Jul 22, 2024&quot;).</li>
-<li><code>htmlDateString</code>: ISO date format for <code>&lt;time&gt;</code> elements (e.g., &quot;2024-07-22&quot;).</li>
-<li><code>head</code>: Returns the first N items of an array.</li>
-<li><code>syndicationLinks</code>: Placeholder for future syndication link processing.</li>
 </ul>
 </li>
-<li><strong>Shortcodes:</strong>
+<li><strong>Helper Functions:</strong> Includes robust <code>load_json_data</code> and <code>save_json_data</code> helpers for consistent file handling.</li>
+<li><strong>API Endpoints:</strong>
 <ul>
-<li><code>image</code>: Uses <code>@11ty/eleventy-img</code> to generate responsive <code>&lt;picture&gt;</code> elements with multiple sizes (e.g., 300, 600, 900px) and formats (AVIF, WebP, JPEG) from source images in <code>images/</code>. Includes lazy loading and async decoding attributes.</li>
+<li><code>/api/update_status/&lt;slug&gt;/&lt;stage_key&gt;</code> (POST): Allows updating the status of a specific stage (or sub-stage like watermarking) for a post within <code>workflow_status.json</code>. Expects JSON body like <code>{&quot;status&quot;: &quot;complete&quot;}</code>.</li>
+<li><code>/api/publish_clan/&lt;slug&gt;</code> (POST): Triggers the <code>scripts/post_to_clan.py</code> deployment script for the specified post's Markdown file (passing relative path). Returns script output.</li>
+<li>Other minor API endpoints (<code>/api/workflow</code>, <code>/api/reload-data</code>).</li>
 </ul>
 </li>
-<li><strong>Environment:</strong> Uses <code>process.env.ELEVENTY_ENV</code> (set in <code>npm run build</code>) for environment-specific actions.</li>
-</ul>
-<h2>5. Auxiliary Components &amp; Workflows</h2>
-<ul>
-<li><strong>Admin Interface (<code>app.py</code>):</strong>
-<ul>
-<li>A <strong>Flask application</strong> providing a <strong>local, read-only</strong> web interface.</li>
-<li>Run via <code>python app.py</code>.</li>
-<li>Routes include <code>/</code> (dashboard showing data from <code>_data/*.json</code>), <code>/posts/&lt;slug&gt;</code> (detailed post view), and simple API endpoints (<code>/api/workflow</code>, <code>/api/reload-data</code>).</li>
-<li>Uses templates from <code>templates/admin*.html</code>.</li>
-<li>Useful for viewing site status, data, and post content without starting the full Eleventy build.</li>
 </ul>
 </li>
-<li><strong>Image Watermarking (<code>scripts/watermark_images.py</code>):</strong>
+<li>
+<p><strong>Image Watermarking (<code>scripts/watermark_images.py</code>):</strong></p>
 <ul>
-<li>A Python script using <code>Pillow</code>.</li>
-<li>Adds a text watermark to images found in <code>images/posts/</code>.</li>
-<li>Intended as a <strong>manual pre-processing step</strong> before running the Eleventy build.</li>
+<li>A Python script using <code>Pillow</code> to add a text watermark.</li>
+<li><strong>Decoupled Process:</strong> Intended as a <strong>manual command-line step</strong>. It is <strong>not</strong> triggered directly via the Flask admin interface.</li>
+<li><strong>Status Update:</strong> The script itself likely does <strong>not</strong> update <code>workflow_status.json</code>. Status updates for watermarking probably occur manually via the <code>/api/update_status</code> endpoint after running the script, or require modifications to the script itself.</li>
+<li>Requires clarification on where watermarked images are saved (e.g., subdirectory, naming convention).</li>
 </ul>
 </li>
-<li><strong>Deployment (<code>scripts/post_to_clan.py</code>):</strong>
+<li>
+<p><strong>Deployment (<code>scripts/post_to_clan.py</code>):</strong></p>
 <ul>
-<li>A Python script using <code>Paramiko</code> for <strong>SFTP deployment</strong>.</li>
-<li>Connects to a remote server (presumably hosting <code>clan.com</code>).</li>
-<li>Synchronizes the contents of the local <code>_site/</code> directory (generated by <code>npm run build</code>) to the specified remote directory.</li>
-<li><strong>Security Consideration:</strong> How SSH/SFTP credentials (host, user, password/key) are managed is critical. Avoid hardcoding credentials; prefer SSH keys or environment variables.</li>
+<li>A Python script using <code>Paramiko</code> for <strong>SFTP deployment</strong>. Triggered via the <code>/api/publish_clan</code> endpoint in the admin interface or run manually.</li>
+<li>Connects to the remote server.</li>
+<li>Synchronizes the contents of the local <code>_site/</code> directory to the remote server. <em>(Security note on credential handling remains critical)</em>.</li>
 </ul>
 </li>
-<li><strong>Development Workflow:</strong>
+<li>
+<p><strong>Development Workflow:</strong></p>
 <ol>
-<li>Edit content/templates.</li>
-<li>Run <code>npm start</code> for local development server with live reload (<code>http://localhost:8080</code> typically).</li>
-<li>View admin interface via <code>python app.py</code> (runs independently on a different port, e.g., 5000).</li>
+<li>Edit content/templates/code.</li>
+<li>Run <code>npm start</code> for Eleventy build/serve (<code>http://localhost:8080</code> default).</li>
+<li>Run <code>python app.py</code> for the admin interface (<code>http://127.0.0.1:5001</code> default).</li>
 </ol>
 </li>
-<li><strong>Deployment Workflow:</strong>
+<li>
+<p><strong>Deployment Workflow:</strong></p>
 <ol>
-<li>Optionally run <code>python scripts/watermark_images.py</code> if needed.</li>
+<li>Run <code>python scripts/watermark_images.py</code> (if needed, manually).</li>
+<li>Update watermarking status in <code>workflow_status.json</code> (likely manual step via API/direct edit, unless script is modified).</li>
 <li>Run <code>npm run build</code> to generate the production site in <code>_site/</code>.</li>
-<li>Run <code>python scripts/post_to_clan.py</code> to upload <code>_site/</code> contents to the server.</li>
+<li>Trigger deployment using the admin interface button (<code>/api/publish_clan/&lt;slug&gt;</code>) or run <code>python scripts/post_to_clan.py</code> manually.</li>
 </ol>
 </li>
 </ul>
 <h2>6. Documentation &amp; Planning</h2>
 <ul>
-<li>The <code>docs/</code> directory contains Markdown files outlining plans and design decisions for various aspects of the project (image system, admin interface, post creation, syndication). These are valuable for understanding project history and intent.</li>
+<li>The <code>docs/</code> directory contains Markdown files outlining plans and design decisions. Valuable for understanding project history and intent.</li>
 </ul>
-<h2>7. Key Files Quick Reference</h2>
+<h2>7. Key Files Quick Reference (Updated)</h2>
 <ul>
-<li><code>.eleventy.js</code>: Core build configuration.</li>
+<li><code>.eleventy.js</code>: Core Eleventy build configuration.</li>
 <li><code>package.json</code>: Node.js dependencies and scripts (<code>start</code>, <code>build</code>).</li>
-<li><code>app.py</code>: Flask admin interface application.</li>
+<li><code>app.py</code>: <strong>Flask admin interface application &amp; API backend.</strong></li>
+<li><code>templates/admin_post_detail.html</code>: Template for the detailed post admin view (displays image workflow).</li>
 <li><code>scripts/post_to_clan.py</code>: Deployment script.</li>
-<li><code>_data/</code>: Global site data.</li>
-<li><code>_includes/</code>: Reusable template code.</li>
-<li><code>posts/</code>: Blog content.</li>
+<li><code>scripts/watermark_images.py</code>: Manual watermarking script.</li>
+<li><code>_data/workflow_status.json</code>: Stores workflow state per post slug, including per-image watermarking.</li>
+<li><code>_data/image_library.json</code>: Stores source image metadata.</li>
+<li><code>posts/</code>: Blog content (Markdown).</li>
 </ul>

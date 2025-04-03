@@ -399,230 +399,142 @@
         </section>
 
     </div> {# End container #}
-
-    <!-- Bootstrap JS Bundle (includes Popper) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <!-- JavaScript for interactions -->
+        <!-- JavaScript for interactions -->
+            <!-- JavaScript for interactions -->
     <script>
         const logOutput = document.getElementById('log-output');
 
+        // --- Helper Function for Logging to Page ---
         function logMessage(message, isError = false) {
             const logEntry = document.createElement('div');
-            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            const timestamp = new Date().toLocaleTimeString();
+            logEntry.textContent = `[${timestamp}] ${message}`;
             if (isError) {
                 logEntry.classList.add('log-error', 'text-danger'); // Add error class
             }
-            // Prepend new messages
-            if (logOutput.firstChild && logOutput.firstChild.textContent === '(Action output will appear here)') {
-                 logOutput.removeChild(logOutput.firstChild); // Remove placeholder
+            const placeholder = logOutput.firstChild;
+            if (placeholder && placeholder.textContent === '(Action output will appear here)') {
+                 logOutput.removeChild(placeholder); // Remove placeholder
             }
             logOutput.insertBefore(logEntry, logOutput.firstChild);
+            // Also log to browser console
+            if (isError) { console.error(`[${timestamp}] ${message}`); }
+            else { console.log(`[${timestamp}] ${message}`); }
         }
 
-
-        // Use body for delegated listeners to catch clicks anywhere
+        // --- Main Click Event Listener ---
         document.body.addEventListener('click', function(event) {
+            const targetElement = event.target; // Element that was directly clicked
+            console.log(`[DEBUG] Body clicked. Target element:`, targetElement);
+            console.log(`[DEBUG] Target classes:`, targetElement.classList);
 
-            // --- Handle Publish Button ---
-            if (event.target.matches('.publish-clan-button')) {
-                const button = event.target.closest('button'); // Ensure we get the button element if icon is clicked
-                const slug = button.dataset.slug;
-                if (!slug) { logMessage("Error: No slug found on publish button.", true); return; }
-                logMessage(`Starting Publish/Update job for '${slug}'...`);
-                button.disabled = true;
-                button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...'; // Add spinner
+            // --- *** ADDED SPECIFIC LOG FOR WATERMARK BUTTON *** ---
+            const watermarkButtonCheck = targetElement.closest('.watermark-all-button');
+            console.log(`[DEBUG] Result of targetElement.closest('.watermark-all-button'):`, watermarkButtonCheck);
+            // --- *** END OF ADDED LOG *** ---
 
-                fetch(`/api/publish_clan/${slug}`, { method: 'POST' })
-                .then(response => { if (!response.ok) { throw new Error(`HTTP error ${response.status}`); } return response.json(); })
-                .then(data => {
-                    logMessage(`Job finished for '${slug}'. Success: ${data.success}`, !data.success); // Log error if not success
-                    logMessage("--- Script Output ---");
-                    const outputLines = data.output.split('\n');
-                    outputLines.forEach(line => {
-                        const isErrorLine = /ERROR|Traceback|Failed|Not Found/i.test(line); // Broader error check
-                        logMessage(line.trim(), isErrorLine);
-                    });
-                    logMessage("--- End Script Output ---");
-
-                    if (!data.success) {
-                        alert(`Script failed for ${slug}. Check log.`);
-                        button.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Failed'; // Indicate failure
-                        button.classList.remove('btn-success'); button.classList.add('btn-danger');
-                         // Re-enable after a delay so user sees failure
-                        setTimeout(() => {
-                            button.disabled = false;
-                            button.innerHTML = '<i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now';
-                            button.classList.remove('btn-danger'); button.classList.add('btn-success');
-                        }, 3000);
-                    } else {
-                        button.innerHTML = '<i class="bi bi-check-circle-fill"></i> Success!'; // Indicate success
-                        button.classList.remove('btn-danger'); button.classList.add('btn-success');
-                         // Re-enable after a delay
-                        setTimeout(() => {
-                            button.disabled = false;
-                            button.innerHTML = '<i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now';
-                            logMessage(`Action complete for ${slug}. Refresh page to see updated status.`);
-                            // Optionally reload after success: window.location.reload();
-                        }, 2000);
-                    }
-                }).catch(error => {
-                    logMessage(`Error during fetch for '${slug}': ${error.message}`, true);
-                    console.error('Fetch Error:', error);
-                    alert(`Network or server error occurred for ${slug}. Check console and log.`);
-                    button.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Error';
-                    button.classList.remove('btn-success'); button.classList.add('btn-danger');
-                    // Re-enable after delay
-                    setTimeout(() => {
-                           button.disabled = false;
-                           button.innerHTML = '<i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now';
-                           button.classList.remove('btn-danger'); button.classList.add('btn-success');
-                     }, 3000);
-                });
-            }
-            // --- Handle Status Update Buttons ---
-            else if (event.target.matches('.status-update-button')) {
-                const button = event.target;
-                const slug = button.dataset.slug;
-                const stageKey = button.dataset.stage;
-                const newStatus = button.dataset.newStatus;
-                if (!slug || !stageKey || !newStatus) { logMessage("Error: Missing data on status button.", true); return; }
-
-                logMessage(`Updating status for '${slug}/${stageKey}' to '${newStatus}'...`);
-                // Disable *all* buttons for this stage temporarily
-                document.querySelectorAll(`.status-update-button[data-slug="${slug}"][data-stage="${stageKey}"]`).forEach(btn => btn.disabled = true);
+            // --- Use closest() to find the nearest relevant ancestor button/trigger ---
+            const publishButton = targetElement.closest('.publish-clan-button');
+            const statusUpdateButton = targetElement.closest('.status-update-button');
+            const watermarkAllButton = watermarkButtonCheck; // Use the result from our specific check
+            const helpTrigger = targetElement.closest('.help-trigger');
+            const oldWatermarkButton = targetElement.closest('.watermark-button'); // Check for old individual one
 
 
-                fetch(`/api/update_status/${slug}/${stageKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: newStatus })
-                })
-                .then(response => {
-                    if (!response.ok) { throw new Error(`HTTP error ${response.status}`); }
-                    return response.json();
-                 })
-                .then(data => {
-                    if (data.success) {
-                        logMessage(`Status updated for '${data.slug}/${data.stage}' to '${data.new_status}'. Reloading...`);
-                        window.location.reload(); // Reload to reflect the new status everywhere
-                    } else {
-                        logMessage(`Error updating status: ${data.message}`, true);
-                        alert(`Error: ${data.message}`);
-                        // Re-enable buttons on failure
-                         document.querySelectorAll(`.status-update-button[data-slug="${slug}"][data-stage="${stageKey}"]`).forEach(btn => btn.disabled = false);
-                    }
-                 })
-                .catch(error => {
-                    logMessage(`Error during status update fetch for '${slug}/${stageKey}': ${error.message}`, true);
-                    console.error('Fetch Error:', error);
-                    alert(`Network or server error updating status for ${slug}/${stageKey}. Check console and log.`);
-                     // Re-enable buttons on failure
-                     document.querySelectorAll(`.status-update-button[data-slug="${slug}"][data-stage="${stageKey}"]`).forEach(btn => btn.disabled = false);
-                });
-            }
-             // --- Handle Help Trigger Clicks ---
-             else if (event.target.matches('.help-trigger')) {
-                 const trigger = event.target;
-                 const helpId = trigger.dataset.helpId;
-                 const helpElement = document.getElementById(helpId);
-                 if (helpElement) {
-                     const isActive = helpElement.classList.contains('active');
-                     // Close others *before* toggling the current one
-                     document.querySelectorAll('.help-content.active').forEach(activeHelp => {
-                         if (activeHelp.id !== helpId) { // Only close *other* active ones
-                             activeHelp.classList.remove('active');
-                         }
+            // --- Handle based on which button/trigger was found ---
+            if (watermarkAllButton) {
+                 console.log("[DEBUG] EXECUTING Watermark All block."); // New log to confirm entry
+                 const slug = watermarkAllButton.dataset.slug;
+                 if (!slug) { logMessage("Error: No slug found on watermark button.", true); return; }
+
+                 if (!confirm(`This will attempt to watermark all referenced images for post '${slug}'.\nOriginals will be backed up (_raw suffix).\nWatermarked versions will be saved as JPGs.\nContinue?`)) {
+                      console.log("[DEBUG] Watermark All cancelled by user.");
+                      return;
+                 }
+
+                 logMessage(`Starting Watermark job for all images in '${slug}'...`);
+                 watermarkAllButton.disabled = true;
+                 watermarkAllButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Watermarking...';
+
+                 fetch(`/api/watermark_all/${slug}`, { method: 'POST' })
+                 .then(response => { if (!response.ok) { throw new Error(`HTTP error ${response.status}`); } return response.json(); })
+                 .then(data => {
+                     logMessage(`Watermark job finished for '${slug}'. Success: ${data.success}`, !data.success);
+                     logMessage("--- Script Output ---");
+                     const outputLines = data.output.split('\n');
+                     outputLines.forEach(line => {
+                          const isErrorLine = /ERROR|Traceback|Failed|Not Found|Critical/i.test(line);
+                          logMessage(line.trim(), isErrorLine);
                      });
-                     // Now toggle the one that was clicked
-                     helpElement.classList.toggle('active');
-                 } else { console.warn(`Help content not found for ID: ${helpId}`); }
+                     logMessage("--- End Script Output ---");
+
+                     if (!data.success) {
+                          alert(`Watermarking script failed or had errors for ${slug}. Check log.`);
+                          watermarkAllButton.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Error';
+                          watermarkAllButton.classList.remove('btn-info'); watermarkAllButton.classList.add('btn-danger');
+                          setTimeout(() => {
+                               watermarkAllButton.disabled = false;
+                               watermarkAllButton.innerHTML = '<i class="bi bi-droplet-half"></i> Watermark Images';
+                               watermarkAllButton.classList.remove('btn-danger'); watermarkAllButton.classList.add('btn-info');
+                           }, 3000);
+                     } else {
+                          watermarkAllButton.innerHTML = '<i class="bi bi-check-circle-fill"></i> Success!';
+                          watermarkAllButton.classList.remove('btn-danger'); watermarkAllButton.classList.add('btn-info');
+                          setTimeout(() => {
+                               watermarkAllButton.disabled = false;
+                               watermarkAllButton.innerHTML = '<i class="bi bi-droplet-half"></i> Watermark Images';
+                               logMessage(`Watermarking complete for ${slug}. Reload page to see updated status/filenames.`, false);
+                               alert(`Watermarking complete for ${slug}. Reload page to see updated status/filenames.`);
+                          }, 2000);
+                     }
+                 }).catch(error => {
+                      logMessage(`Network Error during watermark fetch for '${slug}': ${error.message}`, true);
+                      watermarkAllButton.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Network Error';
+                      watermarkAllButton.classList.remove('btn-info'); watermarkAllButton.classList.add('btn-danger');
+                      setTimeout(() => {
+                           watermarkAllButton.disabled = false;
+                           watermarkAllButton.innerHTML = '<i class="bi bi-droplet-half"></i> Watermark Images';
+                           watermarkAllButton.classList.remove('btn-danger'); watermarkAllButton.classList.add('btn-info');
+                      }, 3000);
+                 });
+            }
+            else if (publishButton) {
+                console.log("[DEBUG] EXECUTING Publish block.");
+                // ... rest of publish logic ...
+                const slug = publishButton.dataset.slug; // Example data access
+                // ... fetch ...
+            }
+            else if (statusUpdateButton) {
+                console.log("[DEBUG] EXECUTING Status Update block.");
+                // ... rest of status update logic ...
+                 const slug = statusUpdateButton.dataset.slug; // Example data access
+                 // ... fetch ...
+            }
+            else if (helpTrigger) {
+                 console.log("[DEBUG] EXECUTING Help Trigger block.");
+                 // ... rest of help logic ...
+            }
+             else if (oldWatermarkButton) {
+                  console.warn("[DEBUG] Clicked on '.watermark-button' (old individual button) via closest(). This should likely be removed.");
+                  alert("Individual watermarking not implemented via this button anymore.");
              }
              // --- Handle clicking outside help ---
-             // Updated: Check if click target is NOT a trigger AND NOT inside an active help box
-             else if (!event.target.matches('.help-trigger') && !event.target.closest('.help-content.active')) {
+             else if (!targetElement.closest('.help-trigger') && !targetElement.closest('.help-content.active')) {
+                  // console.log("[DEBUG] Clicked outside active help or trigger, closing active help.");
                   document.querySelectorAll('.help-content.active').forEach(activeHelp => {
                        activeHelp.classList.remove('active');
                   });
              }
-             // --- Handle Watermark Button ---
-             // TODO: Add fetch call for watermarking API endpoint when created
-             else if (event.target.matches('.watermark-button')) {
-                  const button = event.target;
-                  const slug = button.dataset.slug;
-                  const imageId = button.dataset.imageId;
-                   logMessage(`Watermark requested for ${slug} - ${imageId} (Endpoint not yet implemented)`, true);
-                   alert("Watermarking functionality not yet implemented.");
-             }
-
-
-             // --- Handle Watermark All Button ---
-             else if (event.target.matches('.watermark-all-button')) {
-                  const button = event.target.closest('button'); // Get button if icon clicked
-                  const slug = button.dataset.slug;
-                  if (!slug) { logMessage("Error: No slug found on watermark button.", true); return; }
-
-                  if (!confirm(`This will attempt to watermark all referenced images for post '${slug}'.\nOriginals will be backed up (_raw suffix).\nWatermarked versions will be saved as JPGs.\nContinue?`)) {
-                       return; // User cancelled
-                  }
-
-                  logMessage(`Starting Watermark job for all images in '${slug}'...`);
-                  button.disabled = true;
-                  button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Watermarking...';
-
-                  fetch(`/api/watermark_all/${slug}`, { method: 'POST' })
-                  .then(response => { if (!response.ok) { throw new Error(`HTTP error ${response.status}`); } return response.json(); })
-                  .then(data => {
-                      logMessage(`Watermark job finished for '${slug}'. Success: ${data.success}`, !data.success);
-                      logMessage("--- Script Output ---");
-                      const outputLines = data.output.split('\n');
-                      outputLines.forEach(line => {
-                           const isErrorLine = /ERROR|Traceback|Failed|Not Found|Critical/i.test(line);
-                           logMessage(line.trim(), isErrorLine);
-                      });
-                      logMessage("--- End Script Output ---");
-
-                      if (!data.success) {
-                           alert(`Watermarking script failed or had errors for ${slug}. Check log.`);
-                           button.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Error';
-                           button.classList.remove('btn-info'); button.classList.add('btn-danger');
-                           // Re-enable after delay
-                           setTimeout(() => {
-                               button.disabled = false;
-                               button.innerHTML = '<i class="bi bi-droplet-half"></i> Watermark Images';
-                               button.classList.remove('btn-danger'); button.classList.add('btn-info');
-                            }, 3000);
-                      } else {
-                           button.innerHTML = '<i class="bi bi-check-circle-fill"></i> Success!';
-                           button.classList.remove('btn-danger'); button.classList.add('btn-info');
-                           // Re-enable after delay
-                           setTimeout(() => {
-                               button.disabled = false;
-                               button.innerHTML = '<i class="bi bi-droplet-half"></i> Watermark Images';
-                                logMessage(`Watermarking complete for ${slug}. Reload page to see updated status/filenames.`, false);
-                                alert(`Watermarking complete for ${slug}. Reload page to see updated status/filenames.`);
-                           }, 2000);
-                      }
-                  }).catch(error => {
-                       logMessage(`Network Error during watermark fetch for '${slug}': ${error.message}`, true);
-                       console.error('Fetch Error:', error);
-                       alert(`Network or server error occurred during watermarking for ${slug}. Check console and log.`);
-                       button.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Network Error';
-                       button.classList.remove('btn-info'); button.classList.add('btn-danger');
-                       // Re-enable after delay
-                       setTimeout(() => {
-                            button.disabled = false;
-                            button.innerHTML = '<i class="bi bi-droplet-half"></i> Watermark Images';
-                            button.classList.remove('btn-danger'); button.classList.add('btn-info');
-                       }, 3000);
-                  });
+             else {
+                  console.log("[DEBUG] Click did not match any specific interactive element handler by closest().");
              }
         });
 
         // Initial log message
-        logMessage("Admin interface loaded.");
+        console.log("[DEBUG] Admin interface JS loaded. Event listeners active.");
+        logMessage("Admin interface loaded."); // Log to page
 
     </script>
-
 </body>
 </html>

@@ -134,20 +134,25 @@
                     IV. Image Workflow
                 </summary>
                 <div class="stage-content">
-    
-                    {# Status line including NEW Watermark All button #}
-                    <div class="d-flex justify-content-between align-items-center p-2 mb-3 bg-light rounded flex-wrap"> {# Added flex-wrap #}
-                        <span class="me-3 mb-1 mb-md-0"> {# Margin end, margin bottom on small screens #}
-                            <strong>Status:</strong> <code class="status-text">{{ status.stages.images.status | default('pending') }}</code>
+
+                    {# --- Informational Text about New Workflow --- #}
+                    <div class="alert alert-info small" role="alert">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        Image processing (optimization to WEBP, watermarking) is now handled by running the
+                        <code>scripts/process_imported_image.py</code> script manually from the command line for each new image placed in
+                        <code>_SOURCE_MEDIA/_IMPORT_IMAGES/</code>. This script updates the Image Library and creates the necessary published and watermarked files.
+                        Statuses below reflect the data recorded in the Image Library and Workflow files.
+                    </div>
+                    {# --- End Informational Text --- #}
+
+                    {# Status line WITHOUT old Watermark All button #}
+                    <div class="d-flex justify-content-between align-items-center p-2 mb-3 bg-light rounded flex-wrap">
+                        <span class="me-3 mb-1 mb-md-0">
+                            <strong>Overall Image Status:</strong> <code class="status-text">{{ status.stages.images.status | default('pending') }}</code>
+                            {# Optionally add clickable status updates here later #}
                         </span>
-                        <span> {# Wrap buttons for better alignment #}
-                            {# NEW WATERMARK BUTTON #}
-                            <button class="watermark-all-button btn btn-sm btn-info ms-2" data-slug="{{ slug }}"
-                                    {{ 'disabled' if status.stages.images.assets_prepared_status != 'complete' }}
-                                    title="{{ 'Watermark all prepared images for this post' if status.stages.images.assets_prepared_status == 'complete' else 'All image assets must be prepared first' }}">
-                                <i class="bi bi-droplet-half"></i> Watermark Images
-                            </button>
-                            {# Existing Status Buttons #}
+                        {# Optional Manual Override Buttons for Overall Stage #}
+                        <span>
                             {% set current_status = status.stages.images.status | default('pending') %}
                             {% if current_status != 'complete' %}
                                 <button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="images" data-new-status="complete" title="Mark this stage as fully complete (Manual Override)">Mark Complete</button>
@@ -157,128 +162,131 @@
                             {% endif %}
                         </span>
                     </div>
-    
+
+                    {# Display Calculated Sub-Statuses #}
+                    <p class="mb-1"><small>
+                        Prompts Defined: <span class="traffic-light" data-status="{{ status.stages.images.prompts_defined_status | default('pending') }}"></span>
+                        | Assets Prepared: <span class="traffic-light" data-status="{{ status.stages.images.assets_prepared_status | default('pending') }}"></span>
+                        | Metadata Integrated: <span class="traffic-light" data-status="{{ status.stages.images.metadata_integrated_status | default('pending') }}"></span>
+                        {# Add clickable triggers here later if desired #}
+                    </small></p>
+
+
                     {# --- Loop through detailed image list passed from Flask --- #}
                     {% if images_detailed %}
-                    <ul class="image-detail-list list-unstyled"> {# Added list-unstyled #}
+                    <ul class="image-detail-list list-unstyled mt-3"> {# Added mt-3 #}
                     {% for img_info in images_detailed %}
                     {# --- Start of individual image item --- #}
-                    <li class="mb-3 p-3 border rounded"> {# Card-like styling #}
-                        <div class="d-flex flex-column flex-md-row align-items-md-start"> {# Flex container #}
-    
+                    <li class="mb-3 p-3 border rounded">
+                        <div class="d-flex flex-column flex-md-row align-items-md-start">
+
                             {# --- Left Column: Metadata --- #}
-                            <div class="flex-grow-1 me-md-3"> {# Takes up remaining space #}
-    
+                            <div class="flex-grow-1 me-md-3">
+
                                 {% if img_info.error %}
                                     <p class="text-danger mb-0"><strong>Error:</strong> Image ID <code>{{ img_info.id }}</code> - {{ img_info.error }}</p>
                                 {% else %}
-                                    {# ID and Description - Dynamically Cleaned Up using split #}
+                                    {# ID and Description #}
                                     <p class="mb-1">
                                         <code>{{ img_info.id }}</code> :
-                                        {# Set the original description #}
                                         {% set original_desc = img_info.description %}
-                                        {# Define potential separators #}
-                                        {% set sep_section = ' section image for ' %}
-                                        {% set sep_header = ' header image for ' %}
-                                        {% set sep_conclusion = ' conclusion image for ' %}
-    
-                                        {# Try splitting by each separator and take the first part if found #}
-                                        {% if sep_section in original_desc %}
-                                            {% set cleaned_desc = original_desc.split(sep_section, 1)[0] %}
-                                        {% elif sep_header in original_desc %}
-                                            {% set cleaned_desc = original_desc.split(sep_header, 1)[0] %}
-                                        {% elif sep_conclusion in original_desc %}
-                                            {% set cleaned_desc = original_desc.split(sep_conclusion, 1)[0] %}
-                                        {% else %}
-                                            {% set cleaned_desc = original_desc %} {# No separator found, use original #}
-                                        {% endif %}
-    
-                                        {# Display the cleaned description, trimmed and with a default #}
+                                        {% set sep_section = ' section image for ' %}{% set sep_header = ' header image for ' %}{% set sep_conclusion = ' conclusion image for ' %}
+                                        {% if sep_section in original_desc %}{% set cleaned_desc = original_desc.split(sep_section, 1)[0] %}
+                                        {% elif sep_header in original_desc %}{% set cleaned_desc = original_desc.split(sep_header, 1)[0] %}
+                                        {% elif sep_conclusion in original_desc %}{% set cleaned_desc = original_desc.split(sep_conclusion, 1)[0] %}
+                                        {% else %}{% set cleaned_desc = original_desc %}{% endif %}
                                         <strong>{{ cleaned_desc | trim | default('(No Description)') }}</strong>
                                     </p>
-    
+
                                     {# Filename #}
                                     <p class="mb-1"><small>
-                                        <strong>Filename:</strong> <code>{{ img_info.filename_local | default('N/A') }}</code>
+                                        <strong>Filename (Published):</strong> <code>{{ img_info.filename_local | default('N/A') }}</code> {# Assumes filename_local is the published one #}
                                         {% if img_info.filename_local %}
                                             <a href="#" class="ms-1" onclick="navigator.clipboard.writeText('{{ img_info.filename_local }}'); alert('Filename copied!'); return false;" title="Copy Filename">
-                                                <i class="bi bi-clipboard small"></i>
-                                            </a>
+                                                <i class="bi bi-clipboard small"></i></a>
                                         {% endif %}
                                     </small></p>
-    
-                                    {# Public URL (Assumed Structure) - Add mb-3 for space after <<>> #}
+
+                                    {# Public URL (Derived) #}
                                     {% if img_info.filename_local %}
-                                        {% set public_url = "https://static.clan.com/media/blog/" + img_info.filename_local %} {# *** ASSUMPTION *** #}
-                                        <p class="mb-3"><small> {# << Increased margin here #}
-                                            <strong>URL:</strong> <a href="{{ public_url }}" target="_blank">{{ public_url }}</a>
+                                        {% set public_url = "https://static.clan.com/media/blog/" + img_info.filename_local %} {# Derived URL #}
+                                        <p class="mb-3"><small>
+                                            <strong>Est. URL:</strong> <a href="{{ public_url }}" target="_blank">{{ public_url }}</a>
                                             <a href="#" class="ms-1" onclick="navigator.clipboard.writeText('{{ public_url }}'); alert('URL copied!'); return false;" title="Copy Public URL">
-                                                <i class="bi bi-clipboard small"></i>
-                                            </a>
+                                                <i class="bi bi-clipboard small"></i></a>
                                         </small></p>
-                                    {% else %}
-                                        <div class="mb-3"></div> {# Add space even if no URL #}
-                                    {% endif %}
-    
-                                    {# Prompt - Add mb-3 for space after <<>> #}
-                                    <div class="mb-3"> {# << Increased margin here #}
+                                    {% else %}<div class="mb-3"></div>{% endif %}
+
+                                    {# Prompt #}
+                                    <div class="mb-3">
                                         <p class="mb-1">
-                                            <strong>Prompt Status:</strong> <span class="traffic-light" data-status="{{ img_info.prompt_status }}"></span> <code class="status-text">{{ img_info.prompt_status }}</code>
-                                            <button class="btn btn-sm btn-outline-primary ms-2" disabled style="font-size:0.8em; padding: 2px 5px;">Edit...</button>
+                                            <strong>Prompt:</strong> <span class="traffic-light" data-status="{{ img_info.prompt_status }}"></span> <code class="status-text">{{ img_info.prompt_status }}</code>
+                                            {# Add clickable status here later #}
                                         </p>
                                         <textarea readonly class="form-control form-control-sm" style="min-height: 60px; font-size: 0.85em;">{{ img_info.prompt | default('No prompt defined.') }}</textarea>
                                     </div>
-    
-                                    {# Meta Alt - Add mb-3 for space after <<>> #}
-                                    <div class="mb-3"> {# << Increased margin here #}
+
+                                    {# Meta Alt #}
+                                    <div class="mb-3">
                                          <p class="mb-1">
-                                            <strong>Meta Alt:</strong> <span class="traffic-light" data-status="{{ 'complete' if img_info.alt else 'pending' }}"></span> <code class="status-text">{{ 'complete' if img_info.alt else 'pending' }}</code>
-                                            <button class="btn btn-sm btn-outline-primary ms-2" disabled style="font-size:0.8em; padding: 2px 5px;">Edit...</button>
+                                            <strong>Alt Text:</strong> <span class="traffic-light" data-status="{{ 'complete' if img_info.alt else 'pending' }}"></span> <code class="status-text">{{ 'complete' if img_info.alt else 'pending' }}</code>
+                                            {# Add clickable status here later #}
                                          </p>
                                          <textarea readonly class="form-control form-control-sm" style="min-height: 40px; font-size: 0.85em;">{{ img_info.alt | default('(No alt text)') }}</textarea>
                                     </div>
-    
-                                    {# Caption - Add mb-3 for space after <<>> #}
-                                    <div class="mb-3"> {# << Increased margin here #}
+
+                                    {# Caption #}
+                                    <div class="mb-3">
                                         <p class="mb-1">
                                             <strong>Caption:</strong> <span class="traffic-light" data-status="{{ 'complete' if img_info.blog_caption else 'pending' }}"></span> <code class="status-text">{{ 'complete' if img_info.blog_caption else 'pending' }}</code>
-                                            <button class="btn btn-sm btn-outline-primary ms-2" disabled style="font-size:0.8em; padding: 2px 5px;">Edit...</button>
+                                            {# Add clickable status here later #}
                                         </p>
                                         <textarea readonly class="form-control form-control-sm" style="min-height: 40px; font-size: 0.85em;">{{ img_info.blog_caption | default('(No caption)') }}</textarea>
                                     </div>
-    
-                                    {# Watermarking line REMOVED from here #}
-    
+
+                                    {# --- Individual Watermark Status --- #}
+                                    <div class="mb-3">
+                                        <p class="mb-0"> {# Reduced bottom margin #}
+                                            <strong>Watermark Applied?:</strong>
+                                            <span class="traffic-light" data-status="{{ img_info.watermarking_status | default('pending') }}"></span>
+                                            <code class="status-text status-trigger"
+                                                  data-slug="{{ slug }}"
+                                                  data-stage-key="images.watermarks.{{ img_info.id }}"
+                                                  style="cursor: pointer;" title="Click to cycle status (if JS implemented)">
+                                                {{ img_info.watermarking_status | default('pending') }}
+                                            </code>
+                                            {# JS needed to make this clickable later (Priority 4) #}
+                                        </p>
+                                    </div>
+                                    {# --- End Individual Watermark Status --- #}
+
+
                                     {# Notes #}
                                     {% if img_info.notes %}
-                                    <div class="mb-0"> {# Keep mb-0 here, space was added before #}
-                                        <p class="mb-1">
-                                            <strong>Notes:</strong>
-                                            <button class="btn btn-sm btn-outline-primary ms-2" disabled style="font-size:0.8em; padding: 2px 5px;">Edit...</button>
-                                        </p>
+                                    <div class="mb-0">
+                                        <p class="mb-1"><strong>Notes:</strong></p>
                                          <textarea readonly class="form-control form-control-sm" style="min-height: 40px; font-size: 0.85em;">{{ img_info.notes }}</textarea>
                                     </div>
                                     {% endif %}
-    
+
                                 {% endif %} {# End of no error check #}
                             </div> {# End Left Column #}
-    
+
                             {# --- Right Column: Image Thumbnail/Placeholder --- #}
-                            <div class="flex-shrink-0 mt-3 mt-md-0" style="width: 250px; max-width: 100%;"> {# Width 250px #}
-                                 {% if img_info.assets_prepared_status == 'complete' and img_info.local_dir and img_info.filename_local %}
-                                    {% set img_src = '/' + img_info.local_dir.strip('/') + '/' + img_info.filename_local %}
-                                    <img src="{{ img_src }}" alt="Thumbnail for {{ img_info.id }}" class="img-thumbnail w-100" style="max-width: 250px;"> {# Max-width 250px #}
+                            <div class="flex-shrink-0 mt-3 mt-md-0" style="width: 250px; max-width: 100%;">
+                                 {% if img_info.display_url %} {# Use display_url generated by app.py #}
+                                    <img src="{{ img_info.display_url }}" alt="Thumbnail for {{ img_info.id }}" class="img-thumbnail w-100" style="max-width: 250px;">
                                  {% elif img_info.error %}
-                                    <div class="border rounded bg-light d-flex align-items-center justify-content-center text-muted w-100" style="min-height: 150px; aspect-ratio: 16 / 9; max-width: 250px;"> {# Max-width 250px #}
+                                    <div class="border rounded bg-light d-flex align-items-center justify-content-center text-muted w-100" style="min-height: 150px; aspect-ratio: 16 / 9; max-width: 250px;">
                                         <span>Error Loading Image Info</span>
                                     </div>
                                  {% else %}
-                                    <div class="border rounded bg-light d-flex align-items-center justify-content-center text-muted w-100" style="min-height: 150px; aspect-ratio: 16 / 9; max-width: 250px;"> {# Max-width 250px #}
-                                        <span>Image Not Prepared</span>
+                                    <div class="border rounded bg-light d-flex align-items-center justify-content-center text-muted w-100" style="min-height: 150px; aspect-ratio: 16 / 9; max-width: 250px;">
+                                        <span>Image Not Found / Not Processed</span>
                                     </div>
                                  {% endif %}
                             </div> {# End Right Column #}
-    
+
                         </div> {# End Flex Container #}
                     </li> {# --- End of individual image item --- #}
                     {% endfor %}
@@ -289,7 +297,9 @@
                     {# --- END Image Loop Comment --- #}
                 </div>
             </details>
-    
+
+            {# --- Other Stages (Validation, Publishing, Syndication) remain the same --- #}
+            {# ... #}    
             {# --- Stage V: Local Validation --- #}
             <details class="workflow-stage" data-stage-key="validation">
                 <summary>
@@ -402,139 +412,124 @@
     <!-- JavaScript for interactions -->
         <!-- JavaScript for interactions -->
             <!-- JavaScript for interactions -->
-    <script>
-        const logOutput = document.getElementById('log-output');
-
-        // --- Helper Function for Logging to Page ---
-        function logMessage(message, isError = false) {
-            const logEntry = document.createElement('div');
-            const timestamp = new Date().toLocaleTimeString();
-            logEntry.textContent = `[${timestamp}] ${message}`;
-            if (isError) {
-                logEntry.classList.add('log-error', 'text-danger'); // Add error class
-            }
-            const placeholder = logOutput.firstChild;
-            if (placeholder && placeholder.textContent === '(Action output will appear here)') {
-                 logOutput.removeChild(placeholder); // Remove placeholder
-            }
-            logOutput.insertBefore(logEntry, logOutput.firstChild);
-            // Also log to browser console
-            if (isError) { console.error(`[${timestamp}] ${message}`); }
-            else { console.log(`[${timestamp}] ${message}`); }
-        }
-
-        // --- Main Click Event Listener ---
-        document.body.addEventListener('click', function(event) {
-            const targetElement = event.target; // Element that was directly clicked
-            console.log(`[DEBUG] Body clicked. Target element:`, targetElement);
-            console.log(`[DEBUG] Target classes:`, targetElement.classList);
-
-            // --- *** ADDED SPECIFIC LOG FOR WATERMARK BUTTON *** ---
-            const watermarkButtonCheck = targetElement.closest('.watermark-all-button');
-            console.log(`[DEBUG] Result of targetElement.closest('.watermark-all-button'):`, watermarkButtonCheck);
-            // --- *** END OF ADDED LOG *** ---
-
-            // --- Use closest() to find the nearest relevant ancestor button/trigger ---
-            const publishButton = targetElement.closest('.publish-clan-button');
-            const statusUpdateButton = targetElement.closest('.status-update-button');
-            const watermarkAllButton = watermarkButtonCheck; // Use the result from our specific check
-            const helpTrigger = targetElement.closest('.help-trigger');
-            const oldWatermarkButton = targetElement.closest('.watermark-button'); // Check for old individual one
-
-
-            // --- Handle based on which button/trigger was found ---
-            if (watermarkAllButton) {
-                 console.log("[DEBUG] EXECUTING Watermark All block."); // New log to confirm entry
-                 const slug = watermarkAllButton.dataset.slug;
-                 if (!slug) { logMessage("Error: No slug found on watermark button.", true); return; }
-
-                 if (!confirm(`This will attempt to watermark all referenced images for post '${slug}'.\nOriginals will be backed up (_raw suffix).\nWatermarked versions will be saved as JPGs.\nContinue?`)) {
-                      console.log("[DEBUG] Watermark All cancelled by user.");
-                      return;
-                 }
-
-                 logMessage(`Starting Watermark job for all images in '${slug}'...`);
-                 watermarkAllButton.disabled = true;
-                 watermarkAllButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Watermarking...';
-
-                 fetch(`/api/watermark_all/${slug}`, { method: 'POST' })
-                 .then(response => { if (!response.ok) { throw new Error(`HTTP error ${response.status}`); } return response.json(); })
-                 .then(data => {
-                     logMessage(`Watermark job finished for '${slug}'. Success: ${data.success}`, !data.success);
-                     logMessage("--- Script Output ---");
-                     const outputLines = data.output.split('\n');
-                     outputLines.forEach(line => {
-                          const isErrorLine = /ERROR|Traceback|Failed|Not Found|Critical/i.test(line);
-                          logMessage(line.trim(), isErrorLine);
-                     });
-                     logMessage("--- End Script Output ---");
-
-                     if (!data.success) {
-                          alert(`Watermarking script failed or had errors for ${slug}. Check log.`);
-                          watermarkAllButton.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Error';
-                          watermarkAllButton.classList.remove('btn-info'); watermarkAllButton.classList.add('btn-danger');
-                          setTimeout(() => {
-                               watermarkAllButton.disabled = false;
-                               watermarkAllButton.innerHTML = '<i class="bi bi-droplet-half"></i> Watermark Images';
-                               watermarkAllButton.classList.remove('btn-danger'); watermarkAllButton.classList.add('btn-info');
-                           }, 3000);
-                     } else {
-                          watermarkAllButton.innerHTML = '<i class="bi bi-check-circle-fill"></i> Success!';
-                          watermarkAllButton.classList.remove('btn-danger'); watermarkAllButton.classList.add('btn-info');
-                          setTimeout(() => {
-                               watermarkAllButton.disabled = false;
-                               watermarkAllButton.innerHTML = '<i class="bi bi-droplet-half"></i> Watermark Images';
-                               logMessage(`Watermarking complete for ${slug}. Reload page to see updated status/filenames.`, false);
-                               alert(`Watermarking complete for ${slug}. Reload page to see updated status/filenames.`);
-                          }, 2000);
+            <script>
+                const logOutput = document.getElementById('log-output');
+        
+                // --- Helper Function for Logging to Page ---
+                function logMessage(message, isError = false) {
+                    // ... (keep this function as it is) ...
+                }
+        
+                // --- Main Click Event Listener ---
+                document.body.addEventListener('click', function(event) {
+                    const targetElement = event.target;
+                    console.log(`[DEBUG] Body clicked. Target element:`, targetElement);
+                    console.log(`[DEBUG] Target classes:`, targetElement.classList);
+        
+                    // --- Use closest() to find the nearest relevant ancestor button/trigger ---
+                    const publishButton = targetElement.closest('.publish-clan-button');
+                    const statusUpdateButton = targetElement.closest('.status-update-button');
+                    // const watermarkAllButton = targetElement.closest('.watermark-all-button'); // <<<< REMOVED THIS LINE
+                    const helpTrigger = targetElement.closest('.help-trigger');
+                    // const oldWatermarkButton = targetElement.closest('.watermark-button'); // <<<< Keep if needed, but likely removable
+        
+                    // --- Handle based on which button/trigger was found ---
+        
+                    // REMOVE THE ENTIRE 'if (watermarkAllButton)' BLOCK
+                    /* <<<< START REMOVAL
+                    if (watermarkAllButton) {
+                         console.log("[DEBUG] EXECUTING Watermark All block."); // New log to confirm entry
+                         const slug = watermarkAllButton.dataset.slug;
+                         // ... (entire fetch logic for /api/watermark_all) ...
+                    }
+                    else <<<< END REMOVAL */
+        
+                    // Keep the other if/else if blocks
+                    if (publishButton) { // <<<< ADJUSTED: Start with 'if' now
+                        console.log("[DEBUG] EXECUTING Publish block.");
+                        const slug = publishButton.dataset.slug;
+                        if (!slug) { logMessage("Error: No slug found on publish button.", true); return; }
+        
+                        logMessage(`Starting Publish/Update job for '${slug}'...`);
+                        publishButton.disabled = true;
+                        publishButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Publishing...';
+        
+                        fetch(`/api/publish_clan/${slug}`, { method: 'POST' })
+                        .then(response => { if (!response.ok) { throw new Error(`HTTP error ${response.status}`); } return response.json(); })
+                        .then(data => {
+                            logMessage(`Publish job finished for '${slug}'. Success: ${data.success}`, !data.success);
+                            logMessage("--- Script Output ---");
+                            const outputLines = data.output.split('\n');
+                             outputLines.forEach(line => {
+                                  // Simple check for common error indicators
+                                  const isErrorLine = /ERROR|Traceback|Failed|Not Found|Critical/i.test(line);
+                                  logMessage(line.trim(), isErrorLine);
+                             });
+                            logMessage("--- End Script Output ---");
+        
+                             if (!data.success) {
+                                  alert(`Publishing script failed or had errors for ${slug}. Check log.`);
+                                  publishButton.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Error';
+                                  publishButton.classList.remove('btn-success'); publishButton.classList.add('btn-danger');
+                                  // Keep button disabled on error? Or re-enable after timeout? Re-enable for now.
+                                  setTimeout(() => {
+                                       publishButton.disabled = false;
+                                       publishButton.innerHTML = '<i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now';
+                                       publishButton.classList.remove('btn-danger'); publishButton.classList.add('btn-success');
+                                   }, 3000);
+                             } else {
+                                  publishButton.innerHTML = '<i class="bi bi-check-circle-fill"></i> Success!';
+                                  // Re-enable button after success message?
+                                   setTimeout(() => {
+                                       publishButton.disabled = false;
+                                       publishButton.innerHTML = '<i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now';
+                                       logMessage(`Publishing complete for ${slug}. Reload page or check index for updated status.`, false);
+                                       alert(`Publishing complete for ${slug}. Reload page or check index for updated status.`);
+                                   }, 2000);
+                             }
+        
+                        }).catch(error => {
+                            logMessage(`Network Error during publish fetch for '${slug}': ${error.message}`, true);
+                             publishButton.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Network Error';
+                             publishButton.classList.remove('btn-success'); publishButton.classList.add('btn-danger');
+                              setTimeout(() => {
+                                   publishButton.disabled = false;
+                                   publishButton.innerHTML = '<i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now';
+                                   publishButton.classList.remove('btn-danger'); publishButton.classList.add('btn-success');
+                              }, 3000);
+                        });
+                    }
+                    else if (statusUpdateButton) {
+                        console.log("[DEBUG] EXECUTING Status Update block.");
+                        // ... (keep existing status update logic) ...
+                    }
+                    else if (helpTrigger) {
+                         console.log("[DEBUG] EXECUTING Help Trigger block.");
+                         // ... (keep existing help logic) ...
+                    }
+                     /* Consider removing this check for the old button if it's definitely gone
+                     else if (oldWatermarkButton) {
+                          console.warn("[DEBUG] Clicked on '.watermark-button' (old individual button) via closest(). This should likely be removed.");
+                          alert("Individual watermarking not implemented via this button anymore.");
                      }
-                 }).catch(error => {
-                      logMessage(`Network Error during watermark fetch for '${slug}': ${error.message}`, true);
-                      watermarkAllButton.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Network Error';
-                      watermarkAllButton.classList.remove('btn-info'); watermarkAllButton.classList.add('btn-danger');
-                      setTimeout(() => {
-                           watermarkAllButton.disabled = false;
-                           watermarkAllButton.innerHTML = '<i class="bi bi-droplet-half"></i> Watermark Images';
-                           watermarkAllButton.classList.remove('btn-danger'); watermarkAllButton.classList.add('btn-info');
-                      }, 3000);
-                 });
-            }
-            else if (publishButton) {
-                console.log("[DEBUG] EXECUTING Publish block.");
-                // ... rest of publish logic ...
-                const slug = publishButton.dataset.slug; // Example data access
-                // ... fetch ...
-            }
-            else if (statusUpdateButton) {
-                console.log("[DEBUG] EXECUTING Status Update block.");
-                // ... rest of status update logic ...
-                 const slug = statusUpdateButton.dataset.slug; // Example data access
-                 // ... fetch ...
-            }
-            else if (helpTrigger) {
-                 console.log("[DEBUG] EXECUTING Help Trigger block.");
-                 // ... rest of help logic ...
-            }
-             else if (oldWatermarkButton) {
-                  console.warn("[DEBUG] Clicked on '.watermark-button' (old individual button) via closest(). This should likely be removed.");
-                  alert("Individual watermarking not implemented via this button anymore.");
-             }
-             // --- Handle clicking outside help ---
-             else if (!targetElement.closest('.help-trigger') && !targetElement.closest('.help-content.active')) {
-                  // console.log("[DEBUG] Clicked outside active help or trigger, closing active help.");
-                  document.querySelectorAll('.help-content.active').forEach(activeHelp => {
-                       activeHelp.classList.remove('active');
-                  });
-             }
-             else {
-                  console.log("[DEBUG] Click did not match any specific interactive element handler by closest().");
-             }
-        });
-
-        // Initial log message
-        console.log("[DEBUG] Admin interface JS loaded. Event listeners active.");
-        logMessage("Admin interface loaded."); // Log to page
-
-    </script>
-</body>
+                     */
+                     // --- Handle clicking outside help ---
+                     else if (!targetElement.closest('.help-trigger') && !targetElement.closest('.help-content.active')) {
+                          // console.log("[DEBUG] Clicked outside active help or trigger, closing active help.");
+                          document.querySelectorAll('.help-content.active').forEach(activeHelp => {
+                               activeHelp.classList.remove('active');
+                          });
+                     }
+                     else {
+                          // Log if needed, but often fine to do nothing
+                          // console.log("[DEBUG] Click did not match any specific interactive element handler by closest().");
+                     }
+                });
+        
+                // Initial log message
+                console.log("[DEBUG] Admin post detail JS loaded. Event listeners active.");
+                logMessage("Admin post detail interface loaded."); // Log to page
+        
+            </script>
+        </body>
 </html>

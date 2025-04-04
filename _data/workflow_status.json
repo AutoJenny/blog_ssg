@@ -22,8 +22,21 @@
                 "generation_status": "complete",
                 "assets_prepared_status": "complete",
                 "metadata_integrated_status": "complete",
-                "watermarking_status": "pending",
-                "watermarking_used_in_publish": false
+                "watermarking_status": "complete",
+                "watermarking_used_in_publish": false,
+                "watermarks": {
+                    "IMG00001": "complete",
+                    "IMG00002": "complete",
+                    "IMG00003": "complete",
+                    "IMG00004": "complete",
+                    "IMG00005": "complete",
+                    "IMG00006": "complete",
+                    "IMG00007": "complete",
+                    "IMG00008": "complete",
+                    "IMG00009": "complete",
+                    "IMG00010": "complete",
+                    "IMG00011": "complete"
+                }
             },
             "validation": {
                 "status": "complete",

@@ -96,35 +96,45 @@ def run_eleventy_build():
         logging.error(f"An unexpected error occurred during build: {e}", exc_info=True)
         return False
 
-def extract_html_content(built_html_path):
+# --- Add header_image_filename argument ---
+def extract_html_content(built_html_path, header_image_filename=None):
     """
     Extracts inner HTML content using BeautifulSoup, removes HTML comments,
-    removes the specified 'Back' link element, and rewrites relative image paths.
-    Uses config for selector and image base URL.
+    removes the specified 'Back' link element, removes the header image figure,
+    and rewrites relative image paths. Uses config for selector and image base URL.
+
+    Args:
+        built_html_path (Path): Path to the built HTML file.
+        header_image_filename (str, optional): The filename (e.g., "kilt-evolution_header.webp")
+                                                of the header image to find and remove its figure.
+                                                Defaults to None.
     """
-    selector = CONFIG["html_content_selector"]
-    back_link_selector = CONFIG["html_back_link_selector"]
+    # Get selectors and config from global CONFIG dictionary
+    selector = CONFIG["html_content_selector"] # e.g., "article.blog-post"
+    back_link_selector = CONFIG["html_back_link_selector"] # e.g., "nav.post-navigation-top"
     image_public_base_url = CONFIG["image_public_base_url"]
 
     logging.info(f"Extracting content from {built_html_path} using selector '{selector}'...")
     try:
         with open(built_html_path, 'r', encoding='utf-8') as f:
-            # Use lxml parser if installed, otherwise html.parser
             try:
                 soup = BeautifulSoup(f, 'lxml')
             except ImportError:
-                logging.warning("lxml not found, using html.parser. Install lxml for potentially faster parsing.")
+                logging.warning("lxml not found, using html.parser.")
                 soup = BeautifulSoup(f, 'html.parser')
 
+        # --- Find the main content container element first ---
         content_element = soup.select_one(selector)
         if not content_element:
-            logging.error(f"Error: Could not find element matching selector '{selector}' in {built_html_path}")
+            logging.error(f"Error: Could not find main content element matching selector '{selector}' in {built_html_path}")
             return None
-        logging.info("Found content element.")
+        logging.info(f"Found main content element: <{content_element.name} class='{content_element.get('class', '')}'>")
 
-        # Remove "Back" link element first
+        # --- Perform removals ON THE FULL SOUP or WITHIN CONTENT ELEMENT as appropriate ---
+
+        # 1. Remove "Back" link element (might be outside the main content element)
         if back_link_selector:
-             back_link_element = soup.select_one(back_link_selector) # Search whole soup, might be outside main article
+             back_link_element = soup.select_one(back_link_selector) # Search whole document
              if back_link_element:
                  logging.info(f"Removing element matching back link selector '{back_link_selector}'.")
                  back_link_element.decompose()
@@ -133,18 +143,33 @@ def extract_html_content(built_html_path):
         else:
              logging.debug("No back link selector configured, skipping removal.")
 
-        # --- Remove the main post title H1 (within the content element) ---
-        # Assumes the main title is the first H1 inside the 'article.blog-post'
-        title_selector = 'h1'
-        main_title_h1 = content_element.find(title_selector) # Find first h1 within the content_element
-        if main_title_h1:
-            logging.info(f"Removing first '{title_selector}' element found within content.")
-            main_title_h1.decompose() # Remove the H1 tag and its content
+        # --- ADDED: Remove Header Image Figure ---
+        if header_image_filename:
+            logging.info(f"Attempting to find and remove figure containing image: '{header_image_filename}'")
+            # Find the specific img tag using a lambda to check if src ENDS with the filename
+            # This assumes the src in the built HTML might have prefixes but ends consistently
+            img_tag_to_remove = content_element.find('img', src=lambda s: s and s.endswith(header_image_filename))
+
+            if img_tag_to_remove:
+                # Find the parent figure tag
+                figure_to_remove = img_tag_to_remove.find_parent('figure', class_='section-image') # Be specific if possible
+                if figure_to_remove:
+                    logging.info(f"Found and removing parent <figure class='section-image'> for header image.")
+                    figure_to_remove.decompose()
+                else:
+                    # Fallback or stricter error? Maybe just warn if figure isn't found.
+                    logging.warning(f"Found header img tag, but couldn't find its parent <figure class='section-image'> to remove.")
+                    # Optionally, remove just the img tag as a less ideal fallback:
+                    # logging.info("Removing only the header img tag as figure not found.")
+                    # img_tag_to_remove.decompose()
+            else:
+                logging.warning(f"Could not find header img tag with src ending in '{header_image_filename}' within the content element.")
         else:
-            logging.warning(f"Could not find main title H1 element ('{title_selector}') within the content element to remove.")
-        # --- End H1 Removal ---
-        
-        # Process the main content element
+            logging.info("No header_image_filename provided, skipping header image figure removal.")
+        # --- END: Remove Header Image Figure ---
+
+
+        # --- Process the main content element ---
         # Remove HTML comments within the content element
         comments_found = 0
         for comment in content_element.find_all(string=lambda text: isinstance(text, Comment)):
@@ -153,25 +178,25 @@ def extract_html_content(built_html_path):
         if comments_found > 0:
             logging.info(f"Removed {comments_found} HTML comment(s) from content.")
 
-        # Rewrite image paths within the content element
-        logging.info("Rewriting image paths to full URLs...")
+        # Rewrite other image paths within the content element
+        logging.info("Rewriting remaining image paths within content to full URLs...")
         images_found = 0
         images_rewritten = 0
-        for img_tag in content_element.find_all('img'):
+        for img_tag in content_element.find_all('img'): # Re-find all remaining images
             images_found += 1
             original_src = img_tag.get('src')
-            # Check if path starts relative (adjust pattern if needed)
             if original_src and original_src.startswith(('/images/', 'images/')):
                 filename = os.path.basename(original_src)
-                new_src = image_public_base_url.rstrip('/') + '/' + filename # Construct full URL
+                # Construct full URL, avoid double slashes
+                new_src = image_public_base_url.rstrip('/') + '/' + filename
                 img_tag['src'] = new_src
                 images_rewritten += 1
                 logging.debug(f"  Rewrote img src: '{original_src}' -> '{new_src}'")
             elif original_src:
-                 logging.debug(f"  Skipping img src (doesn't appear relative): '{original_src}'")
-        logging.info(f"Image path rewrite complete. Found: {images_found}, Rewritten: {images_rewritten}.")
+                 logging.debug(f"  Skipping img src (doesn't appear relative or already processed?): '{original_src}'")
+        logging.info(f"Image path rewrite complete. Found remaining: {images_found}, Rewritten: {images_rewritten}.")
 
-        # Extract inner HTML
+        # Extract the final processed inner HTML (without header figure)
         inner_html = ''.join(str(child) for child in content_element.contents)
         return inner_html
 

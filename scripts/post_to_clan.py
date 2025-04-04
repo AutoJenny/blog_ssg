@@ -557,12 +557,36 @@ def main(md_relative_path_from_root, force_create=False):
              temp_html_file = None
              raise
 
-        # 8. Gather and Upload Images (Keep existing logic)
+           # 8. Gather and Upload Images <-- *** APPLY FIX HERE ***
         image_ids_to_upload = []
-        if metadata.get('headerImageId'): image_ids_to_upload.append(metadata['headerImageId'])
-        # Add other image IDs if needed
+        logging.info("Gathering image IDs from front matter...")
+        # Get header image ID
+        header_id = metadata.get('headerImageId')
+        if header_id:
+            image_ids_to_upload.append(header_id)
+            logging.debug(f"  Found headerImageId: {header_id}")
+
+        # Get image IDs from sections
+        for i, section in enumerate(metadata.get('sections', [])):
+            section_id = section.get('imageId')
+            if section_id:
+                image_ids_to_upload.append(section_id)
+                logging.debug(f"  Found imageId in sections[{i}]: {section_id}")
+
+        # Get image ID from conclusion
+        conclusion_id = metadata.get('conclusion', {}).get('imageId')
+        if conclusion_id:
+            image_ids_to_upload.append(conclusion_id)
+            logging.debug(f"  Found imageId in conclusion: {conclusion_id}")
+
+        # Ensure IDs are unique
+        image_ids_to_upload = list(dict.fromkeys(image_ids_to_upload))
+        logging.info(f"Found {len(image_ids_to_upload)} unique image IDs to process: {image_ids_to_upload}")
+
+        # --- The rest of the image upload loop remains the same ---
+        image_library_modified = False
         if image_ids_to_upload:
-             logging.info(f"--- Starting Image Uploads for {len(image_ids_to_upload)} reference(s) ---")
+             logging.info(f"--- Starting Image Uploads for {len(image_ids_to_upload)} image(s) ---")
              current_image_library_state = image_library_data.copy()
              any_upload_succeeded = False
              for image_id in image_ids_to_upload:
@@ -572,11 +596,13 @@ def main(md_relative_path_from_root, force_create=False):
                       any_upload_succeeded = True
                  else:
                       logging.warning(f"Failed to upload image ID: {image_id}. Post might have missing images/thumbnails.")
+
              if image_library_modified:
-                  image_library_data = current_image_library_state
+                  image_library_data = current_image_library_state # Update main dict with changes
              logging.info("--- Finished Image Uploads ---")
         else:
              logging.info("No image IDs found in front matter to upload.")
+
 
         # 9. Save updated image library data IF changes were made (Keep existing logic)
         if image_library_modified:

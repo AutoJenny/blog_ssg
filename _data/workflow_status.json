@@ -1,109 +1,109 @@
 {
-  "kilt-evolution": {
-    "last_updated": "2025-04-03T09:01:24+00:00Z",
-    "stages": {
-      "conceptualisation": {
-        "status": "complete",
-        "notes": null
-      },
-      "authoring": {
-        "status": "complete",
-        "text_format_status": "complete"
-      },
-      "metadata": {
-        "status": "complete",
-        "front_matter_status": "complete",
-        "tags_status": "complete",
-        "author_status": "complete"
-      },
-      "images": {
-        "status": "complete",
-        "prompts_defined_status": "complete",
-        "generation_status": "complete",
-        "assets_prepared_status": "complete",
-        "metadata_integrated_status": "complete",
-        "watermarking_status": "pending",
-        "watermarking_used_in_publish": false
-      },
-      "validation": {
-        "status": "complete",
-        "last_preview_ok": true
-      },
-      "publishing_clancom": {
-        "status": "complete",
-        "post_id": 333,
-        "last_publish_attempt": "2025-04-03T09:01:24+00:00Z",
-        "last_error": null
-      },
-      "syndication": {
-        "status": "pending",
-        "instagram": {
-          "overall_status": "pending"
-        },
-        "facebook": {
-          "overall_status": "pending"
+    "kilt-evolution": {
+        "last_updated": "2025-04-03T10:09:26+00:00Z",
+        "stages": {
+            "conceptualisation": {
+                "status": "complete",
+                "notes": null
+            },
+            "authoring": {
+                "status": "complete",
+                "text_format_status": "complete"
+            },
+            "metadata": {
+                "status": "complete",
+                "front_matter_status": "complete",
+                "tags_status": "complete",
+                "author_status": "complete"
+            },
+            "images": {
+                "status": "complete",
+                "prompts_defined_status": "complete",
+                "generation_status": "complete",
+                "assets_prepared_status": "complete",
+                "metadata_integrated_status": "complete",
+                "watermarking_status": "pending",
+                "watermarking_used_in_publish": false
+            },
+            "validation": {
+                "status": "complete",
+                "last_preview_ok": true
+            },
+            "publishing_clancom": {
+                "status": "complete",
+                "post_id": 333,
+                "last_publish_attempt": "2025-04-03T10:09:26+00:00Z",
+                "last_error": null
+            },
+            "syndication": {
+                "status": "pending",
+                "instagram": {
+                    "overall_status": "pending"
+                },
+                "facebook": {
+                    "overall_status": "pending"
+                }
+            }
         }
-      }
+    },
+    "quaich-traditions": {
+        "last_updated": "2025-04-03T09:09:25+00:00Z",
+        "stages": {
+            "conceptualisation": {
+                "status": "complete",
+                "notes": null
+            },
+            "authoring": {
+                "status": "complete",
+                "text_format_status": "complete"
+            },
+            "metadata": {
+                "status": "complete",
+                "front_matter_status": "complete",
+                "tags_status": "complete",
+                "author_status": "complete"
+            },
+            "images": {
+                "status": "pending",
+                "prompts_defined_status": "complete",
+                "generation_status": "pending",
+                "assets_prepared_status": "pending",
+                "metadata_integrated_status": "pending",
+                "watermarking_status": "complete",
+                "watermarking_used_in_publish": false,
+                "watermarks": {
+                    "IMG00012": "complete",
+                    "IMG00013": "complete",
+                    "IMG00014": "complete",
+                    "IMG00015": "complete",
+                    "IMG00017": "complete",
+                    "IMG00018": "complete",
+                    "IMG00019": "complete",
+                    "IMG00020": "complete",
+                    "IMG00021": "complete",
+                    "IMG00022": "complete",
+                    "IMG00016": "complete"
+                }
+            },
+            "validation": {
+                "status": "pending",
+                "last_preview_ok": false
+            },
+            "publishing_clancom": {
+                "status": "complete",
+                "post_id": 334,
+                "last_publish_attempt": "2025-04-03T09:09:25+00:00Z",
+                "last_error": null
+            },
+            "syndication": {
+                "status": "pending",
+                "instagram": {
+                    "overall_status": "pending"
+                },
+                "facebook": {
+                    "overall_status": "pending"
+                }
+            }
+        }
     }
-  },
-  "quaich-traditions": {
-    "last_updated": "2025-04-03T09:09:25+00:00Z",
-    "stages": {
-      "conceptualisation": {
-        "status": "complete",
-        "notes": null
-      },
-      "authoring": {
-        "status": "complete",
-        "text_format_status": "complete"
-      },
-      "metadata": {
-        "status": "complete",
-        "front_matter_status": "complete",
-        "tags_status": "complete",
-        "author_status": "complete"
-      },
-      "images": {
-        "status": "pending",
-        "prompts_defined_status": "complete",
-        "generation_status": "pending",
-        "assets_prepared_status": "pending",
-        "metadata_integrated_status": "pending",
-        "watermarking_status": "complete",
-        "watermarking_used_in_publish": false,
-        "watermarks": {
-          "IMG00012": "complete",
-          "IMG00013": "complete",
-          "IMG00014": "complete",
-          "IMG00015": "complete",
-          "IMG00017": "complete",
-          "IMG00018": "complete",
-          "IMG00019": "complete",
-          "IMG00020": "complete",
-          "IMG00021": "complete",
-          "IMG00022": "complete",
-          "IMG00016": "complete"
-        }
-      },
-      "validation": {
-        "status": "pending",
-        "last_preview_ok": false
-      },
-      "publishing_clancom": {
-        "status": "complete",
-        "post_id": 334,
-        "last_publish_attempt": "2025-04-03T09:09:25+00:00Z",
-        "last_error": null
-      },
-      "syndication": {
-        "status": "pending",
-        "instagram": {
-          "overall_status": "pending"
-        },
-        "facebook": {
-          "overall_status": "pending"
-        }
-      }
-    }
-  }
 }

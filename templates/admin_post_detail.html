@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {# Title uses metadata passed from Flask #}
-    <title>Manage: {{ metadata.title | default('Unknown Post') }} - Blog Workflow</title>
+    <title>Manage: {{ post.title | default('Unknown Post') }} - Blog Workflow</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
@@ -189,7 +189,7 @@
     <div class="container"> {# Wrap content in container for Bootstrap #}
         <p class="back-link mt-3"><a href="{{ url_for('index') }}">← Back to Post List</a></p>
 
-        <h1>Manage: {{ metadata.title | default('Post Details') }}</h1>
+        <h1>Manage: {{ post.title | default('Post Details') }}</h1>
         <p><strong>Slug:</strong> <code>{{ slug }}</code>
             <a href="vscode://file/{{ config.BASE_DIR_STR }}/posts/{{ slug }}.md" title="Edit Markdown File in VS Code" class="ms-2">
                 <i class="bi bi-pencil-square"></i> (Edit MD)
@@ -209,19 +209,19 @@
                 <div class="stage-content">
                     <div class="mb-3">
                         <label for="concept" class="form-label">Core Idea</label>
-                        <textarea class="form-control" id="concept" rows="3" data-field="concept">{{ metadata.concept | default('') }}</textarea>
+                        <textarea class="form-control" id="concept" rows="3" data-field="concept">{{ post.concept | default('') }}</textarea>
                         <div class="form-text">The core idea or concept of the post</div>
                     </div>
                     
                     <div class="mb-3">
                         <label for="title" class="form-label">Title</label>
-                        <input type="text" class="form-control" id="title" value="{{ metadata.title | default('') }}" data-field="title">
+                        <input type="text" class="form-control" id="title" value="{{ post.title | default('') }}" data-field="title">
                         <div class="form-text">The main title of the post</div>
                     </div>
                     
                     <div class="mb-3">
                         <label for="subtitle" class="form-label">Subtitle</label>
-                        <input type="text" class="form-control" id="subtitle" value="{{ metadata.subtitle | default('') }}" data-field="subtitle">
+                        <input type="text" class="form-control" id="subtitle" value="{{ post.subtitle | default('') }}" data-field="subtitle">
                         <div class="form-text">A brief subtitle or description</div>
                     </div>
                     
@@ -263,14 +263,70 @@
                     II. Content Authoring & Structuring
                 </summary>
                 <div class="stage-content">
-                    <p>Generate/write, review, edit, structure, and format the text content (Summary, Sections, Conclusion) using HTML.</p>
+                    <div class="mb-4">
+                        <h3>Summary</h3>
+                        <div class="mb-3">
+                            <label for="summary" class="form-label">Post Summary</label>
+                            <textarea class="form-control" id="summary" rows="3" data-field="summary">{{ post.summary | default('') }}</textarea>
+                            <div class="form-text">A brief summary of the post that will appear at the top</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3>Content Sections</h3>
+                        <div id="sections-container">
+                            {% if post.sections %}
+                                {% for section in post.sections %}
+                                <div class="section-item mb-4 p-3 border rounded" data-section-index="{{ loop.index0 }}">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h4 class="mb-0">Section {{ loop.index }}</h4>
+                                        <button type="button" class="btn btn-sm btn-outline-danger delete-section" data-section-index="{{ loop.index0 }}">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Heading</label>
+                                        <input type="text" class="form-control section-heading" value="{{ section.heading | default('') }}" data-field="heading">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Content</label>
+                                        <textarea class="form-control section-content" rows="5" data-field="text">{{ section.text | default('') }}</textarea>
+                                        <div class="form-text">Use HTML tags for formatting (p, b, i, ul, li)</div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <button type="button" class="btn btn-outline-primary" id="add-section">
+                            <i class="bi bi-plus-circle"></i> Add Section
+                        </button>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3>Conclusion</h3>
+                        <div class="mb-3">
+                            <label for="conclusion-heading" class="form-label">Conclusion Heading</label>
+                            <input type="text" class="form-control" id="conclusion-heading" value="{{ post.conclusion.heading | default('') }}" data-field="conclusion.heading">
+                        </div>
+                        <div class="mb-3">
+                            <label for="conclusion-text" class="form-label">Conclusion Text</label>
+                            <textarea class="form-control" id="conclusion-text" rows="3" data-field="conclusion.text">{{ post.conclusion.text | default('') }}</textarea>
+                            <div class="form-text">Use HTML tags for formatting (p, b, i, ul, li)</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-primary" id="save-content">Save Content</button>
+                        <span class="ms-2 text-muted" id="save-content-status"></span>
+                    </div>
+
                     <p>
-                        <strong>Overall Status:</strong> <code class="status-text">{{ status.stages.authoring.status | default('pending') }}</code>
+                        <strong>Status:</strong> <code class="status-text">{{ status.stages.authoring.status | default('pending') }}</code>
                         {% set current_status = status.stages.authoring.status | default('pending') %}
                         {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="authoring" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
                         {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="authoring" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
                     </p>
-                    <p><strong>HTML Formatting Status:</strong> <span class="traffic-light" data-status="{{ status.stages.authoring.text_format_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.authoring.text_format_status | default('pending') }}</code></p> {# Sub-status - no button for now #}
+                    <p><strong>HTML Formatting Status:</strong> <span class="traffic-light" data-status="{{ status.stages.authoring.text_format_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.authoring.text_format_status | default('pending') }}</code></p>
                 </div>
             </details>
     
@@ -292,9 +348,9 @@
                     <p><strong>Tags Defined:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.tags_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.tags_status | default('pending') }}</code></p>
                     <p><strong>Author Assigned:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.author_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.author_status | default('pending') }}</code></p>
                     <hr>
-                     <p><i>Title: {{ metadata.title }}</i></p>
-                     <p><i>Author Key: {{ metadata.author }}</i></p>
-                     <p><i>Tags: {{ metadata.tags | join(', ') }}</i></p>
+                     <p><i>Title: {{ post.title }}</i></p>
+                     <p><i>Author Key: {{ post.author }}</i></p>
+                     <p><i>Tags: {{ post.tags | join(', ') }}</i></p>
                 </div>
             </details>
     
@@ -561,8 +617,8 @@
                         {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="syndication" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
                         {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="syndication" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
                     </p>
-                    <p><strong>Instagram:</strong> <span class="traffic-light" data-status="{{ status.stages.syndication.instagram.overall_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.syndication.instagram.overall_status | default('pending') }}</code></p>
-                    <p><strong>Facebook:</strong> <span class="traffic-light" data-status="{{ status.stages.syndication.facebook.overall_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.syndication.facebook.overall_status | default('pending') }}</code></p>
+                    <p><strong>Instagram:</strong> <span class="traffic-light" data-status="{{ status.stages.syndication.instagram.overall_status | default('pending') if status.stages.syndication.instagram is defined else 'pending' }}"></span> <code class="status-text">{{ status.stages.syndication.instagram.overall_status | default('pending') if status.stages.syndication.instagram is defined else 'pending' }}</code></p>
+                    <p><strong>Facebook:</strong> <span class="traffic-light" data-status="{{ status.stages.syndication.facebook.overall_status | default('pending') if status.stages.syndication.facebook is defined else 'pending' }}"></span> <code class="status-text">{{ status.stages.syndication.facebook.overall_status | default('pending') if status.stages.syndication.facebook is defined else 'pending' }}</code></p>
                     <p class="mt-3">
                         <button class="syndicate-button btn btn-sm btn-secondary" data-slug="{{ slug }}" data-platform="instagram" disabled title="Instagram syndication not yet implemented">Syndicate to Instagram</button>
                         <button class="syndicate-button btn btn-sm btn-secondary" data-slug="{{ slug }}" data-platform="facebook" disabled title="Facebook syndication not yet implemented">Syndicate to Facebook</button>
@@ -782,6 +838,111 @@
                     }
                 });
             }
+        });
+
+        // Content Authoring & Structuring functionality
+        document.getElementById('add-section').addEventListener('click', function() {
+            const sectionsContainer = document.getElementById('sections-container');
+            const sectionCount = sectionsContainer.children.length;
+            const newSection = document.createElement('div');
+            newSection.className = 'section-item mb-4 p-3 border rounded';
+            newSection.setAttribute('data-section-index', sectionCount);
+            newSection.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">Section ${sectionCount + 1}</h4>
+                    <button type="button" class="btn btn-sm btn-outline-danger delete-section" data-section-index="${sectionCount}">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Heading</label>
+                    <input type="text" class="form-control section-heading" data-field="heading">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Content</label>
+                    <textarea class="form-control section-content" rows="5" data-field="text"></textarea>
+                    <div class="form-text">Use HTML tags for formatting (p, b, i, ul, li)</div>
+                </div>
+            `;
+            sectionsContainer.appendChild(newSection);
+        });
+
+        // Handle section deletion
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.delete-section')) {
+                const section = e.target.closest('.section-item');
+                section.remove();
+                // Update section numbers
+                const sections = document.querySelectorAll('.section-item');
+                sections.forEach((section, index) => {
+                    section.setAttribute('data-section-index', index);
+                    section.querySelector('h4').textContent = `Section ${index + 1}`;
+                    section.querySelector('.delete-section').setAttribute('data-section-index', index);
+                });
+            }
+        });
+
+        // Save content
+        document.getElementById('save-content').addEventListener('click', function() {
+            const slug = '{{ slug }}';
+            const data = {
+                summary: document.getElementById('summary').value,
+                sections: [],
+                conclusion: {
+                    heading: document.getElementById('conclusion-heading').value,
+                    text: document.getElementById('conclusion-text').value
+                }
+            };
+
+            // Collect section data
+            document.querySelectorAll('.section-item').forEach(section => {
+                data.sections.push({
+                    heading: section.querySelector('.section-heading').value,
+                    text: section.querySelector('.section-content').value
+                });
+            });
+
+            const saveButton = this;
+            const saveStatus = document.getElementById('save-content-status');
+            
+            saveButton.disabled = true;
+            saveButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+            saveStatus.textContent = '';
+
+            fetch(`/api/update_content/${slug}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    saveButton.innerHTML = '<i class="bi bi-check-circle-fill"></i> Saved';
+                    saveStatus.textContent = 'Content saved successfully';
+                    saveStatus.className = 'ms-2 text-success';
+                } else {
+                    throw new Error(data.error || 'Failed to save content');
+                }
+            })
+            .catch(error => {
+                saveButton.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Error';
+                saveStatus.textContent = `Error: ${error.message}`;
+                saveStatus.className = 'ms-2 text-danger';
+            })
+            .finally(() => {
+                setTimeout(() => {
+                    saveButton.disabled = false;
+                    saveButton.innerHTML = 'Save Content';
+                    saveStatus.textContent = '';
+                }, 3000);
+            });
         });
     </script>
 </body>

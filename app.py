@@ -10,6 +10,7 @@ import subprocess
 import sys
 import datetime # Already imported, good.
 import re 
+import yaml
 
 # --- Configuration Constants ---
 BASE_DIR = Path(__file__).resolve().parent
@@ -283,159 +284,93 @@ conclusion:
 
 @app.route('/admin/post/<string:slug>')
 def view_post_detail(slug):
-    """Displays the detailed workflow management page for a single post."""
-    logging.info(f"Processing detail route '/admin/post/{slug}'...")
-    md_file_path = BASE_DIR / POSTS_DIR_NAME / f"{slug}.md"
-    workflow_status_path = DATA_DIR / WORKFLOW_STATUS_FILE
-    image_library_path = DATA_DIR / IMAGE_LIBRARY_FILE
-
-    metadata = {}
-    status_data = {"stages": {}}
-    images_detailed = []
-
-    # 1. Load Markdown Front Matter
-    if md_file_path.exists():
-        try:
-            post_fm = frontmatter.load(md_file_path)
-            metadata = post_fm.metadata
-            logging.info(f"Loaded metadata for '{slug}'.")
-        except Exception as e:
-            logging.error(f"Error loading front matter for '{slug}': {e}", exc_info=True)
-            metadata = {'title': f"Error Loading Post: {slug}"}
-    else:
-        logging.warning(f"Markdown file not found for slug '{slug}': {md_file_path}")
-        metadata = {'title': f"Post Not Found: {slug}"}
-
-    # 2. Load Workflow Status Data
-    workflow_data_full = load_json_data(workflow_status_path)
-    if workflow_data_full is None:
-         logging.error("Critical error loading workflow data file.")
-    elif workflow_data_full:
-        status_data = workflow_data_full.get(slug, {"stages": {}})
-        
-        # Ensure all required stages are present with default values
-        required_stages = {
-            'conceptualisation': {'status': 'pending'},
-            'authoring': {'status': 'pending', 'text_format_status': 'pending'},
-            'metadata': {'status': 'pending', 'front_matter_status': 'pending', 'tags_status': 'pending', 'author_status': 'pending'},
-            'images': {'status': 'pending', 'prompts_defined_status': 'pending', 'assets_prepared_status': 'pending', 'metadata_integrated_status': 'pending'},
-            'validation': {'status': 'pending', 'last_preview_ok': False},
-            'publishing_clancom': {'status': 'pending'},
-            'syndication': {'status': 'pending', 'instagram': {'overall_status': 'pending'}, 'facebook': {'overall_status': 'pending'}}
+    """Display the detailed workflow management page for a single post."""
+    # Load the markdown file
+    markdown_path = os.path.join('posts', f'{slug}.md')
+    if not os.path.exists(markdown_path):
+        app.logger.warning(f"Markdown file not found: {markdown_path}")
+        metadata = {
+            'title': f'Post not found: {slug}',
+            'conclusion': {
+                'heading': 'Conclusion',
+                'text': ''
+            }
         }
-        
-        # Initialize missing stages
-        for stage, default_data in required_stages.items():
-            if stage not in status_data['stages']:
-                status_data['stages'][stage] = default_data
-                logging.info(f"Initialized missing stage '{stage}' for post '{slug}'")
-        
-        # Update conceptualisation status based on required fields
-        has_title = bool(metadata.get('title'))
-        has_subtitle = bool(metadata.get('subtitle'))
-        has_slug = bool(slug)
-        has_concept = bool(metadata.get('concept'))
-        
-        if has_title and has_subtitle and has_slug and has_concept:
-            status_data['stages']['conceptualisation']['status'] = 'complete'
-        else:
-            status_data['stages']['conceptualisation']['status'] = 'pending'
-
-    # 3. Load Image Library Data
-    image_library_data = load_json_data(image_library_path)
-    if image_library_data is None:
-        logging.error("Critical error loading image library data file.")
-        image_library_data = {}
-    elif not image_library_data:
-        logging.warning(f"Image library file '{IMAGE_LIBRARY_FILE}' not found.")
-
-    # 4. Get Referenced Image IDs from Post Metadata
-    referenced_image_ids = []
-    if 'headerImageId' in metadata: referenced_image_ids.append(metadata['headerImageId'])
-    for section in metadata.get('sections', []):
-        if section.get('imageId'): referenced_image_ids.append(section['imageId'])
-    if metadata.get('conclusion', {}).get('imageId'): referenced_image_ids.append(metadata['conclusion']['imageId'])
-    referenced_image_ids = list(dict.fromkeys(referenced_image_ids)) # Unique IDs
-    logging.info(f"Found {len(referenced_image_ids)} unique image IDs referenced by post '{slug}'.")
-
-    # 5. Process Referenced Images - Calculate Statuses
-    all_img_prompts_ok = True if referenced_image_ids else False
-    all_img_assets_ok = True if referenced_image_ids else False
-    all_img_meta_ok = True if referenced_image_ids else False
-
-    for img_id in referenced_image_ids:
-        img_details = image_library_data.get(img_id)
-        if not img_details:
-            logging.warning(f"Image ID '{img_id}' referenced in post '{slug}' not found in image library.")
-            images_detailed.append({"id": img_id, "error": "Not found in image library"})
-            all_img_prompts_ok = all_img_assets_ok = all_img_meta_ok = False
-            continue
-
-        calc_status = {
-            "id": img_id,
-            "description": img_details.get("description", ""),
-            "prompt": img_details.get("prompt", ""),
-            "notes": img_details.get("notes", ""),
-            "filename_local": img_details.get("source_details", {}).get("filename_local", ""),
-            "local_dir": img_details.get("source_details", {}).get("local_dir", "images/posts"), # Default
-            "alt": img_details.get("metadata", {}).get("alt", ""),
-            "blog_caption": img_details.get("metadata", {}).get("blog_caption", ""),
-            # Construct URL for display in admin UI
-            "display_url": url_for('serve_images', filename=f"{img_details.get('source_details', {}).get('local_dir', 'images/posts').strip('/')}/{img_details.get('source_details', {}).get('filename_local', '')}") if img_details.get("source_details", {}).get("filename_local") else None
-        }
-
-        # Prompt Status
-        if calc_status["prompt"]: calc_status["prompt_status"] = "complete"
-        else: calc_status["prompt_status"] = "pending"; all_img_prompts_ok = False
-
-        # Asset Prepared Status
-        local_file_path = None
-        if calc_status["local_dir"] and calc_status["filename_local"]:
-             local_file_path = BASE_DIR / calc_status["local_dir"].strip('/') / calc_status["filename_local"]
-             if local_file_path.is_file(): calc_status["assets_prepared_status"] = "complete"
-             else:
-                 logging.warning(f"Image asset file not found: {local_file_path}")
-                 calc_status["assets_prepared_status"] = "pending"; all_img_assets_ok = False
-        else: calc_status["assets_prepared_status"] = "pending"; all_img_assets_ok = False
-
-        # Metadata Status
-        if calc_status["alt"] and calc_status["blog_caption"]: calc_status["metadata_integrated_status"] = "complete"
-        else: calc_status["metadata_integrated_status"] = "pending"; all_img_meta_ok = False
-
-        # Watermarking Status (from workflow)
-        img_watermark_status = status_data.get('stages', {}).get('images', {}).get('watermarks', {}).get(img_id, 'pending')
-        calc_status["watermarking_status"] = img_watermark_status
-
-        images_detailed.append(calc_status)
-
-    # 6. Determine Overall Image Stage Status (in memory for display)
-    if 'stages' not in status_data: status_data['stages'] = {}
-    if 'images' not in status_data['stages']: status_data['stages']['images'] = {}
-
-    status_data['stages']['images']['prompts_defined_status'] = 'complete' if referenced_image_ids and all_img_prompts_ok else 'pending'
-    status_data['stages']['images']['assets_prepared_status'] = 'complete' if referenced_image_ids and all_img_assets_ok else 'pending'
-    status_data['stages']['images']['metadata_integrated_status'] = 'complete' if referenced_image_ids and all_img_meta_ok else 'pending'
-
-    # Determine overall status based on sub-steps
-    if status_data['stages']['images']['prompts_defined_status'] == 'complete' and \
-       status_data['stages']['images']['assets_prepared_status'] == 'complete' and \
-       status_data['stages']['images']['metadata_integrated_status'] == 'complete':
-           status_data['stages']['images']['status'] = 'complete'
-    elif status_data['stages']['images']['prompts_defined_status'] == 'pending' and \
-         status_data['stages']['images']['assets_prepared_status'] == 'pending' and \
-         status_data['stages']['images']['metadata_integrated_status'] == 'pending':
-           status_data['stages']['images']['status'] = 'pending'
     else:
-           status_data['stages']['images']['status'] = 'partial'
+        with open(markdown_path, 'r') as f:
+            content = f.read()
+            # Parse front matter
+            front_matter_match = re.match(r'^---\n(.*?)\n---\n', content, re.DOTALL)
+            if front_matter_match:
+                front_matter = front_matter_match.group(1)
+                metadata = yaml.safe_load(front_matter)
+                
+                # Initialize missing fields with default values
+                if 'conclusion' not in metadata:
+                    metadata['conclusion'] = {
+                        'heading': 'Conclusion',
+                        'text': ''
+                    }
+                
+                # Validate required fields
+                required_fields = ['title', 'subtitle', 'summary', 'sections']
+                missing_fields = [field for field in required_fields if field not in metadata]
+                if missing_fields:
+                    app.logger.warning(f"Missing required fields in {slug}: {', '.join(missing_fields)}")
+                    metadata['validation_errors'] = {
+                        'missing_fields': missing_fields,
+                        'message': f"Missing required fields: {', '.join(missing_fields)}"
+                    }
+            else:
+                app.logger.warning(f"No front matter found in {markdown_path}")
+                metadata = {
+                    'title': f'Invalid post format: {slug}',
+                    'conclusion': {
+                        'heading': 'Conclusion',
+                        'text': ''
+                    }
+                }
 
-    return render_template(
-        'admin_post_detail.html',
-        slug=slug,
-        metadata=metadata,
-        status=status_data,
-        images_detailed=images_detailed,
-        config=app.config
-    )
+    # Load workflow status
+    workflow_path = os.path.join('_data', 'workflow_status.json')
+    if os.path.exists(workflow_path):
+        with open(workflow_path, 'r') as f:
+            workflow_data = json.load(f)
+            status_data = workflow_data.get(slug, {})
+    else:
+        status_data = {}
+
+    # Initialize missing stages with default values
+    required_stages = {
+        'conceptualisation': {'status': 'pending', 'timestamp': None},
+        'authoring': {'status': 'pending', 'timestamp': None},
+        'metadata': {'status': 'pending', 'timestamp': None},
+        'images': {'status': 'pending', 'timestamp': None},
+        'validation': {'status': 'pending', 'timestamp': None},
+        'publishing_clancom': {'status': 'pending', 'timestamp': None},
+        'syndication': {'status': 'pending', 'timestamp': None}
+    }
+
+    if 'stages' not in status_data:
+        status_data['stages'] = {}
+
+    for stage, defaults in required_stages.items():
+        if stage not in status_data['stages']:
+            app.logger.info(f"Initialized missing stage '{stage}' for post '{slug}'")
+            status_data['stages'][stage] = defaults
+
+    # Load image library
+    image_library_path = os.path.join('_data', 'image_library.json')
+    if os.path.exists(image_library_path):
+        with open(image_library_path, 'r') as f:
+            image_library = json.load(f)
+    else:
+        image_library = {}
+
+    return render_template('admin_post_detail.html',
+                         post=metadata,
+                         status=status_data,
+                         image_library=image_library)
 
 
 # --- NEW API Endpoint for Watermarking All Images ---
@@ -789,6 +724,77 @@ def update_metadata(slug):
 
     except Exception as e:
         logging.error(f"Error updating metadata for post '{slug}': {e}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/update_content/<string:slug>', methods=['POST'])
+def update_content(slug):
+    try:
+        # Get the markdown file path
+        markdown_file = os.path.join('posts', f'{slug}.md')
+        
+        if not os.path.exists(markdown_file):
+            return jsonify({'success': False, 'error': 'Post not found'}), 404
+
+        # Load the current content
+        with open(markdown_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        # Parse the front matter
+        front_matter_match = re.match(r'^---\n(.*?)\n---\n(.*)$', content, re.DOTALL)
+        if not front_matter_match:
+            return jsonify({'success': False, 'error': 'Invalid markdown file format'}), 400
+
+        front_matter = yaml.safe_load(front_matter_match.group(1))
+        markdown_content = front_matter_match.group(2)
+
+        # Update the content from the request
+        data = request.get_json()
+        
+        # Update summary
+        front_matter['summary'] = data.get('summary', '')
+        
+        # Update sections
+        front_matter['sections'] = data.get('sections', [])
+        
+        # Update conclusion
+        front_matter['conclusion'] = data.get('conclusion', {
+            'heading': '',
+            'text': ''
+        })
+
+        # Write the updated content back to the file
+        with open(markdown_file, 'w', encoding='utf-8') as f:
+            f.write('---\n')
+            yaml.dump(front_matter, f, allow_unicode=True)
+            f.write('---\n')
+            f.write(markdown_content)
+
+        # Update workflow status if all required fields are filled
+        workflow_file = '_data/workflow_status.json'
+        if os.path.exists(workflow_file):
+            with open(workflow_file, 'r', encoding='utf-8') as f:
+                workflow_data = json.load(f)
+            
+            if slug in workflow_data:
+                # Check if all required fields are filled
+                has_summary = bool(front_matter.get('summary'))
+                has_sections = bool(front_matter.get('sections'))
+                has_conclusion = bool(front_matter.get('conclusion', {}).get('text'))
+                
+                if has_summary and has_sections and has_conclusion:
+                    workflow_data[slug]['stages']['authoring']['status'] = 'complete'
+                    workflow_data[slug]['stages']['authoring']['text_format_status'] = 'complete'
+                else:
+                    workflow_data[slug]['stages']['authoring']['status'] = 'pending'
+                    workflow_data[slug]['stages']['authoring']['text_format_status'] = 'pending'
+                
+                with open(workflow_file, 'w', encoding='utf-8') as f:
+                    json.dump(workflow_data, f, indent=2)
+
+        return jsonify({'success': True})
+
+    except Exception as e:
+        app.logger.error(f"Error updating content for {slug}: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 # --- Run the App ---

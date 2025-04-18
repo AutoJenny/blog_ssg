@@ -120,7 +120,13 @@ def index():
                     else:
                         clan_com_status_display = "Not Published / Pending"
 
-                    posts_list.append({'slug': slug, 'title': title, 'clan_com_status': clan_com_status_display})
+                    # Add post data to list
+                    posts_list.append({
+                        'slug': slug,
+                        'title': title,
+                        'clan_com_status': clan_com_status_display,
+                        'headerImageId': metadata.get('headerImageId', slug)  # Use slug as fallback
+                    })
                 except Exception as e:
                     logging.error(f"Error processing markdown file {filename}: {e}", exc_info=True) # Add traceback info
 

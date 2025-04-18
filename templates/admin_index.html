@@ -65,6 +65,36 @@
             padding: 10px; 
             position: relative;
             background-color: var(--post-bg);
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .post-content {
+            flex: 1;
+        }
+
+        .post-thumbnail {
+            width: 120px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .post-thumbnail-placeholder {
+            width: 120px;
+            height: 80px;
+            background-color: var(--code-bg);
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+            font-size: 0.8em;
+            text-align: center;
+            padding: 5px;
         }
 
         .post-actions button { 
@@ -210,31 +240,41 @@
                 <ul class="post-list">
                     {% for post in posts %}
                         <li class="post-list-item" data-post-slug="{{ post.slug }}">
-                            <strong><a href="{{ url_for('view_post_detail', slug=post.slug) }}">{{ post.title }}</a></strong>
-                            <br>
-                            <small>Slug: <code>{{ post.slug }}</code></small>
-                            <a href="vscode://file/{{ config.BASE_DIR }}/posts/{{ post.slug }}.md" title="Edit Markdown File in VS Code" style="font-size: 0.8em; margin-left: 5px;">(Edit MD)</a>
-                            <br>
-                            <span class="status-clancom">Clan.com Status: {{ post.clan_com_status }}</span>
+                            <div class="post-content">
+                                <strong><a href="{{ url_for('view_post_detail', slug=post.slug) }}">{{ post.title }}</a></strong>
+                                <br>
+                                <small>Slug: <code>{{ post.slug }}</code></small>
+                                <a href="vscode://file/{{ config.BASE_DIR }}/posts/{{ post.slug }}.md" title="Edit Markdown File in VS Code" style="font-size: 0.8em; margin-left: 5px;">(Edit MD)</a>
+                                <br>
+                                <span class="status-clancom">Clan.com Status: {{ post.clan_com_status }}</span>
 
-                            <div class="post-actions" style="margin-top: 10px;">
-                                <button class="publish-clan-button" data-slug="{{ post.slug }}">Publish/Update Clan.com</button>
-                                {# --- ADDED: Help Trigger and Content for Publish Button --- #}
-                                <span class="help-trigger" data-help-id="publish-help-{{ post.slug }}" title="Help for Publish/Update Clan.com Button">?</span>
-                                <div class="help-content" id="publish-help-{{ post.slug }}">
-                                    {% include 'help/publish_clan_help.njk' %}
+                                <div class="post-actions" style="margin-top: 10px;">
+                                    <button class="publish-clan-button" data-slug="{{ post.slug }}">Publish/Update Clan.com</button>
+                                    {# --- ADDED: Help Trigger and Content for Publish Button --- #}
+                                    <span class="help-trigger" data-help-id="publish-help-{{ post.slug }}" title="Help for Publish/Update Clan.com Button">?</span>
+                                    <div class="help-content" id="publish-help-{{ post.slug }}">
+                                        {% include 'help/publish_clan_help.njk' %}
+                                    </div>
+                                    {# --- END HELP --- #}
+
+
+                                    <a href="http://localhost:8080/{{ post.slug }}/" target="_blank" style="margin-left: 10px;">Preview Locally</a>
+                                    {# --- ADDED: Help Trigger and Content for Preview Link --- #}
+                                    <span class="help-trigger" data-help-id="preview-help-{{ post.slug }}" title="Help for Preview Locally Link">?</span>
+                                    <div class="help-content" id="preview-help-{{ post.slug }}">
+                                         {% include 'help/preview_local_help.njk' %}
+                                    </div>
+                                    {# --- END HELP --- #}
                                 </div>
-                                {# --- END HELP --- #}
-
-
-                                <a href="http://localhost:8080/{{ post.slug }}/" target="_blank" style="margin-left: 10px;">Preview Locally</a>
-                                {# --- ADDED: Help Trigger and Content for Preview Link --- #}
-                                <span class="help-trigger" data-help-id="preview-help-{{ post.slug }}" title="Help for Preview Locally Link">?</span>
-                                <div class="help-content" id="preview-help-{{ post.slug }}">
-                                     {% include 'help/preview_local_help.njk' %}
-                                </div>
-                                {# --- END HELP --- #}
                             </div>
+                            {% if post.headerImageId %}
+                                <img src="/images/posts/{{ post.slug }}/{{ post.slug }}_{% if post.slug == 'quaich-traditions' %}header-collage{% else %}header{% endif %}.jpg" 
+                                     alt="{{ post.title }} thumbnail" 
+                                     class="post-thumbnail"
+                                     onerror="console.error('Failed to load image:', this.src); const placeholder = document.createElement('div'); placeholder.className = 'post-thumbnail-placeholder'; placeholder.textContent = 'No thumbnail available'; this.parentNode.replaceChild(placeholder, this);">
+                            {% else %}
+                                <div class="post-thumbnail-placeholder">No thumbnail available</div>
+                            {% endif %}
                         </li>
                     {% endfor %}
                 </ul>

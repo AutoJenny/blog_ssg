@@ -8,55 +8,191 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #ccc;
+            --post-bg: #ffffff;
+            --post-border: #ddd;
+            --log-bg: #f8f8f8;
+            --help-bg: #ffffe0;
+            --code-bg: #eee;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --border-color: #444;
+            --post-bg: #2d2d2d;
+            --post-border: #444;
+            --log-bg: #2d2d2d;
+            --help-bg: #2d2d2d;
+            --code-bg: #3d3d3d;
+        }
+
         /* --- Base & General Styles --- */
-        body { font-family: sans-serif; padding: 20px; max-width: 900px; margin: auto; background-color: #fdfdfd; }
-        h1, h2, h3 { border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 15px; color: #333; }
+        body { 
+            font-family: sans-serif; 
+            padding: 20px; 
+            max-width: 900px; 
+            margin: auto; 
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        h1, h2, h3 { 
+            border-bottom: 1px solid var(--border-color); 
+            padding-bottom: 5px; 
+            margin-bottom: 15px; 
+            color: var(--text-color); 
+        }
         h1 { font-size: 1.8em; }
-        h2 { font-size: 1.4em; margin-top: 2em; } /* Added top margin to H2 */
-        h3 { font-size: 1.1em; border-bottom: 1px dotted #ccc; margin-top: 1.5em;}
+        h2 { font-size: 1.4em; margin-top: 2em; }
+        h3 { font-size: 1.1em; border-bottom: 1px dotted var(--border-color); margin-top: 1.5em;}
         small { font-size: 0.85em; }
-        hr { border: none; border-top: 1px solid #eee; margin: 1em 0; }
-        textarea[readonly] { cursor: default; background-color: #f8f8f8 !important; } /* Indicate readonly textarea */
+        hr { border: none; border-top: 1px solid var(--border-color); margin: 1em 0; }
+        textarea[readonly] { cursor: default; background-color: var(--log-bg) !important; }
         .back-link { margin-bottom: 20px; display: block; font-size: 0.9em; }
-        code { background-color: #e8e8e8; padding: 0.1em 0.4em; border-radius: 3px; font-size: 0.95em; }
+        code { background-color: var(--code-bg); padding: 0.1em 0.4em; border-radius: 3px; font-size: 0.95em; }
 
         /* --- Traffic Light Styles --- */
         .traffic-light { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; vertical-align: middle; border: 1px solid rgba(0,0,0,0.1); }
-        .traffic-light[data-status="pending"] { background-color: #ccc; /* Grey */ }
-        .traffic-light[data-status="partial"] { background-color: #f0ad4e; /* Orange */ }
-        .traffic-light[data-status="complete"] { background-color: #5cb85c; /* Green */ }
-        .traffic-light[data-status="error"] { background-color: #d9534f; /* Red */ }
+        .traffic-light[data-status="pending"] { background-color: #ccc; }
+        .traffic-light[data-status="partial"] { background-color: #f0ad4e; }
+        .traffic-light[data-status="complete"] { background-color: #5cb85c; }
+        .traffic-light[data-status="error"] { background-color: #d9534f; }
 
         /* --- Collapsible Section Styles --- */
-        .workflow-stage summary { padding: 10px 15px; background-color: #f9f9f9; cursor: pointer; font-weight: bold; outline: none; display: flex; align-items: center; border-radius: 3px; transition: background-color 0.2s ease-out; }
-        .workflow-stage[open] summary { border-bottom: 1px solid #ddd; background-color: #f0f0f0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-        div.stage-content { padding: 20px; border: 1px solid #ddd; border-top: none; background-color: #ffffff; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; }
+        .workflow-stage summary { 
+            padding: 10px 15px; 
+            background-color: var(--post-bg); 
+            cursor: pointer; 
+            font-weight: bold; 
+            outline: none; 
+            display: flex; 
+            align-items: center; 
+            border-radius: 3px; 
+            transition: background-color 0.2s ease-out; 
+        }
+        .workflow-stage[open] summary { 
+            border-bottom: 1px solid var(--post-border); 
+            background-color: var(--post-bg); 
+            border-bottom-left-radius: 0; 
+            border-bottom-right-radius: 0; 
+        }
+        div.stage-content { 
+            padding: 20px; 
+            border: 1px solid var(--post-border); 
+            border-top: none; 
+            background-color: var(--post-bg); 
+            border-bottom-left-radius: 3px; 
+            border-bottom-right-radius: 3px; 
+        }
         div.stage-content p { margin-bottom: 0.8em; line-height: 1.5; }
         div.stage-content p:last-child { margin-bottom: 0; }
         div.stage-content .status-text { font-weight: bold; }
 
         /* --- Help System Styles --- */
-        .help-trigger { display: inline-block; width: 16px; height: 16px; line-height: 16px; margin-left: 6px; font-size: 11px; font-weight: bold; text-align: center; color: #fff; background-color: #0d6efd; border-radius: 50%; cursor: pointer; user-select: none; vertical-align: middle; transition: background-color 0.2s ease; }
+        .help-trigger { 
+            display: inline-block; 
+            width: 16px; 
+            height: 16px; 
+            line-height: 16px; 
+            margin-left: 6px; 
+            font-size: 11px; 
+            font-weight: bold; 
+            text-align: center; 
+            color: #fff; 
+            background-color: #0d6efd; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            user-select: none; 
+            vertical-align: middle; 
+            transition: background-color 0.2s ease; 
+        }
         .help-trigger:hover { background-color: #0a58ca; }
-        .help-content { display: none; position: absolute; background-color: #ffffe0; border: 1px solid #ccc; border-radius: 4px; padding: 10px 15px; box-shadow: 2px 2px 5px rgba(0,0,0,0.15); z-index: 10; margin-left: 5px; margin-top: -5px; /* Adjust positioning */ width: 350px; font-size: 0.9em; line-height: 1.5; letter-spacing: normal; text-align: left; }
+        .help-content { 
+            display: none; 
+            position: absolute; 
+            background-color: var(--help-bg); 
+            border: 1px solid var(--border-color); 
+            border-radius: 4px; 
+            padding: 10px 15px; 
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.15); 
+            z-index: 10; 
+            margin-left: 5px; 
+            margin-top: -5px; 
+            width: 350px; 
+            font-size: 0.9em; 
+            line-height: 1.5; 
+            letter-spacing: normal; 
+            text-align: left; 
+        }
         .help-content p, .help-content ul, .help-content ol { margin-bottom: 0.8em; letter-spacing: normal; }
         .help-content ul, .help-content ol { padding-left: 1.5em; }
-        .help-content code { background-color: #eee; padding: 0.1em 0.3em; border-radius: 2px; font-size: 0.95em; }
+        .help-content code { background-color: var(--code-bg); padding: 0.1em 0.3em; border-radius: 2px; font-size: 0.95em; }
         .help-content.active { display: block; }
         h2 > .help-trigger { vertical-align: baseline; }
 
         /* --- Log Output Styles --- */
-        #log-output { margin-top: 20px; padding: 10px; border: 1px solid #ccc; background-color: #f8f9fa; /* Slightly lighter log */ min-height: 100px; white-space: pre-wrap; font-family: monospace; font-size: 0.9em; max-height: 300px; overflow-y: auto; border-radius: 3px;}
-        #log-output div { margin-bottom: 2px; line-height: 1.3; border-bottom: 1px dotted #ccc; padding-bottom: 2px; }
+        #log-output { 
+            margin-top: 20px; 
+            padding: 10px; 
+            border: 1px solid var(--border-color); 
+            background-color: var(--log-bg); 
+            min-height: 100px; 
+            white-space: pre-wrap; 
+            font-family: monospace; 
+            font-size: 0.9em; 
+            max-height: 300px; 
+            overflow-y: auto; 
+            border-radius: 3px;
+        }
+        #log-output div { margin-bottom: 2px; line-height: 1.3; border-bottom: 1px dotted var(--border-color); padding-bottom: 2px; }
         #log-output div:last-child { border-bottom: none; }
-        #log-output div.log-error { color: #dc3545; } /* Add style for error lines */
+        #log-output div.log-error { color: #dc3545; }
+
+        /* --- Theme Toggle Styles --- */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 32px;
+            height: 32px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+            transition: transform 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-toggle::before {
+            content: '☀️';
+            font-size: 20px;
+        }
+
+        [data-theme="dark"] .theme-toggle::before {
+            content: '🌙';
+        }
     </style>
 </head>
 <body>
+    <button class="theme-toggle" id="themeToggle" title="Toggle dark/light mode"></button>
     <div class="container"> {# Wrap content in container for Bootstrap #}
         <p class="back-link mt-3"><a href="{{ url_for('index') }}">← Back to Post List</a></p>
 
         <h1>Manage: {{ metadata.title | default('Post Details') }}</h1>
+        {% if metadata.concept %}
+            <p class="text-muted"><small>Concept: {{ metadata.concept }}</small></p>
+        {% endif %}
         <p><strong>Slug:</strong> <code>{{ slug }}</code>
             <a href="vscode://file/{{ config.BASE_DIR_STR }}/posts/{{ slug }}.md" title="Edit Markdown File in VS Code" class="ms-2">
                 <i class="bi bi-pencil-square"></i> (Edit MD)
@@ -409,127 +545,126 @@
         </section>
 
     </div> {# End container #}
-    <!-- JavaScript for interactions -->
-        <!-- JavaScript for interactions -->
-            <!-- JavaScript for interactions -->
-            <script>
-                const logOutput = document.getElementById('log-output');
+
+    <script>
+        const logOutput = document.getElementById('log-output');
         
-                // --- Helper Function for Logging to Page ---
-                function logMessage(message, isError = false) {
-                    // ... (keep this function as it is) ...
-                }
+        // --- Helper Function for Logging to Page ---
+        function logMessage(message, isError = false) {
+            // ... (keep this function as it is) ...
+        }
         
-                // --- Main Click Event Listener ---
-                document.body.addEventListener('click', function(event) {
-                    const targetElement = event.target;
-                    console.log(`[DEBUG] Body clicked. Target element:`, targetElement);
-                    console.log(`[DEBUG] Target classes:`, targetElement.classList);
-        
-                    // --- Use closest() to find the nearest relevant ancestor button/trigger ---
-                    const publishButton = targetElement.closest('.publish-clan-button');
-                    const statusUpdateButton = targetElement.closest('.status-update-button');
-                    // const watermarkAllButton = targetElement.closest('.watermark-all-button'); // <<<< REMOVED THIS LINE
-                    const helpTrigger = targetElement.closest('.help-trigger');
-                    // const oldWatermarkButton = targetElement.closest('.watermark-button'); // <<<< Keep if needed, but likely removable
-        
-                    // --- Handle based on which button/trigger was found ---
-        
-                    // REMOVE THE ENTIRE 'if (watermarkAllButton)' BLOCK
-                    /* <<<< START REMOVAL
-                    if (watermarkAllButton) {
-                         console.log("[DEBUG] EXECUTING Watermark All block."); // New log to confirm entry
-                         const slug = watermarkAllButton.dataset.slug;
-                         // ... (entire fetch logic for /api/watermark_all) ...
-                    }
-                    else <<<< END REMOVAL */
-        
-                    // Keep the other if/else if blocks
-                    if (publishButton) { // <<<< ADJUSTED: Start with 'if' now
-                        console.log("[DEBUG] EXECUTING Publish block.");
-                        const slug = publishButton.dataset.slug;
-                        if (!slug) { logMessage("Error: No slug found on publish button.", true); return; }
-        
-                        logMessage(`Starting Publish/Update job for '${slug}'...`);
-                        publishButton.disabled = true;
-                        publishButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Publishing...';
-        
-                        fetch(`/api/publish_clan/${slug}`, { method: 'POST' })
-                        .then(response => { if (!response.ok) { throw new Error(`HTTP error ${response.status}`); } return response.json(); })
-                        .then(data => {
-                            logMessage(`Publish job finished for '${slug}'. Success: ${data.success}`, !data.success);
-                            logMessage("--- Script Output ---");
-                            const outputLines = data.output.split('\n');
-                             outputLines.forEach(line => {
-                                  // Simple check for common error indicators
-                                  const isErrorLine = /ERROR|Traceback|Failed|Not Found|Critical/i.test(line);
-                                  logMessage(line.trim(), isErrorLine);
-                             });
-                            logMessage("--- End Script Output ---");
-        
-                             if (!data.success) {
-                                  alert(`Publishing script failed or had errors for ${slug}. Check log.`);
-                                  publishButton.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Error';
-                                  publishButton.classList.remove('btn-success'); publishButton.classList.add('btn-danger');
-                                  // Keep button disabled on error? Or re-enable after timeout? Re-enable for now.
-                                  setTimeout(() => {
-                                       publishButton.disabled = false;
-                                       publishButton.innerHTML = '<i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now';
-                                       publishButton.classList.remove('btn-danger'); publishButton.classList.add('btn-success');
-                                   }, 3000);
-                             } else {
-                                  publishButton.innerHTML = '<i class="bi bi-check-circle-fill"></i> Success!';
-                                  // Re-enable button after success message?
-                                   setTimeout(() => {
-                                       publishButton.disabled = false;
-                                       publishButton.innerHTML = '<i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now';
-                                       logMessage(`Publishing complete for ${slug}. Reload page or check index for updated status.`, false);
-                                       alert(`Publishing complete for ${slug}. Reload page or check index for updated status.`);
-                                   }, 2000);
-                             }
-        
-                        }).catch(error => {
-                            logMessage(`Network Error during publish fetch for '${slug}': ${error.message}`, true);
-                             publishButton.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Network Error';
-                             publishButton.classList.remove('btn-success'); publishButton.classList.add('btn-danger');
-                              setTimeout(() => {
-                                   publishButton.disabled = false;
-                                   publishButton.innerHTML = '<i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now';
-                                   publishButton.classList.remove('btn-danger'); publishButton.classList.add('btn-success');
-                              }, 3000);
-                        });
-                    }
-                    else if (statusUpdateButton) {
-                        console.log("[DEBUG] EXECUTING Status Update block.");
-                        // ... (keep existing status update logic) ...
-                    }
-                    else if (helpTrigger) {
-                         console.log("[DEBUG] EXECUTING Help Trigger block.");
-                         // ... (keep existing help logic) ...
-                    }
-                     /* Consider removing this check for the old button if it's definitely gone
-                     else if (oldWatermarkButton) {
-                          console.warn("[DEBUG] Clicked on '.watermark-button' (old individual button) via closest(). This should likely be removed.");
-                          alert("Individual watermarking not implemented via this button anymore.");
+        // --- Main Click Event Listener ---
+        document.body.addEventListener('click', function(event) {
+            const targetElement = event.target;
+            console.log(`[DEBUG] Body clicked. Target element:`, targetElement);
+            console.log(`[DEBUG] Target classes:`, targetElement.classList);
+    
+            // --- Use closest() to find the nearest relevant ancestor button/trigger ---
+            const publishButton = targetElement.closest('.publish-clan-button');
+            const statusUpdateButton = targetElement.closest('.status-update-button');
+            const helpTrigger = targetElement.closest('.help-trigger');
+    
+            // --- Handle based on which button/trigger was found ---
+            if (publishButton) {
+                console.log("[DEBUG] EXECUTING Publish block.");
+                const slug = publishButton.dataset.slug;
+                if (!slug) { logMessage("Error: No slug found on publish button.", true); return; }
+    
+                logMessage(`Starting Publish/Update job for '${slug}'...`);
+                publishButton.disabled = true;
+                publishButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Publishing...';
+    
+                fetch(`/api/publish_clan/${slug}`, { method: 'POST' })
+                .then(response => { if (!response.ok) { throw new Error(`HTTP error ${response.status}`); } return response.json(); })
+                .then(data => {
+                    logMessage(`Publish job finished for '${slug}'. Success: ${data.success}`, !data.success);
+                    logMessage("--- Script Output ---");
+                    const outputLines = data.output.split('\n');
+                     outputLines.forEach(line => {
+                          // Simple check for common error indicators
+                          const isErrorLine = /ERROR|Traceback|Failed|Not Found|Critical/i.test(line);
+                          logMessage(line.trim(), isErrorLine);
+                     });
+                    logMessage("--- End Script Output ---");
+    
+                     if (!data.success) {
+                          alert(`Publishing script failed or had errors for ${slug}. Check log.`);
+                          publishButton.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Error';
+                          publishButton.classList.remove('btn-success'); publishButton.classList.add('btn-danger');
+                          // Keep button disabled on error? Or re-enable after timeout? Re-enable for now.
+                          setTimeout(() => {
+                               publishButton.disabled = false;
+                               publishButton.innerHTML = '<i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now';
+                               publishButton.classList.remove('btn-danger'); publishButton.classList.add('btn-success');
+                           }, 3000);
+                     } else {
+                          publishButton.innerHTML = '<i class="bi bi-check-circle-fill"></i> Success!';
+                          // Re-enable button after success message?
+                           setTimeout(() => {
+                               publishButton.disabled = false;
+                               publishButton.innerHTML = '<i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now';
+                               logMessage(`Publishing complete for ${slug}. Reload page or check index for updated status.`, false);
+                               alert(`Publishing complete for ${slug}. Reload page or check index for updated status.`);
+                           }, 2000);
                      }
-                     */
-                     // --- Handle clicking outside help ---
-                     else if (!targetElement.closest('.help-trigger') && !targetElement.closest('.help-content.active')) {
-                          // console.log("[DEBUG] Clicked outside active help or trigger, closing active help.");
-                          document.querySelectorAll('.help-content.active').forEach(activeHelp => {
-                               activeHelp.classList.remove('active');
-                          });
-                     }
-                     else {
-                          // Log if needed, but often fine to do nothing
-                          // console.log("[DEBUG] Click did not match any specific interactive element handler by closest().");
-                     }
+    
+                }).catch(error => {
+                    logMessage(`Network Error during publish fetch for '${slug}': ${error.message}`, true);
+                     publishButton.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Network Error';
+                     publishButton.classList.remove('btn-success'); publishButton.classList.add('btn-danger');
+                      setTimeout(() => {
+                           publishButton.disabled = false;
+                           publishButton.innerHTML = '<i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now';
+                           publishButton.classList.remove('btn-danger'); publishButton.classList.add('btn-success');
+                      }, 3000);
                 });
+            }
+            else if (statusUpdateButton) {
+                console.log("[DEBUG] EXECUTING Status Update block.");
+                // ... (keep existing status update logic) ...
+            }
+            else if (helpTrigger) {
+                 console.log("[DEBUG] EXECUTING Help Trigger block.");
+                 // ... (keep existing help logic) ...
+            }
+            // --- Handle clicking outside help ---
+            else if (!targetElement.closest('.help-trigger') && !targetElement.closest('.help-content.active')) {
+                 document.querySelectorAll('.help-content.active').forEach(activeHelp => {
+                      activeHelp.classList.remove('active');
+                 });
+            }
+        });
+    
+        // Initial log message
+        console.log("[DEBUG] Admin post detail JS loaded. Event listeners active.");
+        logMessage("Admin post detail interface loaded."); // Log to page
+
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
         
-                // Initial log message
-                console.log("[DEBUG] Admin post detail JS loaded. Event listeners active.");
-                logMessage("Admin post detail interface loaded."); // Log to page
+        // Check for saved theme preference or use system preference
+        const currentTheme = localStorage.getItem('theme') || 
+                           (prefersDarkScheme.matches ? 'dark' : 'light');
         
-            </script>
-        </body>
+        if (currentTheme === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+            themeToggle.textContent = 'Toggle Light Mode';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.body.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                document.body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                themeToggle.textContent = 'Toggle Dark Mode';
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                themeToggle.textContent = 'Toggle Light Mode';
+            }
+        });
+    </script>
+</body>
 </html>

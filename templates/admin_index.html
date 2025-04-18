@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog Workflow Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
         :root {
             --bg-color: #ffffff;
@@ -116,6 +118,28 @@
             cursor: not-allowed;
         }
 
+        .delete-post-button {
+            background-color: #dc3545 !important;
+            font-size: 0.85em;
+            padding: 3px 8px !important;
+        }
+
+        .delete-post-button:hover {
+            background-color: #c82333 !important;
+        }
+
+        .form-check.form-switch {
+            display: inline-block;
+            margin-left: 10px;
+            transform: scale(0.8);
+            vertical-align: middle;
+        }
+
+        .form-check-label {
+            font-size: 0.9em;
+            color: var(--text-color);
+        }
+
         .theme-toggle {
             position: fixed;
             top: 20px;
@@ -216,190 +240,333 @@
         a:hover {
             text-decoration: underline;
         }
+
+        /* New Post Button Styles */
+        .new-post-button {
+            margin-left: 15px;
+            vertical-align: middle;
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .modal-header {
+            border-bottom-color: var(--border-color);
+        }
+
+        .modal-footer {
+            border-top-color: var(--border-color);
+        }
+
+        .form-control {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+
+        .form-control:focus {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border-color: var(--border-color);
+            box-shadow: 0 0 0 0.25rem rgba(119, 170, 255, 0.25);
+        }
+
+        [data-theme="dark"] .text-muted {
+            color: #888 !important;
+        }
     </style>
 </head>
 <body>
     <button class="theme-toggle" id="themeToggle" title="Toggle dark/light mode"></button>
 
-    <h1>Blog Workflow Manager</h1>
+    <div class="container">
+        <h1 class="d-inline-block">Blog Workflow Manager</h1>
+        <button class="btn btn-primary new-post-button" data-bs-toggle="modal" data-bs-target="#newPostModal">
+            <i class="bi bi-plus-circle"></i> New Post
+        </button>
 
-    <section id="post-management">
-        
-        <h2>
-            Manage Posts
-            {# --- ADDED: Help Trigger and Content for Section --- #}
-            <span class="help-trigger" data-help-id="manage-posts-main-help" title="Help for Manage Posts Section">?</span>
-            <div class="help-content" id="manage-posts-main-help">
-                {% include 'help/manage_posts_help.njk' %}
-            </div>
-            {# --- END HELP --- #}
-        </h2>
+        <section id="post-management">
+            
+            <h2>
+                Manage Posts
+                {# --- ADDED: Help Trigger and Content for Section --- #}
+                <span class="help-trigger" data-help-id="manage-posts-main-help" title="Help for Manage Posts Section">?</span>
+                <div class="help-content" id="manage-posts-main-help">
+                    {% include 'help/manage_posts_help.njk' %}
+                </div>
+                {# --- END HELP --- #}
+                <div class="form-check form-switch d-inline-block float-end">
+                    <input class="form-check-input" type="checkbox" id="showDeletedToggle">
+                    <label class="form-check-label" for="showDeletedToggle">Show deleted</label>
+                </div>
+            </h2>
 
-        <div id="post-list-container">
-            {% if posts %}
-                <ul class="post-list">
-                    {% for post in posts %}
-                        <li class="post-list-item" data-post-slug="{{ post.slug }}">
-                            <div class="post-content">
-                                <strong><a href="{{ url_for('view_post_detail', slug=post.slug) }}">{{ post.title }}</a></strong>
-                                <br>
-                                <small>Slug: <code>{{ post.slug }}</code></small>
-                                <a href="vscode://file/{{ config.BASE_DIR }}/posts/{{ post.slug }}.md" title="Edit Markdown File in VS Code" style="font-size: 0.8em; margin-left: 5px;">(Edit MD)</a>
-                                <br>
-                                <span class="status-clancom">Clan.com Status: {{ post.clan_com_status }}</span>
+            <div id="post-list-container">
+                {% if posts %}
+                    <ul class="post-list">
+                        {% for post in posts %}
+                            <li class="post-list-item {% if post.deleted %}deleted-post{% endif %}" data-post-slug="{{ post.slug }}" {% if post.deleted %}style="display: none;"{% endif %}>
+                                <div class="post-content">
+                                    <strong><a href="{{ url_for('view_post_detail', slug=post.slug) }}">{{ post.title }}</a></strong>
+                                    {% if post.concept %}
+                                    <br>
+                                    <small class="text-muted concept-text">{{ post.concept }}</small>
+                                    {% endif %}
+                                    <br>
+                                    <small>Slug: <code>{{ post.slug }}</code></small>
+                                    <a href="vscode://file/{{ config.BASE_DIR }}/posts/{{ post.slug }}.md" title="Edit Markdown File in VS Code" style="font-size: 0.8em; margin-left: 5px;">(Edit MD)</a>
+                                    <br>
+                                    <span class="status-clancom">Clan.com Status: {{ post.clan_com_status }}</span>
 
-                                <div class="post-actions" style="margin-top: 10px;">
-                                    <button class="publish-clan-button" data-slug="{{ post.slug }}">Publish/Update Clan.com</button>
-                                    {# --- ADDED: Help Trigger and Content for Publish Button --- #}
-                                    <span class="help-trigger" data-help-id="publish-help-{{ post.slug }}" title="Help for Publish/Update Clan.com Button">?</span>
-                                    <div class="help-content" id="publish-help-{{ post.slug }}">
-                                        {% include 'help/publish_clan_help.njk' %}
+                                    <div class="post-actions" style="margin-top: 10px;">
+                                        <button class="publish-clan-button" data-slug="{{ post.slug }}">Publish/Update Clan.com</button>
+                                        <button class="delete-post-button" data-slug="{{ post.slug }}">{% if post.deleted %}Restore{% else %}Delete{% endif %}</button>
+                                        {# --- ADDED: Help Trigger and Content for Publish Button --- #}
+                                        <span class="help-trigger" data-help-id="publish-help-{{ post.slug }}" title="Help for Publish/Update Clan.com Button">?</span>
+                                        <div class="help-content" id="publish-help-{{ post.slug }}">
+                                            {% include 'help/publish_clan_help.njk' %}
+                                        </div>
+                                        {# --- END HELP --- #}
+
+                                        <a href="http://localhost:8080/{{ post.slug }}/" target="_blank" style="margin-left: 10px;">Preview Locally</a>
+                                        {# --- ADDED: Help Trigger and Content for Preview Link --- #}
+                                        <span class="help-trigger" data-help-id="preview-help-{{ post.slug }}" title="Help for Preview Locally Link">?</span>
+                                        <div class="help-content" id="preview-help-{{ post.slug }}">
+                                             {% include 'help/preview_local_help.njk' %}
+                                        </div>
+                                        {# --- END HELP --- #}
                                     </div>
-                                    {# --- END HELP --- #}
-
-
-                                    <a href="http://localhost:8080/{{ post.slug }}/" target="_blank" style="margin-left: 10px;">Preview Locally</a>
-                                    {# --- ADDED: Help Trigger and Content for Preview Link --- #}
-                                    <span class="help-trigger" data-help-id="preview-help-{{ post.slug }}" title="Help for Preview Locally Link">?</span>
-                                    <div class="help-content" id="preview-help-{{ post.slug }}">
-                                         {% include 'help/preview_local_help.njk' %}
-                                    </div>
-                                    {# --- END HELP --- #}
                                 </div>
-                            </div>
-                            {% if post.headerImageId %}
-                                <img src="/images/posts/{{ post.slug }}/{{ post.slug }}_{% if post.slug == 'quaich-traditions' %}header-collage{% else %}header{% endif %}.jpg" 
-                                     alt="{{ post.title }} thumbnail" 
-                                     class="post-thumbnail"
-                                     onerror="console.error('Failed to load image:', this.src); const placeholder = document.createElement('div'); placeholder.className = 'post-thumbnail-placeholder'; placeholder.textContent = 'No thumbnail available'; this.parentNode.replaceChild(placeholder, this);">
-                            {% else %}
-                                <div class="post-thumbnail-placeholder">No thumbnail available</div>
-                            {% endif %}
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                 <p>No posts found in the '{{ config.POSTS_DIR if config else 'posts' }}' directory.</p>
-            {% endif %}
+                                {% if post.headerImageId %}
+                                    <img src="/images/posts/{{ post.slug }}/{{ post.slug }}_{% if post.slug == 'quaich-traditions' %}header-collage{% else %}header{% endif %}.jpg" 
+                                         alt="{{ post.title }} thumbnail" 
+                                         class="post-thumbnail"
+                                         onerror="console.error('Failed to load image:', this.src); const placeholder = document.createElement('div'); placeholder.className = 'post-thumbnail-placeholder'; placeholder.textContent = 'No thumbnail available'; this.parentNode.replaceChild(placeholder, this);">
+                                {% else %}
+                                    <div class="post-thumbnail-placeholder">No thumbnail available</div>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                     <p>No posts found in the '{{ config.POSTS_DIR if config else 'posts' }}' directory.</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <section id="log-section">
+            <h2>Action Log / Output</h2>
+            <pre id="log-output">(Script output will appear here)</pre>
+        </section>
+    </div>
+
+    <!-- New Post Modal -->
+    <div class="modal fade" id="newPostModal" tabindex="-1" aria-labelledby="newPostModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newPostModalLabel">Create New Post</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newPostForm">
+                        <div class="mb-3">
+                            <label for="coreIdea" class="form-label">Core Idea</label>
+                            <textarea class="form-control" id="coreIdea" rows="4" required 
+                                placeholder="Describe the core idea, topic, and key points for this blog post..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="createPostButton">Create Post</button>
+                </div>
+            </div>
         </div>
-    </section>
+    </div>
 
-    <section id="log-section">
-        <h2>Action Log / Output</h2>
-        <pre id="log-output">(Script output will appear here)</pre>
-    </section>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const logOutput = document.getElementById('log-output');
+        const postListContainer = document.getElementById('post-list-container');
 
-    <!-- JavaScript (keep existing script block) -->
-        <!-- JavaScript for interactions -->
-        <script>
-            const logOutput = document.getElementById('log-output');
-            const postListContainer = document.getElementById('post-list-container');
-    
-            // --- Log Message Function (from previous step) ---
-            function logMessage(message, isError = false) {
-                const timestamp = new Date().toLocaleTimeString();
-                const entry = document.createElement('div');
-                entry.textContent = `[${timestamp}] ${message}`;
-                if (isError) { entry.style.color = 'red'; }
-                logOutput.appendChild(entry);
-                logOutput.scrollTop = logOutput.scrollHeight;
-            }
-    
-            // --- Event Listener for Actions (Publish Button) ---
-            postListContainer.addEventListener('click', function(event) {
-                if (event.target.matches('.publish-clan-button')) {
-                    const button = event.target;
-                    const slug = button.dataset.slug;
-                    if (!slug) { logMessage("Error: No slug found for publish button.", true); return; }
-                    logMessage(`Starting Publish/Update job for '${slug}'...`);
-                    button.disabled = true; button.textContent = 'Processing...';
-                    fetch(`/api/publish_clan/${slug}`, { method: 'POST' })
-                    .then(response => { if (!response.ok) { throw new Error(`HTTP error ${response.status}`); } return response.json(); })
-                    .then(data => {
-                        logMessage(`Job finished for '${slug}'. Success: ${data.success}`);
-                        logMessage("--- Script Output ---");
-                        const outputLines = data.output.split('\n');
-                        outputLines.forEach(line => { const isErrorLine = /ERROR|Traceback|Failed/i.test(line); logMessage(line.trim(), isErrorLine); });
-                        logMessage("--- End Script Output ---");
-                        if (!data.success) { alert(`Script failed for ${slug}. Check log.`); }
-                        else {
-                            button.textContent = 'Success!';
-                            setTimeout(() => { button.disabled = false; button.textContent = 'Publish/Update Clan.com'; logMessage(`Action complete for ${slug}. Refresh page to see updated status.`); }, 2000);
-                            return;
-                        }
-                    })
-                    .catch(error => { logMessage(`Error during fetch for '${slug}': ${error.message}`, true); console.error('Fetch Error:', error); })
-                    .finally(() => { if (button.textContent !== 'Success!') { button.disabled = false; button.textContent = 'Publish/Update Clan.com'; } });
-                }
-                // Add handlers for other buttons later...
-            });
-    
-            // --- NEW: Event Listener for Help Triggers ---
-            document.body.addEventListener('click', function(event) {
-                // Check if a help trigger was clicked
-                if (event.target.matches('.help-trigger')) {
-                    const trigger = event.target;
-                    const helpId = trigger.dataset.helpId;
-                    const helpElement = document.getElementById(helpId);
-    
-                    if (helpElement) {
-                        // Toggle the 'active' class
-                        const isActive = helpElement.classList.contains('active');
-    
-                        // Hide all other currently active help elements first
-                        document.querySelectorAll('.help-content.active').forEach(activeHelp => {
-                            // Don't hide the one we are about to show if it was already active
-                            if (activeHelp.id !== helpId || !isActive) {
-                                activeHelp.classList.remove('active');
-                            }
-                        });
-    
-                        // Now toggle the clicked one
-                        helpElement.classList.toggle('active');
-    
-                    } else {
-                        console.warn(`Help content not found for ID: ${helpId}`);
+        // --- Log Message Function (from previous step) ---
+        function logMessage(message, isError = false) {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.textContent = `[${timestamp}] ${message}`;
+            if (isError) { entry.style.color = 'red'; }
+            logOutput.appendChild(entry);
+            logOutput.scrollTop = logOutput.scrollHeight;
+        }
+
+        // --- Event Listener for Actions (Publish Button) ---
+        postListContainer.addEventListener('click', function(event) {
+            if (event.target.matches('.publish-clan-button')) {
+                const button = event.target;
+                const slug = button.dataset.slug;
+                if (!slug) { logMessage("Error: No slug found for publish button.", true); return; }
+                logMessage(`Starting Publish/Update job for '${slug}'...`);
+                button.disabled = true; button.textContent = 'Processing...';
+                fetch(`/api/publish_clan/${slug}`, { method: 'POST' })
+                .then(response => { if (!response.ok) { throw new Error(`HTTP error ${response.status}`); } return response.json(); })
+                .then(data => {
+                    logMessage(`Job finished for '${slug}'. Success: ${data.success}`);
+                    logMessage("--- Script Output ---");
+                    const outputLines = data.output.split('\n');
+                    outputLines.forEach(line => { const isErrorLine = /ERROR|Traceback|Failed/i.test(line); logMessage(line.trim(), isErrorLine); });
+                    logMessage("--- End Script Output ---");
+                    if (!data.success) { alert(`Script failed for ${slug}. Check log.`); }
+                    else {
+                        button.textContent = 'Success!';
+                        setTimeout(() => { button.disabled = false; button.textContent = 'Publish/Update Clan.com'; logMessage(`Action complete for ${slug}. Refresh page to see updated status.`); }, 2000);
+                        return;
                     }
-                }
-                // Optional: Hide help if clicking outside trigger/content
-                else if (!event.target.closest('.help-content') && !event.target.matches('.help-trigger')) {
-                     document.querySelectorAll('.help-content.active').forEach(activeHelp => {
-                          activeHelp.classList.remove('active');
-                     });
-                }
+                })
+                .catch(error => { logMessage(`Error during fetch for '${slug}': ${error.message}`, true); console.error('Fetch Error:', error); })
+                .finally(() => { if (button.textContent !== 'Success!') { button.disabled = false; button.textContent = 'Publish/Update Clan.com'; } });
+            }
+            else if (event.target.matches('.delete-post-button')) {
+                const button = event.target;
+                const slug = button.dataset.slug;
+                if (!slug) { logMessage("Error: No slug found for delete button.", true); return; }
+                
+                const isDeleting = button.textContent === 'Delete';
+                const action = isDeleting ? 'delete' : 'restore';
+                
+                fetch(`/api/${action}_post/${slug}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        logMessage(`Post ${action}d: ${slug}`);
+                        // Update button text
+                        button.textContent = isDeleting ? 'Restore' : 'Delete';
+                        // Toggle visibility based on show deleted toggle
+                        const postItem = button.closest('.post-list-item');
+                        if (document.getElementById('showDeletedToggle').checked) {
+                            postItem.style.display = '';
+                        } else {
+                            postItem.style.display = isDeleting ? 'none' : '';
+                        }
+                    } else {
+                        logMessage(`Error ${action}ing post: ${data.error}`, true);
+                    }
+                })
+                .catch(error => {
+                    logMessage(`Error ${action}ing post: ${error.message}`, true);
+                });
+            }
+        });
+
+        // Show deleted toggle handler
+        document.getElementById('showDeletedToggle').addEventListener('change', function() {
+            const showDeleted = this.checked;
+            document.querySelectorAll('.deleted-post').forEach(post => {
+                post.style.display = showDeleted ? '' : 'none';
             });
-            // --- END Help Trigger Listener ---
-    
-    
-            console.log("Admin interface loaded.");
-    
-            // Theme toggle functionality
-            const themeToggle = document.getElementById('themeToggle');
-            const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-            
-            // Check for saved theme preference or use system preference
-            const currentTheme = localStorage.getItem('theme') || 
-                               (prefersDarkScheme.matches ? 'dark' : 'light');
-            
+        });
+
+        // --- NEW: Event Listener for Help Triggers ---
+        document.body.addEventListener('click', function(event) {
+            // Check if a help trigger was clicked
+            if (event.target.matches('.help-trigger')) {
+                const trigger = event.target;
+                const helpId = trigger.dataset.helpId;
+                const helpElement = document.getElementById(helpId);
+
+                if (helpElement) {
+                    // Toggle the 'active' class
+                    const isActive = helpElement.classList.contains('active');
+
+                    // Hide all other currently active help elements first
+                    document.querySelectorAll('.help-content.active').forEach(activeHelp => {
+                        // Don't hide the one we are about to show if it was already active
+                        if (activeHelp.id !== helpId || !isActive) {
+                            activeHelp.classList.remove('active');
+                        }
+                    });
+
+                    // Now toggle the clicked one
+                    helpElement.classList.toggle('active');
+
+                } else {
+                    console.warn(`Help content not found for ID: ${helpId}`);
+                }
+            }
+            // Optional: Hide help if clicking outside trigger/content
+            else if (!event.target.closest('.help-content') && !event.target.matches('.help-trigger')) {
+                 document.querySelectorAll('.help-content.active').forEach(activeHelp => {
+                      activeHelp.classList.remove('active');
+                 });
+            }
+        });
+        // --- END Help Trigger Listener ---
+
+
+        console.log("Admin interface loaded.");
+
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        // Check for saved theme preference or use system preference
+        const currentTheme = localStorage.getItem('theme') || 
+                           (prefersDarkScheme.matches ? 'dark' : 'light');
+        
+        if (currentTheme === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+            themeToggle.textContent = 'Toggle Light Mode';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.body.getAttribute('data-theme');
             if (currentTheme === 'dark') {
+                document.body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                themeToggle.textContent = 'Toggle Dark Mode';
+            } else {
                 document.body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
                 themeToggle.textContent = 'Toggle Light Mode';
             }
+        });
 
-            themeToggle.addEventListener('click', () => {
-                const currentTheme = document.body.getAttribute('data-theme');
-                if (currentTheme === 'dark') {
-                    document.body.removeAttribute('data-theme');
-                    localStorage.setItem('theme', 'light');
-                    themeToggle.textContent = 'Toggle Dark Mode';
+        // New Post Form Handling
+        document.getElementById('createPostButton').addEventListener('click', function() {
+            const coreIdea = document.getElementById('coreIdea').value.trim();
+            if (!coreIdea) {
+                alert('Please enter a core idea for the post.');
+                return;
+            }
+
+            // Send the core idea to the server
+            fetch('/api/create_post', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ core_idea: coreIdea })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    logMessage(`New post created: ${data.slug}`);
+                    // Close the modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('newPostModal'));
+                    modal.hide();
+                    // Reload the page to show the new post
+                    window.location.reload();
                 } else {
-                    document.body.setAttribute('data-theme', 'dark');
-                    localStorage.setItem('theme', 'dark');
-                    themeToggle.textContent = 'Toggle Light Mode';
+                    logMessage(`Error creating post: ${data.error}`, true);
                 }
+            })
+            .catch(error => {
+                logMessage(`Error creating post: ${error.message}`, true);
             });
-    
-        </script>
-
+        });
+    </script>
 </body>
 </html>

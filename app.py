@@ -78,8 +78,8 @@ def index():
     """Renders the main admin interface page, loading post data."""
     logging.info("Processing index route '/'...")
     posts_list = []
-    posts_dir_path = BASE_DIR / POSTS_DIR_NAME # Correct path construction
-    workflow_status_path = DATA_DIR / WORKFLOW_STATUS_FILE # Correct path construction
+    posts_dir_path = BASE_DIR / POSTS_DIR_NAME
+    workflow_status_path = DATA_DIR / WORKFLOW_STATUS_FILE
 
     workflow_data = load_json_data(workflow_status_path)
     if workflow_data is None:
@@ -94,7 +94,7 @@ def index():
              logging.error(f"Posts directory not found: {posts_dir_path}")
              raise FileNotFoundError
 
-        for filename in sorted(os.listdir(posts_dir_path)): # Sort for consistent order
+        for filename in sorted(os.listdir(posts_dir_path), reverse=True): # Sort in reverse for newest first
             if filename.endswith(".md"):
                 file_path = posts_dir_path / filename
                 logging.debug(f"Processing file: {filename}")
@@ -103,6 +103,7 @@ def index():
                     metadata = post_fm.metadata
                     slug = Path(filename).stem
                     title = metadata.get('title', f"Untitled ({slug})")
+                    deleted = metadata.get('deleted', False)
 
                     # Get clan.com status from workflow data
                     post_workflow_data = workflow_data.get(slug, {})
@@ -124,14 +125,17 @@ def index():
                     posts_list.append({
                         'slug': slug,
                         'title': title,
+                        'concept': metadata.get('concept', ''),
                         'clan_com_status': clan_com_status_display,
-                        'headerImageId': metadata.get('headerImageId', slug)  # Use slug as fallback
+                        'headerImageId': metadata.get('headerImageId', slug),
+                        'deleted': deleted,
+                        'date': metadata.get('date', '')
                     })
                 except Exception as e:
-                    logging.error(f"Error processing markdown file {filename}: {e}", exc_info=True) # Add traceback info
+                    logging.error(f"Error processing markdown file {filename}: {e}", exc_info=True)
 
-        # Optionally sort by title or other criteria if needed, slug sort already done by sorted(os.listdir(...))
-        # posts_list.sort(key=lambda p: p['title'])
+        # Sort by date, newest first
+        posts_list.sort(key=lambda x: x['date'] if x['date'] else '', reverse=True)
         logging.info(f"Found and processed {len(posts_list)} posts.")
 
     except FileNotFoundError:
@@ -145,6 +149,137 @@ def index():
             config=app.config
            )
 
+@app.route('/api/create_post', methods=['POST'])
+def create_post():
+    """Creates a new blog post with the given core idea."""
+    logging.info("Received request to create new post")
+    data = request.get_json()
+    if not data or 'core_idea' not in data:
+        logging.error("Missing 'core_idea' in request body")
+        return jsonify({"success": False, "error": "Missing 'core_idea' in request body"}), 400
+
+    core_idea = data['core_idea'].strip()
+    if not core_idea:
+        logging.error("Empty 'core_idea' provided")
+        return jsonify({"success": False, "error": "Empty 'core_idea' provided"}), 400
+
+    # Generate a temporary slug with timestamp
+    timestamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+    slug = f"new-{timestamp}"
+
+    # Create the markdown file
+    posts_dir = BASE_DIR / POSTS_DIR_NAME
+    md_file_path = posts_dir / f"{slug}.md"
+
+    if md_file_path.exists():
+        logging.error(f"Post with slug '{slug}' already exists")
+        return jsonify({"success": False, "error": f"Post with slug '{slug}' already exists"}), 409
+
+    # Create the markdown file with initial front matter
+    try:
+        with open(md_file_path, 'w') as f:
+            f.write(f"""---
+title: "New post"
+concept: "{core_idea}"
+layout: post.njk
+date: {datetime.datetime.now().strftime('%Y-%m-%d')}
+author: "default"
+tags:
+  - post
+  - draft
+headerImage:
+  src: "/images/{slug}/header.jpg"
+  alt: ""
+  caption: ""
+  imagePrompt: ""
+  notes: ""
+summary: |
+  <p>Summary of the post will go here.</p>
+sections:
+  - heading: "Introduction"
+    text: |
+      <p>Introduction text will go here.</p>
+    image:
+      src: "/images/{slug}/intro.jpg"
+      alt: ""
+      caption: ""
+      imagePrompt: ""
+      notes: ""
+conclusion:
+  heading: "Conclusion"
+  text: |
+    <p>Conclusion text will go here.</p>
+---
+
+""")
+        logging.info(f"Created new post file: {md_file_path}")
+
+        # Create the images directory for this post
+        images_dir = BASE_DIR / 'images' / slug
+        images_dir.mkdir(parents=True, exist_ok=True)
+        logging.info(f"Created images directory: {images_dir}")
+
+        # Update workflow status with proper initialization
+        workflow_status_path = DATA_DIR / WORKFLOW_STATUS_FILE
+        workflow_data = load_json_data(workflow_status_path) or {}
+        if slug not in workflow_data:
+            workflow_data[slug] = {
+                "stages": {
+                    "conceptualisation": {
+                        "status": "complete",
+                        "last_updated": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds') + 'Z',
+                        "concept": core_idea
+                    },
+                    "authoring": {
+                        "status": "pending",
+                        "text_format_status": "pending"
+                    },
+                    "metadata": {
+                        "status": "pending",
+                        "front_matter_status": "pending",
+                        "tags_status": "pending",
+                        "author_status": "pending"
+                    },
+                    "images": {
+                        "status": "pending",
+                        "prompts_defined_status": "pending",
+                        "generation_status": "pending",
+                        "assets_prepared_status": "pending",
+                        "metadata_integrated_status": "pending",
+                        "watermarking_status": "pending",
+                        "watermarking_used_in_publish": False,
+                        "watermarks": {}
+                    },
+                    "validation": {
+                        "status": "pending",
+                        "last_preview_ok": False
+                    },
+                    "publishing_clancom": {
+                        "status": "pending"
+                    },
+                    "syndication": {
+                        "status": "pending",
+                        "instagram": {
+                            "overall_status": "pending"
+                        },
+                        "facebook": {
+                            "overall_status": "pending"
+                        }
+                    }
+                },
+                "last_updated": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds') + 'Z'
+            }
+        save_json_data(workflow_status_path, workflow_data)
+
+        return jsonify({
+            "success": True,
+            "slug": slug,
+            "message": f"Created new post with slug: {slug}"
+        })
+
+    except Exception as e:
+        logging.error(f"Error creating new post: {e}", exc_info=True)
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/admin/post/<string:slug>')
 def view_post_detail(slug):
@@ -516,6 +651,50 @@ def update_status_api(slug, stage_key):
         })
     else:
         return jsonify({"success": False, "message": "Failed to save updated workflow data."}), 500
+
+@app.route('/api/delete_post/<string:slug>', methods=['POST'])
+def delete_post(slug):
+    """Marks a post as deleted by adding a deleted flag to its front matter."""
+    try:
+        md_file_path = BASE_DIR / POSTS_DIR_NAME / f"{slug}.md"
+        if not md_file_path.exists():
+            return jsonify({"success": False, "error": f"Post not found: {slug}"}), 404
+
+        # Load the current front matter
+        post = frontmatter.load(md_file_path)
+        post.metadata['deleted'] = True
+
+        # Save the updated front matter
+        with open(md_file_path, 'w') as f:
+            f.write(frontmatter.dumps(post))
+
+        return jsonify({"success": True, "message": f"Post {slug} marked as deleted"})
+
+    except Exception as e:
+        logging.error(f"Error deleting post {slug}: {e}", exc_info=True)
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/restore_post/<string:slug>', methods=['POST'])
+def restore_post(slug):
+    """Removes the deleted flag from a post's front matter."""
+    try:
+        md_file_path = BASE_DIR / POSTS_DIR_NAME / f"{slug}.md"
+        if not md_file_path.exists():
+            return jsonify({"success": False, "error": f"Post not found: {slug}"}), 404
+
+        # Load the current front matter
+        post = frontmatter.load(md_file_path)
+        post.metadata['deleted'] = False
+
+        # Save the updated front matter
+        with open(md_file_path, 'w') as f:
+            f.write(frontmatter.dumps(post))
+
+        return jsonify({"success": True, "message": f"Post {slug} restored"})
+
+    except Exception as e:
+        logging.error(f"Error restoring post {slug}: {e}", exc_info=True)
+        return jsonify({"success": False, "error": str(e)}), 500
 
 # --- Run the App ---
 if __name__ == '__main__':

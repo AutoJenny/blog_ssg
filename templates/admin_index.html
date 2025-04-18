@@ -1,93 +1,195 @@
 <!DOCTYPE html>
-TEST2wibble
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog Workflow Manager</title>
-    <!-- Basic styling (will be enhanced in next step) -->
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        h1, h2 { border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 15px; }
-        #log-output { margin-top: 20px; padding: 10px; border: 1px solid #eee; background-color: #f8f8f8; min-height: 100px; white-space: pre-wrap; font-family: monospace; font-size: 0.9em; max-height: 400px; overflow-y: auto; }
-        .post-list { list-style: none; padding: 0; }
-        .post-list li { border: 1px solid #ddd; margin-bottom: 10px; padding: 10px; position: relative; } /* Added position:relative for help positioning later */
-        .post-actions button { margin-right: 5px; }
-        /* Placeholder styles for help elements (will be improved) */
-        .help-trigger { cursor: pointer; color: blue; font-weight: bold; margin-left: 5px; font-size: 0.8em; display: inline-block; border: 1px solid blue; border-radius: 50%; width: 1.2em; height: 1.2em; line-height: 1.2em; text-align: center; }
-        .help-content { display: none; /* Hidden by default */ }
-    
-                /* --- Help System Styles --- */
-                .help-trigger {
-            display: inline-block; /* Allows setting width/height */
-            width: 16px;           /* Size of the circle */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #ccc;
+            --post-bg: #ffffff;
+            --post-border: #ddd;
+            --log-bg: #f8f8f8;
+            --help-bg: #ffffe0;
+            --code-bg: #eee;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --border-color: #444;
+            --post-bg: #2d2d2d;
+            --post-border: #444;
+            --log-bg: #2d2d2d;
+            --help-bg: #2d2d2d;
+            --code-bg: #3d3d3d;
+        }
+
+        body { 
+            font-family: sans-serif; 
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        h1, h2 { 
+            border-bottom: 1px solid var(--border-color); 
+            padding-bottom: 5px; 
+            margin-bottom: 15px; 
+        }
+
+        #log-output { 
+            margin-top: 20px; 
+            padding: 10px; 
+            border: 1px solid var(--border-color); 
+            background-color: var(--log-bg); 
+            min-height: 100px; 
+            white-space: pre-wrap; 
+            font-family: monospace; 
+            font-size: 0.9em; 
+            max-height: 400px; 
+            overflow-y: auto; 
+        }
+
+        .post-list { 
+            list-style: none; 
+            padding: 0; 
+        }
+
+        .post-list li { 
+            border: 1px solid var(--post-border); 
+            margin-bottom: 10px; 
+            padding: 10px; 
+            position: relative;
+            background-color: var(--post-bg);
+        }
+
+        .post-actions button { 
+            margin-right: 5px; 
+            background-color: #77aaff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .post-actions button:hover {
+            background-color: #4477cc;
+        }
+
+        .post-actions button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 32px;
+            height: 32px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+            transition: transform 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-toggle::before {
+            content: '☀️';
+            font-size: 20px;
+        }
+
+        [data-theme="dark"] .theme-toggle::before {
+            content: '🌙';
+        }
+
+        /* Help System Styles */
+        .help-trigger {
+            display: inline-block;
+            width: 16px;
             height: 16px;
-            line-height: 16px;     /* Vertically center the '?' */
+            line-height: 16px;
             margin-left: 6px;
-            font-size: 11px;       /* Size of the '?' */
+            font-size: 11px;
             font-weight: bold;
             text-align: center;
-            color: #fff;           /* White '?' */
-            background-color: #77aaff; /* Light blue background */
-            border-radius: 50%;    /* Make it a circle */
+            color: #fff;
+            background-color: #77aaff;
+            border-radius: 50%;
             cursor: pointer;
-            user-select: none;     /* Prevent text selection */
-            vertical-align: middle;/* Align nicely with text/buttons */
-            transition: background-color 0.2s ease; /* Smooth hover */
+            user-select: none;
+            vertical-align: middle;
+            transition: background-color 0.2s ease;
         }
+
         .help-trigger:hover {
-            background-color: #4477cc; /* Darker blue on hover */
+            background-color: #4477cc;
         }
 
         .help-content {
-            display: none; /* Hidden by default */
-            position: absolute; /* Position relative to the nearest positioned ancestor (the <li>) */
-            background-color: #ffffe0; /* Light yellow background */
-            border: 1px solid #ccc;
+            display: none;
+            position: absolute;
+            background-color: var(--help-bg);
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             padding: 10px 15px;
             box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
-            z-index: 10; /* Ensure it appears above other elements */
-            /* Positioning adjustments - may need tweaking */
-            left: 25px; /* Position slightly to the right of the trigger */
-            top: 0; /* Align top with trigger (can adjust) */
-            width: 300px; /* Set a reasonable width */
-            font-size: 0.9em; /* Slightly smaller text */
-            line-height: 1.5; /* Standard line height */
-            letter-spacing: normal; /* Reset letter spacing */
+            z-index: 10;
+            left: 25px;
+            top: 0;
+            width: 300px;
+            font-size: 0.9em;
+            line-height: 1.5;
+            letter-spacing: normal;
             text-align: left;
+            color: var(--text-color);
         }
-        /* Style paragraphs inside help content */
-        .help-content p,
-        .help-content ul,
-        .help-content ol {
-             margin-bottom: 0.8em;
-             letter-spacing: normal; /* Ensure reset */
-        }
-        .help-content ul, .help-content ol {
-            padding-left: 1.5em; /* Indent lists */
-        }
-         .help-content code {
-            background-color: #eee;
+
+        .help-content code {
+            background-color: var(--code-bg);
             padding: 0.1em 0.3em;
             border-radius: 2px;
             font-size: 0.95em;
         }
-        /* Style to show the help content */
+
         .help-content.active {
             display: block;
         }
-        /* Minor adjustment for help next to heading */
+
         h2 > .help-trigger {
-             vertical-align: baseline; /* Align better with heading text */
+            vertical-align: baseline;
         }
-        h2 + .help-content { /* Position help for heading */
-             top: 25px; /* Position below the heading */
-             left: 0;
+
+        h2 + .help-content {
+            top: 25px;
+            left: 0;
+        }
+
+        a {
+            color: #77aaff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
+    <button class="theme-toggle" id="themeToggle" title="Toggle dark/light mode"></button>
 
     <h1>Blog Workflow Manager</h1>
 
@@ -230,6 +332,32 @@ TEST2wibble
     
     
             console.log("Admin interface loaded.");
+    
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('themeToggle');
+            const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+            
+            // Check for saved theme preference or use system preference
+            const currentTheme = localStorage.getItem('theme') || 
+                               (prefersDarkScheme.matches ? 'dark' : 'light');
+            
+            if (currentTheme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                themeToggle.textContent = 'Toggle Light Mode';
+            }
+
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.body.getAttribute('data-theme');
+                if (currentTheme === 'dark') {
+                    document.body.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    themeToggle.textContent = 'Toggle Dark Mode';
+                } else {
+                    document.body.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    themeToggle.textContent = 'Toggle Light Mode';
+                }
+            });
     
         </script>
 

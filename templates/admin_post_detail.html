@@ -190,9 +190,6 @@
         <p class="back-link mt-3"><a href="{{ url_for('index') }}">← Back to Post List</a></p>
 
         <h1>Manage: {{ metadata.title | default('Post Details') }}</h1>
-        {% if metadata.concept %}
-            <p class="text-muted"><small>Concept: {{ metadata.concept }}</small></p>
-        {% endif %}
         <p><strong>Slug:</strong> <code>{{ slug }}</code>
             <a href="vscode://file/{{ config.BASE_DIR_STR }}/posts/{{ slug }}.md" title="Edit Markdown File in VS Code" class="ms-2">
                 <i class="bi bi-pencil-square"></i> (Edit MD)
@@ -210,14 +207,52 @@
                     I. Conceptualisation
                 </summary>
                 <div class="stage-content">
-                    <p>Define the core idea, Title, Subtitle, and URL Slug.</p>
+                    <div class="mb-3">
+                        <label for="concept" class="form-label">Core Idea</label>
+                        <textarea class="form-control" id="concept" rows="3" data-field="concept">{{ metadata.concept | default('') }}</textarea>
+                        <div class="form-text">The core idea or concept of the post</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" value="{{ metadata.title | default('') }}" data-field="title">
+                        <div class="form-text">The main title of the post</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="subtitle" class="form-label">Subtitle</label>
+                        <input type="text" class="form-control" id="subtitle" value="{{ metadata.subtitle | default('') }}" data-field="subtitle">
+                        <div class="form-text">A brief subtitle or description</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="slug" class="form-label">URL Slug</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="slug" value="{{ slug }}" data-field="slug" {% if status.stages.publishing_clancom.status == 'complete' %}readonly{% endif %}>
+                            <button class="btn btn-outline-secondary" type="button" id="edit-slug" {% if status.stages.publishing_clancom.status == 'complete' %}disabled{% endif %}>
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </div>
+                        <div class="form-text">
+                            {% if status.stages.publishing_clancom.status == 'complete' %}
+                                <span class="text-warning"><i class="bi bi-exclamation-triangle-fill"></i> Warning: This post has been published. Changing the slug may break existing links.</span>
+                            {% else %}
+                                The URL-friendly version of the title. Can only be changed before publication.
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-primary" id="save-metadata">Save Changes</button>
+                        <span class="ms-2 text-muted" id="save-status"></span>
+                    </div>
+
                     <p>
                         <strong>Status:</strong> <code class="status-text">{{ status.stages.conceptualisation.status | default('pending') }}</code>
                         {% set current_status = status.stages.conceptualisation.status | default('pending') %}
                         {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="conceptualisation" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
                         {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="conceptualisation" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
                     </p>
-                    <p>Notes: {{ status.stages.conceptualisation.notes | default('N/A') }}</p> {# Add textarea later #}
                 </div>
             </details>
     
@@ -663,6 +698,89 @@
                 document.body.setAttribute('data-theme', 'dark');
                 localStorage.setItem('theme', 'dark');
                 themeToggle.textContent = 'Toggle Light Mode';
+            }
+        });
+
+        // Add event listener for save button
+        document.getElementById('save-metadata').addEventListener('click', function() {
+            const slug = '{{ slug }}';
+            const fields = ['concept', 'title', 'subtitle', 'slug'];
+            const data = {};
+            
+            fields.forEach(field => {
+                const element = document.getElementById(field);
+                if (element) {
+                    data[field] = element.value;
+                }
+            });
+
+            const saveButton = this;
+            const saveStatus = document.getElementById('save-status');
+            
+            saveButton.disabled = true;
+            saveButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+            saveStatus.textContent = '';
+
+            fetch(`/api/update_metadata/${slug}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    saveButton.innerHTML = '<i class="bi bi-check-circle-fill"></i> Saved';
+                    saveStatus.textContent = 'Changes saved successfully';
+                    saveStatus.className = 'ms-2 text-success';
+                    
+                    // Update the conceptualisation status if all fields are filled
+                    const hasTitle = document.getElementById('title').value.trim() !== '';
+                    const hasSubtitle = document.getElementById('subtitle').value.trim() !== '';
+                    const hasSlug = document.getElementById('slug').value.trim() !== '';
+                    const hasConcept = document.getElementById('concept').value.trim() !== '';
+                    
+                    if (hasTitle && hasSubtitle && hasSlug && hasConcept) {
+                        const statusElement = document.querySelector('[data-stage-key="conceptualisation"] .traffic-light');
+                        if (statusElement) {
+                            statusElement.setAttribute('data-status', 'complete');
+                        }
+                    }
+                } else {
+                    throw new Error(data.error || 'Failed to save changes');
+                }
+            })
+            .catch(error => {
+                saveButton.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Error';
+                saveStatus.textContent = `Error: ${error.message}`;
+                saveStatus.className = 'ms-2 text-danger';
+            })
+            .finally(() => {
+                setTimeout(() => {
+                    saveButton.disabled = false;
+                    saveButton.innerHTML = 'Save Changes';
+                    saveStatus.textContent = '';
+                }, 3000);
+            });
+        });
+
+        // Add input event listeners to update save button state
+        const fields = ['concept', 'title', 'subtitle', 'slug'];
+        fields.forEach(field => {
+            const element = document.getElementById(field);
+            if (element) {
+                element.addEventListener('input', function() {
+                    const saveButton = document.getElementById('save-metadata');
+                    if (saveButton) {
+                        saveButton.disabled = false;
+                    }
+                });
             }
         });
     </script>

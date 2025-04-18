@@ -312,6 +312,34 @@ def view_post_detail(slug):
          logging.error("Critical error loading workflow data file.")
     elif workflow_data_full:
         status_data = workflow_data_full.get(slug, {"stages": {}})
+        
+        # Ensure all required stages are present with default values
+        required_stages = {
+            'conceptualisation': {'status': 'pending'},
+            'authoring': {'status': 'pending', 'text_format_status': 'pending'},
+            'metadata': {'status': 'pending', 'front_matter_status': 'pending', 'tags_status': 'pending', 'author_status': 'pending'},
+            'images': {'status': 'pending', 'prompts_defined_status': 'pending', 'assets_prepared_status': 'pending', 'metadata_integrated_status': 'pending'},
+            'validation': {'status': 'pending', 'last_preview_ok': False},
+            'publishing_clancom': {'status': 'pending'},
+            'syndication': {'status': 'pending', 'instagram': {'overall_status': 'pending'}, 'facebook': {'overall_status': 'pending'}}
+        }
+        
+        # Initialize missing stages
+        for stage, default_data in required_stages.items():
+            if stage not in status_data['stages']:
+                status_data['stages'][stage] = default_data
+                logging.info(f"Initialized missing stage '{stage}' for post '{slug}'")
+        
+        # Update conceptualisation status based on required fields
+        has_title = bool(metadata.get('title'))
+        has_subtitle = bool(metadata.get('subtitle'))
+        has_slug = bool(slug)
+        has_concept = bool(metadata.get('concept'))
+        
+        if has_title and has_subtitle and has_slug and has_concept:
+            status_data['stages']['conceptualisation']['status'] = 'complete'
+        else:
+            status_data['stages']['conceptualisation']['status'] = 'pending'
 
     # 3. Load Image Library Data
     image_library_data = load_json_data(image_library_path)
@@ -695,6 +723,73 @@ def restore_post(slug):
     except Exception as e:
         logging.error(f"Error restoring post {slug}: {e}", exc_info=True)
         return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/update_metadata/<string:slug>', methods=['POST'])
+def update_metadata(slug):
+    """Updates the metadata for a post."""
+    try:
+        # Get the request data
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
+
+        # Validate required fields
+        required_fields = ['concept', 'title', 'subtitle', 'slug']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'success': False, 'error': f'Missing required field: {field}'}), 400
+
+        # Check if the post exists
+        md_file_path = BASE_DIR / POSTS_DIR_NAME / f"{slug}.md"
+        if not md_file_path.exists():
+            return jsonify({'success': False, 'error': 'Post not found'}), 404
+
+        # Load the current post
+        post = frontmatter.load(md_file_path)
+
+        # Update the metadata
+        post.metadata['concept'] = data['concept']
+        post.metadata['title'] = data['title']
+        post.metadata['subtitle'] = data['subtitle']
+
+        # If the slug is being changed, we need to rename the file
+        if data['slug'] != slug:
+            # Check if the new slug already exists
+            new_md_file_path = BASE_DIR / POSTS_DIR_NAME / f"{data['slug']}.md"
+            if new_md_file_path.exists():
+                return jsonify({'success': False, 'error': 'A post with this slug already exists'}), 400
+
+            # Update the slug in metadata
+            post.metadata['slug'] = data['slug']
+
+            # Save the file with the new name
+            frontmatter.dump(post, new_md_file_path)
+
+            # Delete the old file
+            md_file_path.unlink()
+
+            # Update the workflow status file
+            workflow_status_path = DATA_DIR / WORKFLOW_STATUS_FILE
+            workflow_data = load_json_data(workflow_status_path)
+            if workflow_data and slug in workflow_data:
+                workflow_data[data['slug']] = workflow_data.pop(slug)
+                save_json_data(workflow_data, workflow_status_path)
+
+            # Update the image directory if it exists
+            old_images_dir = BASE_DIR / 'images' / 'posts' / slug
+            new_images_dir = BASE_DIR / 'images' / 'posts' / data['slug']
+            if old_images_dir.exists():
+                old_images_dir.rename(new_images_dir)
+
+        else:
+            # Just save the updated metadata
+            frontmatter.dump(post, md_file_path)
+
+        return jsonify({'success': True})
+
+    except Exception as e:
+        logging.error(f"Error updating metadata for post '{slug}': {e}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 # --- Run the App ---
 if __name__ == '__main__':

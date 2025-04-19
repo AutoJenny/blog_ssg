@@ -815,6 +815,16 @@ def update_metadata(slug):
                 'concept': data['concept']
             })
         
+        # Update metadata stage if title, subtitle, or categories are updated
+        if any(field in data for field in ['title', 'subtitle', 'categories']):
+            if 'metadata' not in workflow_status[slug]['stages']:
+                workflow_status[slug]['stages']['metadata'] = {}
+            
+            workflow_status[slug]['stages']['metadata'].update({
+                'status': 'complete',
+                'last_updated': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00Z')
+            })
+        
         save_json_data(DATA_DIR / WORKFLOW_STATUS_FILE, workflow_status)
         
         return jsonify({"success": True})

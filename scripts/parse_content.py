@@ -5,76 +5,143 @@ from bs4 import BeautifulSoup
 import markdown
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 def parse_html(content):
-    """Parse HTML content and extract sections."""
-    soup = BeautifulSoup(content, 'html.parser')
-    
-    # Extract summary (first paragraph)
-    summary = None
-    first_p = soup.find('p')
-    if first_p:
-        summary = first_p.get_text().strip()
-    
-    # Extract sections
-    sections = []
-    current_section = None
-    
-    for element in soup.find_all(['h2', 'p']):
-        if element.name == 'h2':
-            if current_section:
-                sections.append(current_section)
-            current_section = {
-                'heading': element.get_text().strip(),
-                'text': ''
-            }
-        elif element.name == 'p' and current_section:
-            if current_section['text']:
-                current_section['text'] += '\n\n'
-            current_section['text'] += element.get_text().strip()
-    
-    if current_section:
-        sections.append(current_section)
-    
-    # Extract conclusion (last section)
-    conclusion = None
-    if sections:
-        last_section = sections.pop()
+    """Parse HTML content and extract sections, summary, and conclusion."""
+    try:
+        soup = BeautifulSoup(content, 'html.parser')
+        
+        # Extract summary (first paragraph, preserving HTML)
+        summary = str(soup.find('p')) if soup.find('p') else ""
+        
+        # Extract concept (from meta tag or first h2)
+        concept = ""
+        meta_concept = soup.find('meta', attrs={'name': 'concept'})
+        if meta_concept:
+            concept = meta_concept.get('content', '')
+        else:
+            first_h2 = soup.find('h2')
+            if first_h2 and first_h2.get_text().lower().startswith('concept'):
+                concept = str(first_h2.find_next('p')) if first_h2.find_next('p') else ""
+        
+        # Extract sections
+        sections = []
+        for h2 in soup.find_all('h2'):
+            # Skip sections with headings that are 'concept', 'summary', or 'conclusion'
+            if h2.get_text().lower() not in ['concept', 'summary', 'conclusion']:
+                # Get all content until the next h2, preserving HTML
+                section_content = []
+                next_element = h2.find_next_sibling()
+                while next_element and next_element.name != 'h2':
+                    section_content.append(str(next_element))
+                    next_element = next_element.find_next_sibling()
+                
+                section = {
+                    'heading': h2.get_text(),
+                    'text': '\n'.join(section_content)
+                }
+                sections.append(section)
+        
+        # Extract conclusion
+        conclusion_h2 = soup.find('h2', text=lambda t: t and t.lower() == 'conclusion')
+        conclusion_content = []
+        if conclusion_h2:
+            next_element = conclusion_h2.find_next_sibling()
+            while next_element:
+                conclusion_content.append(str(next_element))
+                next_element = next_element.find_next_sibling()
+        
         conclusion = {
-            'heading': last_section['heading'],
-            'text': last_section['text']
+            'heading': 'Conclusion',
+            'text': '\n'.join(conclusion_content)
         }
-    
-    return {
-        'summary': summary,
-        'sections': sections,
-        'conclusion': conclusion
-    }
+        
+        return {
+            'concept': concept,
+            'summary': summary,
+            'sections': sections,
+            'conclusion': conclusion
+        }
+    except Exception as e:
+        logger.error(f"Error parsing HTML content: {str(e)}", exc_info=True)
+        raise
 
 def parse_markdown(content):
-    """Parse Markdown content and extract sections."""
-    # Convert markdown to HTML first
-    html = markdown.markdown(content)
-    return parse_html(html)
+    """Parse Markdown content and extract sections, summary, and conclusion."""
+    try:
+        # Convert markdown to HTML with extensions for better formatting
+        html_content = markdown.markdown(content, extensions=['extra'])
+        
+        # Parse the HTML content
+        soup = BeautifulSoup(html_content, 'html.parser')
+        
+        # Extract summary (first paragraph, preserving HTML)
+        summary = str(soup.find('p')) if soup.find('p') else ""
+        
+        # Extract sections
+        sections = []
+        for h2 in soup.find_all('h2'):
+            if h2.get_text().lower() not in ['concept', 'conclusion']:
+                # Get all content until the next h2, preserving HTML
+                section_content = []
+                next_element = h2.find_next_sibling()
+                while next_element and next_element.name != 'h2':
+                    section_content.append(str(next_element))
+                    next_element = next_element.find_next_sibling()
+                
+                section = {
+                    'heading': h2.get_text(),
+                    'text': '\n'.join(section_content)
+                }
+                sections.append(section)
+        
+        # Extract conclusion
+        conclusion_h2 = soup.find('h2', text=lambda t: t and t.lower() == 'conclusion')
+        conclusion_content = []
+        if conclusion_h2:
+            next_element = conclusion_h2.find_next_sibling()
+            while next_element:
+                conclusion_content.append(str(next_element))
+                next_element = next_element.find_next_sibling()
+        
+        conclusion = {
+            'heading': 'Conclusion',
+            'text': '\n'.join(conclusion_content)
+        }
+        
+        return {
+            'summary': summary,
+            'sections': sections,
+            'conclusion': conclusion
+        }
+    except Exception as e:
+        logger.error(f"Error parsing Markdown content: {str(e)}", exc_info=True)
+        raise
 
 def parse_file(file_path):
-    """Parse a content file based on its extension."""
+    """Parse a content file (HTML or Markdown) and extract sections, summary, and conclusion."""
     try:
+        logger.info(f"Attempting to parse file: {file_path}")
+        
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
+            
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        _, ext = os.path.splitext(file_path)
-        if ext.lower() in ['.html', '.htm']:
+        # Determine file type
+        if file_path.endswith('.html'):
+            logger.info("Parsing HTML file")
             return parse_html(content)
-        elif ext.lower() in ['.md', '.markdown']:
+        elif file_path.endswith('.md'):
+            logger.info("Parsing Markdown file")
             return parse_markdown(content)
         else:
-            raise ValueError(f"Unsupported file format: {ext}")
-    
+            raise ValueError("Unsupported file format. Please provide HTML or Markdown.")
     except Exception as e:
-        logger.error(f"Error parsing file {file_path}: {str(e)}")
+        logger.error(f"Error parsing file {file_path}: {str(e)}", exc_info=True)
         raise
 
 if __name__ == "__main__":
@@ -87,5 +154,5 @@ if __name__ == "__main__":
         result = parse_file(file_path)
         print(result)
     except Exception as e:
-        logger.error(f"Failed to parse file: {str(e)}")
+        logger.error(f"Failed to parse file: {str(e)}", exc_info=True)
         sys.exit(1) 

@@ -1,264 +1,264 @@
 {
-    "kilt-evolution": {
-        "last_updated": "2025-04-03T10:09:26+00:00Z",
-        "stages": {
-            "conceptualisation": {
-                "status": "complete",
-                "notes": null
-            },
-            "authoring": {
-                "status": "complete",
-                "text_format_status": "complete"
-            },
-            "metadata": {
-                "status": "complete",
-                "front_matter_status": "complete",
-                "tags_status": "complete",
-                "author_status": "complete"
-            },
-            "images": {
-                "status": "complete",
-                "prompts_defined_status": "complete",
-                "generation_status": "complete",
-                "assets_prepared_status": "complete",
-                "metadata_integrated_status": "complete",
-                "watermarking_status": "complete",
-                "watermarking_used_in_publish": false,
-                "watermarks": {
-                    "IMG00001": "complete",
-                    "IMG00002": "complete",
-                    "IMG00003": "complete",
-                    "IMG00004": "complete",
-                    "IMG00005": "complete",
-                    "IMG00006": "complete",
-                    "IMG00007": "complete",
-                    "IMG00008": "complete",
-                    "IMG00009": "complete",
-                    "IMG00010": "complete",
-                    "IMG00011": "complete"
-                }
-            },
-            "validation": {
-                "status": "complete",
-                "last_preview_ok": true
-            },
-            "publishing_clancom": {
-                "status": "complete",
-                "post_id": 333,
-                "last_publish_attempt": "2025-04-03T10:09:26+00:00Z",
-                "last_error": null
-            },
-            "syndication": {
-                "status": "pending",
-                "instagram": {
-                    "overall_status": "pending"
-                },
-                "facebook": {
-                    "overall_status": "pending"
-                }
-            }
+  "kilt-evolution": {
+    "last_updated": "2025-04-03T10:09:26+00:00Z",
+    "stages": {
+      "conceptualisation": {
+        "status": "complete",
+        "notes": null
+      },
+      "authoring": {
+        "status": "complete",
+        "text_format_status": "complete"
+      },
+      "metadata": {
+        "status": "complete",
+        "front_matter_status": "complete",
+        "tags_status": "complete",
+        "author_status": "complete"
+      },
+      "images": {
+        "status": "complete",
+        "prompts_defined_status": "complete",
+        "generation_status": "complete",
+        "assets_prepared_status": "complete",
+        "metadata_integrated_status": "complete",
+        "watermarking_status": "complete",
+        "watermarking_used_in_publish": false,
+        "watermarks": {
+          "IMG00001": "complete",
+          "IMG00002": "complete",
+          "IMG00003": "complete",
+          "IMG00004": "complete",
+          "IMG00005": "complete",
+          "IMG00006": "complete",
+          "IMG00007": "complete",
+          "IMG00008": "complete",
+          "IMG00009": "complete",
+          "IMG00010": "complete",
+          "IMG00011": "complete"
         }
-    },
-    "quaich-traditions": {
-        "last_updated": "2025-04-18T14:35:23+00:00Z",
-        "stages": {
-            "conceptualisation": {
-                "status": "complete",
-                "notes": null
-            },
-            "authoring": {
-                "status": "complete",
-                "text_format_status": "complete"
-            },
-            "metadata": {
-                "status": "complete",
-                "front_matter_status": "complete",
-                "tags_status": "complete",
-                "author_status": "complete"
-            },
-            "images": {
-                "status": "pending",
-                "prompts_defined_status": "complete",
-                "generation_status": "pending",
-                "assets_prepared_status": "pending",
-                "metadata_integrated_status": "pending",
-                "watermarking_status": "complete",
-                "watermarking_used_in_publish": false,
-                "watermarks": {
-                    "IMG00012": "complete",
-                    "IMG00013": "complete",
-                    "IMG00014": "complete",
-                    "IMG00015": "complete",
-                    "IMG00017": "complete",
-                    "IMG00018": "complete",
-                    "IMG00019": "complete",
-                    "IMG00020": "complete",
-                    "IMG00021": "complete",
-                    "IMG00022": "complete",
-                    "IMG00016": "complete"
-                }
-            },
-            "validation": {
-                "status": "pending",
-                "last_preview_ok": false
-            },
-            "publishing_clancom": {
-                "status": "complete",
-                "post_id": 334,
-                "last_publish_attempt": "2025-04-18T14:35:23+00:00Z",
-                "last_error": null
-            },
-            "syndication": {
-                "status": "pending",
-                "instagram": {
-                    "overall_status": "pending"
-                },
-                "facebook": {
-                    "overall_status": "pending"
-                }
-            }
+      },
+      "validation": {
+        "status": "complete",
+        "last_preview_ok": true
+      },
+      "publishing_clancom": {
+        "status": "complete",
+        "post_id": 333,
+        "last_publish_attempt": "2025-04-03T10:09:26+00:00Z",
+        "last_error": null
+      },
+      "syndication": {
+        "status": "pending",
+        "instagram": {
+          "overall_status": "pending"
+        },
+        "facebook": {
+          "overall_status": "pending"
         }
-    },
-    "english-tartans": {
-        "last_updated": "2025-04-19T08:52:51+00:00Z",
-        "stages": {
-            "conceptualisation": {
-                "status": "complete",
-                "last_updated": "2025-04-19T08:52:51+00:00Z",
-                "concept": "An in-depth article about the history and development of English tartans, to be published on St George's day. This will focus on issues like similar patterns woven in England historically, and how the Celtic Fringe of England took on the idea of tartans from Scotland, and also how some English families or other organisations have developed their own tartans."
-            },
-            "authoring": {
-                "status": "pending",
-                "text_format_status": "pending"
-            },
-            "metadata": {
-                "status": "pending",
-                "front_matter_status": "pending",
-                "tags_status": "pending",
-                "author_status": "pending"
-            },
-            "images": {
-                "status": "pending",
-                "prompts_defined_status": "pending",
-                "generation_status": "pending",
-                "assets_prepared_status": "pending",
-                "metadata_integrated_status": "pending",
-                "watermarking_status": "pending",
-                "watermarking_used_in_publish": false,
-                "watermarks": {}
-            },
-            "validation": {
-                "status": "pending",
-                "last_preview_ok": false
-            },
-            "publishing_clancom": {
-                "status": "pending"
-            },
-            "syndication": {
-                "status": "pending",
-                "instagram": {
-                    "overall_status": "pending"
-                },
-                "facebook": {
-                    "overall_status": "pending"
-                }
-            }
-        }
-    },
-    "an-in-depth-article-about-the-history-and-developm": {
-        "stages": {},
-        "last_updated": "2025-04-18T15:22:09+00:00Z"
-    },
-    "new-20250418-162653": {
-        "stages": {
-            "conceptualisation": {
-                "status": "complete",
-                "last_updated": "2025-04-18T15:26:53+00:00Z"
-            },
-            "images": {
-                "status": "pending"
-            },
-            "publishing_clancom": {
-                "status": "pending"
-            }
-        },
-        "last_updated": "2025-04-18T15:26:53+00:00Z"
-    },
-    "new-20250418-162718": {
-        "stages": {
-            "conceptualisation": {
-                "status": "complete",
-                "last_updated": "2025-04-18T15:27:18+00:00Z"
-            },
-            "images": {
-                "status": "pending"
-            },
-            "publishing_clancom": {
-                "status": "pending"
-            }
-        },
-        "last_updated": "2025-04-18T15:27:18+00:00Z"
-    },
-    "new-20250418-163246": {
-        "stages": {
-            "conceptualisation": {
-                "status": "complete",
-                "last_updated": "2025-04-18T15:32:46+00:00Z",
-                "concept": "An in-depth article about the history and development of English tartans, to be published on St George's day. This will focus on issues like similar patterns woven in England historically, and how the Celtic Fringe of England took on the idea of tartans from Scotland, and also how some English families or other organisations have developed their own tartans."
-            },
-            "images": {
-                "status": "pending"
-            },
-            "publishing_clancom": {
-                "status": "pending"
-            }
-        },
-        "last_updated": "2025-04-18T15:32:46+00:00Z"
-    },
-    "new-20250418-164412": {
-        "stages": {
-            "conceptualisation": {
-                "status": "complete",
-                "last_updated": "2025-04-18T15:44:12+00:00Z",
-                "concept": "An in-depth article about the history and development of English tartans, to be published on St George's day. This will focus on issues like similar patterns woven in England historically, and how the Celtic Fringe of England took on the idea of tartans from Scotland, and also how some English families or other organisations have developed their own tartans."
-            },
-            "authoring": {
-                "status": "pending",
-                "text_format_status": "pending"
-            },
-            "metadata": {
-                "status": "pending",
-                "front_matter_status": "pending",
-                "tags_status": "pending",
-                "author_status": "pending"
-            },
-            "images": {
-                "status": "pending",
-                "prompts_defined_status": "pending",
-                "generation_status": "pending",
-                "assets_prepared_status": "pending",
-                "metadata_integrated_status": "pending",
-                "watermarking_status": "pending",
-                "watermarking_used_in_publish": false,
-                "watermarks": {}
-            },
-            "validation": {
-                "status": "pending",
-                "last_preview_ok": false
-            },
-            "publishing_clancom": {
-                "status": "pending"
-            },
-            "syndication": {
-                "status": "pending",
-                "instagram": {
-                    "overall_status": "pending"
-                },
-                "facebook": {
-                    "overall_status": "pending"
-                }
-            }
-        },
-        "last_updated": "2025-04-18T15:44:12+00:00Z"
+      }
     }
+  },
+  "quaich-traditions": {
+    "last_updated": "2025-04-18T14:35:23+00:00Z",
+    "stages": {
+      "conceptualisation": {
+        "status": "complete",
+        "notes": null
+      },
+      "authoring": {
+        "status": "complete",
+        "text_format_status": "complete"
+      },
+      "metadata": {
+        "status": "complete",
+        "front_matter_status": "complete",
+        "tags_status": "complete",
+        "author_status": "complete"
+      },
+      "images": {
+        "status": "pending",
+        "prompts_defined_status": "complete",
+        "generation_status": "pending",
+        "assets_prepared_status": "pending",
+        "metadata_integrated_status": "pending",
+        "watermarking_status": "complete",
+        "watermarking_used_in_publish": false,
+        "watermarks": {
+          "IMG00012": "complete",
+          "IMG00013": "complete",
+          "IMG00014": "complete",
+          "IMG00015": "complete",
+          "IMG00017": "complete",
+          "IMG00018": "complete",
+          "IMG00019": "complete",
+          "IMG00020": "complete",
+          "IMG00021": "complete",
+          "IMG00022": "complete",
+          "IMG00016": "complete"
+        }
+      },
+      "validation": {
+        "status": "pending",
+        "last_preview_ok": false
+      },
+      "publishing_clancom": {
+        "status": "complete",
+        "post_id": 334,
+        "last_publish_attempt": "2025-04-18T14:35:23+00:00Z",
+        "last_error": null
+      },
+      "syndication": {
+        "status": "pending",
+        "instagram": {
+          "overall_status": "pending"
+        },
+        "facebook": {
+          "overall_status": "pending"
+        }
+      }
+    }
+  },
+  "english-tartans": {
+    "last_updated": "2025-04-19T08:52:51+00:00Z",
+    "stages": {
+      "conceptualisation": {
+        "status": "complete",
+        "last_updated": "2025-04-19T08:52:51+00:00Z",
+        "concept": "An in-depth article about the history and development of English tartans, to be published on St George's day. This will focus on issues like similar patterns woven in England historically, and how the Celtic Fringe of England took on the idea of tartans from Scotland, and also how some English families or other organisations have developed their own tartans."
+      },
+      "authoring": {
+        "status": "complete",
+        "text_format_status": "complete"
+      },
+      "metadata": {
+        "status": "pending",
+        "front_matter_status": "pending",
+        "tags_status": "pending",
+        "author_status": "pending"
+      },
+      "images": {
+        "status": "pending",
+        "prompts_defined_status": "pending",
+        "generation_status": "pending",
+        "assets_prepared_status": "pending",
+        "metadata_integrated_status": "pending",
+        "watermarking_status": "pending",
+        "watermarking_used_in_publish": false,
+        "watermarks": {}
+      },
+      "validation": {
+        "status": "pending",
+        "last_preview_ok": false
+      },
+      "publishing_clancom": {
+        "status": "pending"
+      },
+      "syndication": {
+        "status": "pending",
+        "instagram": {
+          "overall_status": "pending"
+        },
+        "facebook": {
+          "overall_status": "pending"
+        }
+      }
+    }
+  },
+  "an-in-depth-article-about-the-history-and-developm": {
+    "stages": {},
+    "last_updated": "2025-04-18T15:22:09+00:00Z"
+  },
+  "new-20250418-162653": {
+    "stages": {
+      "conceptualisation": {
+        "status": "complete",
+        "last_updated": "2025-04-18T15:26:53+00:00Z"
+      },
+      "images": {
+        "status": "pending"
+      },
+      "publishing_clancom": {
+        "status": "pending"
+      }
+    },
+    "last_updated": "2025-04-18T15:26:53+00:00Z"
+  },
+  "new-20250418-162718": {
+    "stages": {
+      "conceptualisation": {
+        "status": "complete",
+        "last_updated": "2025-04-18T15:27:18+00:00Z"
+      },
+      "images": {
+        "status": "pending"
+      },
+      "publishing_clancom": {
+        "status": "pending"
+      }
+    },
+    "last_updated": "2025-04-18T15:27:18+00:00Z"
+  },
+  "new-20250418-163246": {
+    "stages": {
+      "conceptualisation": {
+        "status": "complete",
+        "last_updated": "2025-04-18T15:32:46+00:00Z",
+        "concept": "An in-depth article about the history and development of English tartans, to be published on St George's day. This will focus on issues like similar patterns woven in England historically, and how the Celtic Fringe of England took on the idea of tartans from Scotland, and also how some English families or other organisations have developed their own tartans."
+      },
+      "images": {
+        "status": "pending"
+      },
+      "publishing_clancom": {
+        "status": "pending"
+      }
+    },
+    "last_updated": "2025-04-18T15:32:46+00:00Z"
+  },
+  "new-20250418-164412": {
+    "stages": {
+      "conceptualisation": {
+        "status": "complete",
+        "last_updated": "2025-04-18T15:44:12+00:00Z",
+        "concept": "An in-depth article about the history and development of English tartans, to be published on St George's day. This will focus on issues like similar patterns woven in England historically, and how the Celtic Fringe of England took on the idea of tartans from Scotland, and also how some English families or other organisations have developed their own tartans."
+      },
+      "authoring": {
+        "status": "pending",
+        "text_format_status": "pending"
+      },
+      "metadata": {
+        "status": "pending",
+        "front_matter_status": "pending",
+        "tags_status": "pending",
+        "author_status": "pending"
+      },
+      "images": {
+        "status": "pending",
+        "prompts_defined_status": "pending",
+        "generation_status": "pending",
+        "assets_prepared_status": "pending",
+        "metadata_integrated_status": "pending",
+        "watermarking_status": "pending",
+        "watermarking_used_in_publish": false,
+        "watermarks": {}
+      },
+      "validation": {
+        "status": "pending",
+        "last_preview_ok": false
+      },
+      "publishing_clancom": {
+        "status": "pending"
+      },
+      "syndication": {
+        "status": "pending",
+        "instagram": {
+          "overall_status": "pending"
+        },
+        "facebook": {
+          "overall_status": "pending"
+        }
+      }
+    },
+    "last_updated": "2025-04-18T15:44:12+00:00Z"
+  }
 }

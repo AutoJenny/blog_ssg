@@ -327,6 +327,7 @@
                                     <input type="file" class="form-control" id="contentFile" name="file" accept=".html,.htm,.md,.markdown" required>
                                     <div class="form-text">Supported formats: HTML (.html, .htm) or Markdown (.md, .markdown)</div>
                                 </div>
+                                <div id="importError" class="alert alert-danger d-none mb-3"></div>
                                 <button type="submit" class="btn btn-primary">
                                     <i class="bi bi-upload me-1"></i>Import Content
                                 </button>
@@ -1085,8 +1086,12 @@ This is the conclusion section.</pre>
         });
 
         // Import Content functionality
-        document.getElementById('importContent').addEventListener('click', function() {
-            const fileInput = document.getElementById('contentFile');
+        document.getElementById('importContentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const form = e.target;
+            const fileInput = form.querySelector('input[type="file"]');
+            const submitButton = form.querySelector('button[type="submit"]');
             const errorDiv = document.getElementById('importError');
             const slug = '{{ slug }}';
             
@@ -1095,27 +1100,26 @@ This is the conclusion section.</pre>
                 errorDiv.classList.remove('d-none');
                 return;
             }
-
-            const file = fileInput.files[0];
+            
             const formData = new FormData();
-            formData.append('file', file);
+            formData.append('file', fileInput.files[0]);
+            
+            try {
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Importing...';
+                errorDiv.classList.add('d-none');
 
-            // Show loading state
-            const importButton = this;
-            importButton.disabled = true;
-            importButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Importing...';
+                const response = await fetch(`/api/import_content/${slug}`, {
+                    method: 'POST',
+                    body: formData
+                });
 
-            fetch(`/api/import_content/${slug}`, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error ${response.status}`);
                 }
-                return response.json();
-            })
-            .then(data => {
+
+                const data = await response.json();
+                
                 if (data.success) {
                     // Update the form fields with the imported content
                     if (data.summary) {
@@ -1158,83 +1162,17 @@ This is the conclusion section.</pre>
                         document.getElementById('conclusion-text').value = data.conclusion.text || '';
                     }
 
-                    // Close the modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('importContentModal'));
-                    modal.hide();
-
                     // Show success message
                     alert('Content imported successfully!');
                 } else {
                     throw new Error(data.error || 'Failed to import content');
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 errorDiv.textContent = `Error: ${error.message}`;
                 errorDiv.classList.remove('d-none');
-            })
-            .finally(() => {
-                importButton.disabled = false;
-                importButton.innerHTML = 'Import';
-            });
-        });
-
-        // Handle content import
-        document.getElementById('importContentForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const form = e.target;
-            const fileInput = form.querySelector('input[type="file"]');
-            const submitButton = form.querySelector('button[type="submit"]');
-            
-            if (!fileInput.files.length) {
-                alert('Please select a file to upload');
-                return;
-            }
-            
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-            
-            try {
-                submitButton.disabled = true;
-                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Importing...';
-                
-                const response = await fetch(`/api/import_content/${slug}`, {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.error || 'Failed to import content');
-                }
-                
-                // Update the form fields with the imported content
-                document.getElementById('summary').value = data.summary;
-                
-                // Clear existing sections
-                const sectionsContainer = document.getElementById('sections-container');
-                sectionsContainer.innerHTML = '';
-                
-                // Add sections from imported content
-                data.sections.forEach((section, index) => {
-                    addSection(section.heading, section.text, section.imageId);
-                });
-                
-                // Update conclusion
-                document.getElementById('conclusion-heading').value = data.conclusion.heading;
-                document.getElementById('conclusion-text').value = data.conclusion.text;
-                
-                // Show success message
-                alert('Content imported successfully!');
-                
-            } catch (error) {
-                console.error('Error importing content:', error);
-                alert(`Error importing content: ${error.message}`);
             } finally {
                 submitButton.disabled = false;
-                submitButton.innerHTML = '<i class="bi bi-upload me-1"></i>Import Content';
-                form.reset();
+                submitButton.innerHTML = 'Import';
             }
         });
 

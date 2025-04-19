@@ -11,6 +11,7 @@ import sys
 import datetime # Already imported, good.
 import re 
 import yaml
+from werkzeug.utils import secure_filename
 
 # --- Configuration Constants ---
 BASE_DIR = Path(__file__).resolve().parent
@@ -19,6 +20,12 @@ DATA_DIR_NAME = "_data"
 DATA_DIR = BASE_DIR / DATA_DIR_NAME
 WORKFLOW_STATUS_FILE = "workflow_status.json" # Main file for post status tracking
 IMAGE_LIBRARY_FILE = "image_library.json"
+UPLOAD_FOLDER = BASE_DIR / 'tmp'  # Add upload folder configuration
+IMAGES_DIR = BASE_DIR / 'images'  # Define images directory
+
+# Create upload folder if it doesn't exist
+UPLOAD_FOLDER.mkdir(exist_ok=True)
+IMAGES_DIR.mkdir(exist_ok=True)
 
 # --- Logging Setup ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -26,15 +33,16 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # --- Flask App Initialization ---
 app = Flask(__name__)
 app.config['BASE_DIR_STR'] = str(BASE_DIR) # Make base dir accessible in templates
+app.config['UPLOAD_FOLDER'] = str(UPLOAD_FOLDER)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['POSTS_DIR'] = str(BASE_DIR / POSTS_DIR_NAME)
+app.config['IMAGES_DIR'] = str(IMAGES_DIR)
 
 # --- Add Static Route for Images (Development Only) ---
-# Serve files from the 'images' directory at the '/images' URL path
-IMAGES_DIR = BASE_DIR / 'images' # Define the images directory path
 @app.route('/images/<path:filename>')
 def serve_images(filename):
+    """Serve images from the images directory."""
     logging.debug(f"Serving image: {filename} from {IMAGES_DIR}")
-    # Ensure the path requested is safe and within the intended directory
-    # send_from_directory handles this reasonably well
     return send_from_directory(IMAGES_DIR, filename)
 
 # --- Helper Functions ---
@@ -786,16 +794,20 @@ def update_content(slug):
 
 @app.route('/api/import_content/<string:slug>', methods=['POST'])
 def import_content(slug):
+    """Import content from an uploaded file."""
     try:
         if 'file' not in request.files:
-            return jsonify({'error': 'No file provided'}), 400
+            logging.error("No file provided in request")
+            return jsonify({'success': False, 'error': 'No file provided'}), 400
         
         file = request.files['file']
         if file.filename == '':
-            return jsonify({'error': 'No file selected'}), 400
+            logging.error("No file selected")
+            return jsonify({'success': False, 'error': 'No file selected'}), 400
         
-        # Save the uploaded file temporarily
-        temp_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        # Secure the filename and save it
+        filename = secure_filename(file.filename)
+        temp_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(temp_path)
         
         try:
@@ -803,20 +815,22 @@ def import_content(slug):
             from scripts.parse_content import parse_file
             parsed_content = parse_file(temp_path)
             
-            # Update the post's content
+            # Get the post path
             post_path = os.path.join(app.config['POSTS_DIR'], f"{slug}.md")
             if not os.path.exists(post_path):
-                return jsonify({'error': 'Post not found'}), 404
+                logging.error(f"Post not found: {post_path}")
+                return jsonify({'success': False, 'error': 'Post not found'}), 404
             
-            # Load the existing post using frontmatter library
+            # Load the existing post
             post = frontmatter.load(post_path)
             
             # Update the metadata with the new content
-            post.metadata.update({
-                'summary': parsed_content['summary'],
-                'sections': parsed_content['sections'],
-                'conclusion': parsed_content['conclusion']
-            })
+            if parsed_content.get('summary'):
+                post.metadata['summary'] = parsed_content['summary']
+            if parsed_content.get('sections'):
+                post.metadata['sections'] = parsed_content['sections']
+            if parsed_content.get('conclusion'):
+                post.metadata['conclusion'] = parsed_content['conclusion']
             
             # Write the updated content back to the file
             with open(post_path, 'w', encoding='utf-8') as f:
@@ -824,21 +838,41 @@ def import_content(slug):
             
             # Update workflow status
             workflow_data = load_json_data(DATA_DIR / WORKFLOW_STATUS_FILE)
-            if slug in workflow_data:
-                workflow_data[slug]['stages']['authoring']['status'] = 'complete'
-                workflow_data[slug]['stages']['authoring']['completed_at'] = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds') + 'Z'
-                save_json_data(DATA_DIR / WORKFLOW_STATUS_FILE, workflow_data)
+            if workflow_data is None:
+                workflow_data = {}
             
-            return jsonify(parsed_content)
+            if slug not in workflow_data:
+                workflow_data[slug] = {'stages': {}}
             
-        finally:
+            workflow_data[slug]['stages']['authoring'] = {
+                'status': 'complete',
+                'text_format_status': 'complete',
+                'last_updated': datetime.datetime.now().isoformat()
+            }
+            
+            save_json_data(workflow_data, DATA_DIR / WORKFLOW_STATUS_FILE)
+            
             # Clean up the temporary file
+            os.unlink(temp_path)
+            
+            logging.info(f"Successfully imported content for post '{slug}'")
+            return jsonify({
+                'success': True,
+                'summary': parsed_content.get('summary', ''),
+                'sections': parsed_content.get('sections', []),
+                'conclusion': parsed_content.get('conclusion', {})
+            })
+            
+        except Exception as e:
+            logging.error(f"Error processing file for post '{slug}': {str(e)}", exc_info=True)
+            # Clean up the temporary file in case of error
             if os.path.exists(temp_path):
-                os.remove(temp_path)
-                
+                os.unlink(temp_path)
+            return jsonify({'success': False, 'error': str(e)}), 500
+            
     except Exception as e:
-        logging.error(f"Error importing content: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        logging.error(f"Error importing content for post '{slug}': {str(e)}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 # --- Run the App ---
 if __name__ == '__main__':

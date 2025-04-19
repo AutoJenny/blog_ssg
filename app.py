@@ -297,39 +297,36 @@ def view_post_detail(slug):
             }
         }
     else:
-        with open(markdown_path, 'r') as f:
-            content = f.read()
-            # Parse front matter
-            front_matter_match = re.match(r'^---\n(.*?)\n---\n', content, re.DOTALL)
-            if front_matter_match:
-                front_matter = front_matter_match.group(1)
-                metadata = yaml.safe_load(front_matter)
-                
-                # Initialize missing fields with default values
-                if 'conclusion' not in metadata:
-                    metadata['conclusion'] = {
-                        'heading': 'Conclusion',
-                        'text': ''
-                    }
-                
-                # Validate required fields
-                required_fields = ['title', 'subtitle', 'summary', 'sections']
-                missing_fields = [field for field in required_fields if field not in metadata]
-                if missing_fields:
-                    app.logger.warning(f"Missing required fields in {slug}: {', '.join(missing_fields)}")
-                    metadata['validation_errors'] = {
-                        'missing_fields': missing_fields,
-                        'message': f"Missing required fields: {', '.join(missing_fields)}"
-                    }
-            else:
-                app.logger.warning(f"No front matter found in {markdown_path}")
-                metadata = {
-                    'title': f'Invalid post format: {slug}',
-                    'conclusion': {
-                        'heading': 'Conclusion',
-                        'text': ''
-                    }
+        try:
+            # Use frontmatter library instead of regex
+            post_fm = frontmatter.load(markdown_path)
+            metadata = post_fm.metadata
+            
+            # Initialize missing fields with default values
+            if 'conclusion' not in metadata:
+                metadata['conclusion'] = {
+                    'heading': 'Conclusion',
+                    'text': ''
                 }
+            
+            # Validate required fields
+            required_fields = ['title', 'subtitle', 'summary', 'sections']
+            missing_fields = [field for field in required_fields if field not in metadata]
+            if missing_fields:
+                app.logger.warning(f"Missing required fields in {slug}: {', '.join(missing_fields)}")
+                metadata['validation_errors'] = {
+                    'missing_fields': missing_fields,
+                    'message': f"Missing required fields: {', '.join(missing_fields)}"
+                }
+        except Exception as e:
+            app.logger.error(f"Error parsing front matter in {markdown_path}: {str(e)}")
+            metadata = {
+                'title': f'Error parsing post: {slug}',
+                'conclusion': {
+                    'heading': 'Conclusion',
+                    'text': ''
+                }
+            }
 
     # Load workflow status
     workflow_path = os.path.join('_data', 'workflow_status.json')
@@ -370,7 +367,9 @@ def view_post_detail(slug):
     return render_template('admin_post_detail.html',
                          post=metadata,
                          status=status_data,
-                         image_library=image_library)
+                         image_library=image_library,
+                         slug=slug,
+                         config=app.config)
 
 
 # --- NEW API Endpoint for Watermarking All Images ---
@@ -735,39 +734,27 @@ def update_content(slug):
         if not os.path.exists(markdown_file):
             return jsonify({'success': False, 'error': 'Post not found'}), 404
 
-        # Load the current content
-        with open(markdown_file, 'r', encoding='utf-8') as f:
-            content = f.read()
-
-        # Parse the front matter
-        front_matter_match = re.match(r'^---\n(.*?)\n---\n(.*)$', content, re.DOTALL)
-        if not front_matter_match:
-            return jsonify({'success': False, 'error': 'Invalid markdown file format'}), 400
-
-        front_matter = yaml.safe_load(front_matter_match.group(1))
-        markdown_content = front_matter_match.group(2)
-
+        # Load the current content using frontmatter library
+        post = frontmatter.load(markdown_file)
+        
         # Update the content from the request
         data = request.get_json()
         
         # Update summary
-        front_matter['summary'] = data.get('summary', '')
+        post.metadata['summary'] = data.get('summary', '')
         
         # Update sections
-        front_matter['sections'] = data.get('sections', [])
+        post.metadata['sections'] = data.get('sections', [])
         
         # Update conclusion
-        front_matter['conclusion'] = data.get('conclusion', {
+        post.metadata['conclusion'] = data.get('conclusion', {
             'heading': '',
             'text': ''
         })
 
         # Write the updated content back to the file
         with open(markdown_file, 'w', encoding='utf-8') as f:
-            f.write('---\n')
-            yaml.dump(front_matter, f, allow_unicode=True)
-            f.write('---\n')
-            f.write(markdown_content)
+            f.write(frontmatter.dumps(post))
 
         # Update workflow status if all required fields are filled
         workflow_file = '_data/workflow_status.json'
@@ -777,9 +764,9 @@ def update_content(slug):
             
             if slug in workflow_data:
                 # Check if all required fields are filled
-                has_summary = bool(front_matter.get('summary'))
-                has_sections = bool(front_matter.get('sections'))
-                has_conclusion = bool(front_matter.get('conclusion', {}).get('text'))
+                has_summary = bool(post.metadata.get('summary'))
+                has_sections = bool(post.metadata.get('sections'))
+                has_conclusion = bool(post.metadata.get('conclusion', {}).get('text'))
                 
                 if has_summary and has_sections and has_conclusion:
                     workflow_data[slug]['stages']['authoring']['status'] = 'complete'
@@ -796,6 +783,62 @@ def update_content(slug):
     except Exception as e:
         app.logger.error(f"Error updating content for {slug}: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/import_content/<string:slug>', methods=['POST'])
+def import_content(slug):
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file provided'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+        
+        # Save the uploaded file temporarily
+        temp_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(temp_path)
+        
+        try:
+            # Parse the content file
+            from scripts.parse_content import parse_file
+            parsed_content = parse_file(temp_path)
+            
+            # Update the post's content
+            post_path = os.path.join(app.config['POSTS_DIR'], f"{slug}.md")
+            if not os.path.exists(post_path):
+                return jsonify({'error': 'Post not found'}), 404
+            
+            # Load the existing post using frontmatter library
+            post = frontmatter.load(post_path)
+            
+            # Update the metadata with the new content
+            post.metadata.update({
+                'summary': parsed_content['summary'],
+                'sections': parsed_content['sections'],
+                'conclusion': parsed_content['conclusion']
+            })
+            
+            # Write the updated content back to the file
+            with open(post_path, 'w', encoding='utf-8') as f:
+                f.write(frontmatter.dumps(post))
+            
+            # Update workflow status
+            workflow_data = load_json_data(DATA_DIR / WORKFLOW_STATUS_FILE)
+            if slug in workflow_data:
+                workflow_data[slug]['stages']['authoring']['status'] = 'complete'
+                workflow_data[slug]['stages']['authoring']['completed_at'] = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds') + 'Z'
+                save_json_data(DATA_DIR / WORKFLOW_STATUS_FILE, workflow_data)
+            
+            return jsonify(parsed_content)
+            
+        finally:
+            # Clean up the temporary file
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+                
+    except Exception as e:
+        logging.error(f"Error importing content: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 # --- Run the App ---
 if __name__ == '__main__':

@@ -7,6 +7,7 @@
     <title>Manage: {{ post.title | default('Unknown Post') }} - Blog Workflow</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         :root {
             --bg-color: #ffffff;
@@ -133,6 +134,55 @@
         .help-content code { background-color: var(--code-bg); padding: 0.1em 0.3em; border-radius: 2px; font-size: 0.95em; }
         .help-content.active { display: block; }
         h2 > .help-trigger { vertical-align: baseline; }
+
+        /* --- Modal Dark Mode Styles --- */
+        [data-theme="dark"] .modal-content {
+            background-color: var(--post-bg);
+            color: var(--text-color);
+            border-color: var(--post-border);
+        }
+        [data-theme="dark"] .modal-header {
+            border-bottom-color: var(--post-border);
+        }
+        [data-theme="dark"] .modal-footer {
+            border-top-color: var(--post-border);
+        }
+        [data-theme="dark"] .modal-body pre {
+            background-color: var(--code-bg);
+            color: var(--text-color);
+            border-color: var(--post-border);
+        }
+        [data-theme="dark"] .modal-body h6 {
+            color: var(--text-color);
+        }
+        [data-theme="dark"] .modal-body ul {
+            color: var(--text-color);
+        }
+        [data-theme="dark"] .modal-body p {
+            color: var(--text-color);
+        }
+        [data-theme="dark"] .modal-body code {
+            background-color: var(--code-bg);
+            color: var(--text-color);
+        }
+
+        /* Example code block styles */
+        .example-code {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            border: 1px solid #444;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin-bottom: 1rem;
+        }
+
+        [data-theme="dark"] .example-code {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            border-color: #333;
+        }
 
         /* --- Log Output Styles --- */
         #log-output { 
@@ -263,6 +313,95 @@
                     II. Content Authoring & Structuring
                 </summary>
                 <div class="stage-content">
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Import Content</h5>
+                            <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#importFormatModal">
+                                <i class="bi bi-info-circle"></i> Format Info
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <form id="importContentForm" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label for="contentFile" class="form-label">Upload HTML or Markdown file</label>
+                                    <input type="file" class="form-control" id="contentFile" name="file" accept=".html,.htm,.md,.markdown" required>
+                                    <div class="form-text">Supported formats: HTML (.html, .htm) or Markdown (.md, .markdown)</div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-upload me-1"></i>Import Content
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Import Format Info Modal -->
+                    <div class="modal fade" id="importFormatModal" tabindex="-1" aria-labelledby="importFormatModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="importFormatModalLabel">Content Import Format Guide</h5>
+                                    <div class="ms-auto me-2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary copy-guide" title="Copy Format Guide to Clipboard">
+                                            <i class="bi bi-clipboard"></i> Copy Guide
+                                        </button>
+                                    </div>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <h6>Supported Formats</h6>
+                                    <ul>
+                                        <li>Markdown (.md) - Uses standard Markdown syntax</li>
+                                        <li>HTML (.html) - Uses standard HTML tags</li>
+                                    </ul>
+
+                                    <h6 class="mt-3">Required Structure</h6>
+                                    <p>Your content should follow this structure:</p>
+                                    <pre class="example-code">
+# Title (optional, will be ignored)
+## Summary
+[Your summary text here]
+
+## Section 1
+[Section 1 content]
+
+## Section 2
+[Section 2 content]
+
+...
+
+## Conclusion
+[Conclusion text]</pre>
+
+                                    <h6 class="mt-3">Formatting Guidelines</h6>
+                                    <ul>
+                                        <li>Use <code>##</code> for section headings in Markdown</li>
+                                        <li>Use <code>&lt;h2&gt;</code> for section headings in HTML</li>
+                                        <li>Content can include basic HTML tags (p, b, i, ul, li)</li>
+                                        <li>Each section should have a heading and content</li>
+                                        <li>The last section will be treated as the conclusion</li>
+                                    </ul>
+
+                                    <h6 class="mt-3">Example Markdown</h6>
+                                    <pre class="example-code">
+## Summary
+This is a brief summary of the article.
+
+## Introduction
+This is the introduction section.
+
+## Main Content
+This is the main content section.
+
+## Conclusion
+This is the conclusion section.</pre>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mb-4">
                         <h3>Summary</h3>
                         <div class="mb-3">
@@ -943,6 +1082,215 @@
                     saveStatus.textContent = '';
                 }, 3000);
             });
+        });
+
+        // Import Content functionality
+        document.getElementById('importContent').addEventListener('click', function() {
+            const fileInput = document.getElementById('contentFile');
+            const errorDiv = document.getElementById('importError');
+            const slug = '{{ slug }}';
+            
+            if (!fileInput.files.length) {
+                errorDiv.textContent = 'Please select a file to upload';
+                errorDiv.classList.remove('d-none');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Show loading state
+            const importButton = this;
+            importButton.disabled = true;
+            importButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Importing...';
+
+            fetch(`/api/import_content/${slug}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Update the form fields with the imported content
+                    if (data.summary) {
+                        document.getElementById('summary').value = data.summary;
+                    }
+                    
+                    // Clear existing sections
+                    const sectionsContainer = document.getElementById('sections-container');
+                    sectionsContainer.innerHTML = '';
+                    
+                    // Add new sections
+                    if (data.sections && data.sections.length > 0) {
+                        data.sections.forEach((section, index) => {
+                            const newSection = document.createElement('div');
+                            newSection.className = 'section-item mb-4 p-3 border rounded';
+                            newSection.setAttribute('data-section-index', index);
+                            newSection.innerHTML = `
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="mb-0">Section ${index + 1}</h4>
+                                    <button type="button" class="btn btn-sm btn-outline-danger delete-section" data-section-index="${index}">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Heading</label>
+                                    <input type="text" class="form-control section-heading" value="${section.heading}" data-field="heading">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Content</label>
+                                    <textarea class="form-control section-content" rows="5" data-field="text">${section.text}</textarea>
+                                    <div class="form-text">Use HTML tags for formatting (p, b, i, ul, li)</div>
+                                </div>
+                            `;
+                            sectionsContainer.appendChild(newSection);
+                        });
+                    }
+
+                    if (data.conclusion) {
+                        document.getElementById('conclusion-heading').value = data.conclusion.heading || '';
+                        document.getElementById('conclusion-text').value = data.conclusion.text || '';
+                    }
+
+                    // Close the modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('importContentModal'));
+                    modal.hide();
+
+                    // Show success message
+                    alert('Content imported successfully!');
+                } else {
+                    throw new Error(data.error || 'Failed to import content');
+                }
+            })
+            .catch(error => {
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.classList.remove('d-none');
+            })
+            .finally(() => {
+                importButton.disabled = false;
+                importButton.innerHTML = 'Import';
+            });
+        });
+
+        // Handle content import
+        document.getElementById('importContentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const form = e.target;
+            const fileInput = form.querySelector('input[type="file"]');
+            const submitButton = form.querySelector('button[type="submit"]');
+            
+            if (!fileInput.files.length) {
+                alert('Please select a file to upload');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            try {
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Importing...';
+                
+                const response = await fetch(`/api/import_content/${slug}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to import content');
+                }
+                
+                // Update the form fields with the imported content
+                document.getElementById('summary').value = data.summary;
+                
+                // Clear existing sections
+                const sectionsContainer = document.getElementById('sections-container');
+                sectionsContainer.innerHTML = '';
+                
+                // Add sections from imported content
+                data.sections.forEach((section, index) => {
+                    addSection(section.heading, section.text, section.imageId);
+                });
+                
+                // Update conclusion
+                document.getElementById('conclusion-heading').value = data.conclusion.heading;
+                document.getElementById('conclusion-text').value = data.conclusion.text;
+                
+                // Show success message
+                alert('Content imported successfully!');
+                
+            } catch (error) {
+                console.error('Error importing content:', error);
+                alert(`Error importing content: ${error.message}`);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="bi bi-upload me-1"></i>Import Content';
+                form.reset();
+            }
+        });
+
+        // Copy guide functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const copyGuideButton = document.querySelector('.copy-guide');
+            if (copyGuideButton) {
+                copyGuideButton.addEventListener('click', async function() {
+                    const modalBody = document.querySelector('#importFormatModal .modal-body');
+                    const textToCopy = Array.from(modalBody.children)
+                        .map(element => {
+                            if (element.tagName === 'H6') {
+                                return `\n${element.textContent}\n`;
+                            } else if (element.tagName === 'UL' || element.tagName === 'OL') {
+                                return Array.from(element.children)
+                                    .map(li => `- ${li.textContent}`)
+                                    .join('\n');
+                            } else if (element.tagName === 'PRE') {
+                                return `\n${element.textContent}\n`;
+                            } else if (element.tagName === 'P') {
+                                return element.textContent;
+                            }
+                            return '';
+                        })
+                        .filter(text => text.trim())
+                        .join('\n\n');
+
+                    try {
+                        await navigator.clipboard.writeText(textToCopy);
+                        const originalText = this.innerHTML;
+                        this.innerHTML = '<i class="bi bi-check-circle"></i> Copied!';
+                        setTimeout(() => {
+                            this.innerHTML = originalText;
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Failed to copy text: ', err);
+                        // Fallback for older browsers
+                        const textArea = document.createElement('textarea');
+                        textArea.value = textToCopy;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        try {
+                            document.execCommand('copy');
+                            const originalText = this.innerHTML;
+                            this.innerHTML = '<i class="bi bi-check-circle"></i> Copied!';
+                            setTimeout(() => {
+                                this.innerHTML = originalText;
+                            }, 2000);
+                        } catch (fallbackErr) {
+                            console.error('Fallback copy failed: ', fallbackErr);
+                            alert('Failed to copy text to clipboard. Please try again or copy manually.');
+                        }
+                        document.body.removeChild(textArea);
+                    }
+                });
+            }
         });
     </script>
 </body>

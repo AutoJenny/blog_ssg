@@ -372,10 +372,28 @@ def view_post_detail(slug):
     else:
         image_library = {}
 
+    # Load authors data
+    authors_path = os.path.join('_data', 'authors.json')
+    app.logger.info(f"Loading authors from: {os.path.abspath(authors_path)}")
+    if os.path.exists(authors_path):
+        with open(authors_path, 'r') as f:
+            try:
+                authors = json.load(f)
+                app.logger.info(f"Loaded authors data: {authors}")
+                app.logger.info(f"Authors type: {type(authors)}")
+                app.logger.info(f"Authors has items() method: {hasattr(authors, 'items')}")
+            except json.JSONDecodeError as e:
+                app.logger.error(f"Error decoding authors.json: {e}")
+                authors = {}
+    else:
+        app.logger.warning(f"Authors file not found at: {os.path.abspath(authors_path)}")
+        authors = {}
+
     return render_template('admin_post_detail.html',
                          post=metadata,
                          status=status_data,
                          image_library=image_library,
+                         authors=authors,  # Pass the dictionary directly
                          slug=slug,
                          config=app.config)
 
@@ -676,7 +694,7 @@ def update_metadata(slug):
             return jsonify({'success': False, 'error': 'No data provided'}), 400
 
         # Validate required fields
-        required_fields = ['concept', 'title', 'subtitle', 'slug']
+        required_fields = ['concept', 'title', 'subtitle', 'slug', 'author']
         for field in required_fields:
             if field not in data:
                 return jsonify({'success': False, 'error': f'Missing required field: {field}'}), 400
@@ -693,6 +711,7 @@ def update_metadata(slug):
         post.metadata['concept'] = data['concept']
         post.metadata['title'] = data['title']
         post.metadata['subtitle'] = data['subtitle']
+        post.metadata['author'] = data['author']
 
         # If the slug is being changed, we need to rename the file
         if data['slug'] != slug:
@@ -726,6 +745,13 @@ def update_metadata(slug):
         else:
             # Just save the updated metadata
             frontmatter.dump(post, md_file_path)
+
+        # Update workflow status for author
+        workflow_status_path = DATA_DIR / WORKFLOW_STATUS_FILE
+        workflow_data = load_json_data(workflow_status_path)
+        if workflow_data and slug in workflow_data:
+            workflow_data[slug]['stages']['metadata']['author_status'] = 'complete'
+            save_json_data(workflow_data, workflow_status_path)
 
         return jsonify({'success': True})
 
@@ -873,6 +899,24 @@ def import_content(slug):
     except Exception as e:
         logging.error(f"Error importing content for post '{slug}': {str(e)}", exc_info=True)
         return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/debug/authors')
+def debug_authors():
+    """Debug route to check authors data."""
+    authors_path = os.path.join('_data', 'authors.json')
+    if os.path.exists(authors_path):
+        with open(authors_path, 'r') as f:
+            try:
+                authors = json.load(f)
+                return jsonify({
+                    'authors': authors,
+                    'type': str(type(authors)),
+                    'has_items': hasattr(authors, 'items'),
+                    'keys': list(authors.keys()) if isinstance(authors, dict) else None
+                })
+            except json.JSONDecodeError as e:
+                return jsonify({'error': f"Error decoding authors.json: {e}"})
+    return jsonify({'error': f"Authors file not found at: {os.path.abspath(authors_path)}"})
 
 # --- Run the App ---
 if __name__ == '__main__':

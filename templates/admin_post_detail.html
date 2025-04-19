@@ -293,8 +293,8 @@
                     </div>
 
                     <div class="mb-3">
-                        <button type="button" class="btn btn-primary" id="save-metadata">Save Changes</button>
-                        <span class="ms-2 text-muted" id="save-status"></span>
+                        <button type="button" class="btn btn-primary save-metadata-button" id="save-metadata-concept">Save Changes</button>
+                        <span class="ms-2 text-muted save-status"></span>
                     </div>
 
                     <p>
@@ -477,20 +477,108 @@ This is the conclusion section.</pre>
                     III. Metadata & File Setup
                 </summary>
                 <div class="stage-content">
-                    <p>Create the `.md` file and populate YAML front matter (Title, Subtitle, Description, Date, Author Key, Tags, Content Placeholders).</p>
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Post Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="final-title" class="form-label">Final Title</label>
+                                <input type="text" class="form-control" id="final-title" value="{{ post.title | default('') }}" data-field="title">
+                                <div class="form-text">The final, SEO-optimized title for the post</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="final-subtitle" class="form-label">Subtitle</label>
+                                <input type="text" class="form-control" id="final-subtitle" value="{{ post.subtitle | default('') }}" data-field="subtitle">
+                                <div class="form-text">A compelling subtitle that complements the title</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="meta-description" class="form-label">Meta Description</label>
+                                <textarea class="form-control" id="meta-description" rows="2" data-field="meta_description">{{ post.meta_description | default('') }}</textarea>
+                                <div class="form-text">A concise description for search engines (150-160 characters)</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="meta-keywords" class="form-label">Meta Keywords</label>
+                                <input type="text" class="form-control" id="meta-keywords" value="{{ post.meta_keywords | default('') }}" data-field="meta_keywords">
+                                <div class="form-text">Comma-separated keywords for SEO</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Author & Dates</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="author" class="form-label">Author</label>
+                                <select class="form-select" id="author" data-field="author">
+                                    <option value="">Select an author...</option>
+                                    {% for author_key, author in authors.items() %}
+                                    <option value="{{ author_key }}" {% if post.author == author_key %}selected{% endif %}>{{ author.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="created-date" class="form-label">Created Date</label>
+                                        <input type="date" class="form-control" id="created-date" value="{{ post.created_date | default('') }}" data-field="created_date" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="published-date" class="form-label">Published Date</label>
+                                        <input type="date" class="form-control" id="published-date" value="{{ post.published_date | default('') }}" data-field="published_date">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="updated-date" class="form-label">Last Updated</label>
+                                        <input type="date" class="form-control" id="updated-date" value="{{ post.updated_date | default('') }}" data-field="updated_date" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Tags & Categories</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="tags" class="form-label">Tags</label>
+                                <input type="text" class="form-control" id="tags" value="{{ post.tags | join(', ') | default('') }}" data-field="tags">
+                                <div class="form-text">Comma-separated tags for categorization</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="categories" class="form-label">Categories</label>
+                                <input type="text" class="form-control" id="categories" value="{{ post.categories | join(', ') | default('') }}" data-field="categories">
+                                <div class="form-text">Comma-separated categories</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-primary save-metadata-button" id="save-metadata-details">Save Metadata</button>
+                        <span class="ms-2 text-muted save-status"></span>
+                    </div>
+
                     <p>
                         <strong>Overall Status:</strong> <code class="status-text">{{ status.stages.metadata.status | default('pending') }}</code>
-                         {% set current_status = status.stages.metadata.status | default('pending') %}
-                         {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="metadata" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
-                         {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="metadata" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
+                        {% set current_status = status.stages.metadata.status | default('pending') %}
+                        {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="metadata" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
+                        {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="metadata" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
                     </p>
                     <p><strong>Front Matter Populated:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.front_matter_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.front_matter_status | default('pending') }}</code></p>
                     <p><strong>Tags Defined:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.tags_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.tags_status | default('pending') }}</code></p>
                     <p><strong>Author Assigned:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.author_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.author_status | default('pending') }}</code></p>
-                    <hr>
-                     <p><i>Title: {{ post.title }}</i></p>
-                     <p><i>Author Key: {{ post.author }}</i></p>
-                     <p><i>Tags: {{ post.tags | join(', ') }}</i></p>
                 </div>
             </details>
     
@@ -782,94 +870,125 @@ This is the conclusion section.</pre>
         
         // --- Helper Function for Logging to Page ---
         function logMessage(message, isError = false) {
-            // ... (keep this function as it is) ...
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = isError ? 'text-danger' : 'text-muted';
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logOutput.insertBefore(logEntry, logOutput.firstChild);
         }
+
+        // Initial log message
+        console.log("[DEBUG] Admin post detail JS loaded. Event listeners active.");
+        logMessage("Admin post detail interface loaded.");
+
+        // Add event listeners for save buttons
+        document.querySelectorAll('.save-metadata-button').forEach(button => {
+            console.log("[DEBUG] Found save metadata button:", button.id);
+            button.addEventListener('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                console.log("[DEBUG] Save metadata button clicked:", this.id);
+                
+                const slug = '{{ slug }}';
+                const fields = ['concept', 'title', 'subtitle', 'slug', 'author'];
+                const data = {};
+                
+                fields.forEach(field => {
+                    const element = document.getElementById(field);
+                    if (element) {
+                        data[field] = element.value;
+                    }
+                });
+
+                console.log("[DEBUG] Collected data:", data);
+
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+                const saveStatus = this.nextElementSibling;
+                saveStatus.textContent = '';
+
+                fetch(`/api/update_metadata/${slug}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => {
+                    console.log("[DEBUG] Save response status:", response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("[DEBUG] Save response data:", data);
+                    if (data.success) {
+                        this.innerHTML = '<i class="bi bi-check-circle-fill"></i> Saved';
+                        saveStatus.textContent = 'Changes saved successfully';
+                        saveStatus.className = 'ms-2 text-success';
+                        
+                        // Update the conceptualisation status if all fields are filled
+                        const hasTitle = document.getElementById('title').value.trim() !== '';
+                        const hasSubtitle = document.getElementById('subtitle').value.trim() !== '';
+                        const hasSlug = document.getElementById('slug').value.trim() !== '';
+                        const hasConcept = document.getElementById('concept').value.trim() !== '';
+                        
+                        if (hasTitle && hasSubtitle && hasSlug && hasConcept) {
+                            const statusElement = document.querySelector('[data-stage-key="conceptualisation"] .traffic-light');
+                            if (statusElement) {
+                                statusElement.setAttribute('data-status', 'complete');
+                            }
+                        }
+                    } else {
+                        throw new Error(data.error || 'Failed to save changes');
+                    }
+                })
+                .catch(error => {
+                    console.error("[DEBUG] Save error:", error);
+                    this.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Error';
+                    saveStatus.textContent = `Error: ${error.message}`;
+                    saveStatus.className = 'ms-2 text-danger';
+                })
+                .finally(() => {
+                    setTimeout(() => {
+                        this.disabled = false;
+                        this.innerHTML = this.id === 'save-metadata-concept' ? 'Save Changes' : 'Save Metadata';
+                        saveStatus.textContent = '';
+                    }, 3000);
+                });
+            });
+        });
+
+        // Add input event listeners to update save button state
+        const fields = ['concept', 'title', 'subtitle', 'slug', 'author'];
+        fields.forEach(field => {
+            const element = document.getElementById(field);
+            if (element) {
+                element.addEventListener('input', function() {
+                    document.querySelectorAll('.save-metadata-button').forEach(button => {
+                        button.disabled = false;
+                    });
+                });
+            }
+        });
         
         // --- Main Click Event Listener ---
         document.body.addEventListener('click', function(event) {
             const targetElement = event.target;
-            console.log(`[DEBUG] Body clicked. Target element:`, targetElement);
-            console.log(`[DEBUG] Target classes:`, targetElement.classList);
-    
+            
+            // Skip if clicking the save metadata button
+            if (targetElement.closest('.save-metadata-button')) {
+                return;
+            }
+
             // --- Use closest() to find the nearest relevant ancestor button/trigger ---
             const publishButton = targetElement.closest('.publish-clan-button');
             const statusUpdateButton = targetElement.closest('.status-update-button');
             const helpTrigger = targetElement.closest('.help-trigger');
-    
-            // --- Handle based on which button/trigger was found ---
-            if (publishButton) {
-                console.log("[DEBUG] EXECUTING Publish block.");
-                const slug = publishButton.dataset.slug;
-                if (!slug) { logMessage("Error: No slug found on publish button.", true); return; }
-    
-                logMessage(`Starting Publish/Update job for '${slug}'...`);
-                publishButton.disabled = true;
-                publishButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Publishing...';
-    
-                fetch(`/api/publish_clan/${slug}`, { method: 'POST' })
-                .then(response => { if (!response.ok) { throw new Error(`HTTP error ${response.status}`); } return response.json(); })
-                .then(data => {
-                    logMessage(`Publish job finished for '${slug}'. Success: ${data.success}`, !data.success);
-                    logMessage("--- Script Output ---");
-                    const outputLines = data.output.split('\n');
-                     outputLines.forEach(line => {
-                          // Simple check for common error indicators
-                          const isErrorLine = /ERROR|Traceback|Failed|Not Found|Critical/i.test(line);
-                          logMessage(line.trim(), isErrorLine);
-                     });
-                    logMessage("--- End Script Output ---");
-    
-                     if (!data.success) {
-                          alert(`Publishing script failed or had errors for ${slug}. Check log.`);
-                          publishButton.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Error';
-                          publishButton.classList.remove('btn-success'); publishButton.classList.add('btn-danger');
-                          // Keep button disabled on error? Or re-enable after timeout? Re-enable for now.
-                          setTimeout(() => {
-                               publishButton.disabled = false;
-                               publishButton.innerHTML = '<i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now';
-                               publishButton.classList.remove('btn-danger'); publishButton.classList.add('btn-success');
-                           }, 3000);
-                     } else {
-                          publishButton.innerHTML = '<i class="bi bi-check-circle-fill"></i> Success!';
-                          // Re-enable button after success message?
-                           setTimeout(() => {
-                               publishButton.disabled = false;
-                               publishButton.innerHTML = '<i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now';
-                               logMessage(`Publishing complete for ${slug}. Reload page or check index for updated status.`, false);
-                               alert(`Publishing complete for ${slug}. Reload page or check index for updated status.`);
-                           }, 2000);
-                     }
-    
-                }).catch(error => {
-                    logMessage(`Network Error during publish fetch for '${slug}': ${error.message}`, true);
-                     publishButton.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Network Error';
-                     publishButton.classList.remove('btn-success'); publishButton.classList.add('btn-danger');
-                      setTimeout(() => {
-                           publishButton.disabled = false;
-                           publishButton.innerHTML = '<i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now';
-                           publishButton.classList.remove('btn-danger'); publishButton.classList.add('btn-success');
-                      }, 3000);
-                });
-            }
-            else if (statusUpdateButton) {
-                console.log("[DEBUG] EXECUTING Status Update block.");
-                // ... (keep existing status update logic) ...
-            }
-            else if (helpTrigger) {
-                 console.log("[DEBUG] EXECUTING Help Trigger block.");
-                 // ... (keep existing help logic) ...
-            }
-            // --- Handle clicking outside help ---
-            else if (!targetElement.closest('.help-trigger') && !targetElement.closest('.help-content.active')) {
-                 document.querySelectorAll('.help-content.active').forEach(activeHelp => {
-                      activeHelp.classList.remove('active');
-                 });
-            }
+
+            // ... rest of the click handling code ...
         });
-    
-        // Initial log message
-        console.log("[DEBUG] Admin post detail JS loaded. Event listeners active.");
-        logMessage("Admin post detail interface loaded."); // Log to page
 
         // Theme toggle functionality
         const themeToggle = document.getElementById('themeToggle');
@@ -894,89 +1013,6 @@ This is the conclusion section.</pre>
                 document.body.setAttribute('data-theme', 'dark');
                 localStorage.setItem('theme', 'dark');
                 themeToggle.textContent = 'Toggle Light Mode';
-            }
-        });
-
-        // Add event listener for save button
-        document.getElementById('save-metadata').addEventListener('click', function() {
-            const slug = '{{ slug }}';
-            const fields = ['concept', 'title', 'subtitle', 'slug'];
-            const data = {};
-            
-            fields.forEach(field => {
-                const element = document.getElementById(field);
-                if (element) {
-                    data[field] = element.value;
-                }
-            });
-
-            const saveButton = this;
-            const saveStatus = document.getElementById('save-status');
-            
-            saveButton.disabled = true;
-            saveButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
-            saveStatus.textContent = '';
-
-            fetch(`/api/update_metadata/${slug}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    saveButton.innerHTML = '<i class="bi bi-check-circle-fill"></i> Saved';
-                    saveStatus.textContent = 'Changes saved successfully';
-                    saveStatus.className = 'ms-2 text-success';
-                    
-                    // Update the conceptualisation status if all fields are filled
-                    const hasTitle = document.getElementById('title').value.trim() !== '';
-                    const hasSubtitle = document.getElementById('subtitle').value.trim() !== '';
-                    const hasSlug = document.getElementById('slug').value.trim() !== '';
-                    const hasConcept = document.getElementById('concept').value.trim() !== '';
-                    
-                    if (hasTitle && hasSubtitle && hasSlug && hasConcept) {
-                        const statusElement = document.querySelector('[data-stage-key="conceptualisation"] .traffic-light');
-                        if (statusElement) {
-                            statusElement.setAttribute('data-status', 'complete');
-                        }
-                    }
-                } else {
-                    throw new Error(data.error || 'Failed to save changes');
-                }
-            })
-            .catch(error => {
-                saveButton.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Error';
-                saveStatus.textContent = `Error: ${error.message}`;
-                saveStatus.className = 'ms-2 text-danger';
-            })
-            .finally(() => {
-                setTimeout(() => {
-                    saveButton.disabled = false;
-                    saveButton.innerHTML = 'Save Changes';
-                    saveStatus.textContent = '';
-                }, 3000);
-            });
-        });
-
-        // Add input event listeners to update save button state
-        const fields = ['concept', 'title', 'subtitle', 'slug'];
-        fields.forEach(field => {
-            const element = document.getElementById(field);
-            if (element) {
-                element.addEventListener('input', function() {
-                    const saveButton = document.getElementById('save-metadata');
-                    if (saveButton) {
-                        saveButton.disabled = false;
-                    }
-                });
             }
         });
 

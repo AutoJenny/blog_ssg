@@ -1,0 +1,76 @@
+{
+    "14": {
+        "name": "History & Heritage",
+        "description": "Broad coverage of Scotland's historical events, places, and traditions.",
+        "examples": [
+            "Ancient Scotland",
+            "Castles",
+            "Folklore"
+        ]
+    },
+    "15": {
+        "name": "Clans & Tartans",
+        "description": "In-depth focus on clan histories, tartan design, heraldry, and symbolism.",
+        "examples": [
+            "Clan Profiles",
+            "Tartan Guides",
+            "Family Histories"
+        ]
+    },
+    "19": {
+        "name": "Culture & Tradition",
+        "description": "Everyday life, customs, arts, festivals, music, language, and traditional skills.",
+        "examples": [
+            "Highland Games",
+            "Gaelic",
+            "Bagpipes",
+            "Ceilidhs",
+            "Highlandwear"
+        ]
+    },
+    "20": {
+        "name": "Skills & Crafts",
+        "description": "Hands-on topics and profiles of traditional Scottish crafts and artisans.",
+        "examples": [
+            "Kiltmaking",
+            "Sporran Leatherwork",
+            "Tartan Weaving",
+            "Whisky Making"
+        ]
+    },
+    "7": {
+        "name": "People & Profiles",
+        "description": "Features on notable Scots—historical and modern—and community figures.",
+        "examples": [
+            "Scottish Inventors",
+            "Modern Artisans",
+            "Clan Chiefs"
+        ]
+    },
+    "18": {
+        "name": "Travel & Exploration",
+        "description": "Place-based content, guides, and recommendations.",
+        "examples": [
+            "Scenic Routes",
+            "Historic Sites",
+            "Hebridean Islands"
+        ]
+    },
+    "16": {
+        "name": "Guides & How-Tos",
+        "description": "Practical advice, tutorials, and cultural explainers.",
+        "examples": [
+            "How to Wear a Kilt",
+            "Understanding Highland Dress",
+            "Buying Scottish Gifts"
+        ]
+    },
+    "17": {
+        "name": "Just for Fun",
+        "description": "Humour, quizzes, themed lists, odd facts.",
+        "examples": [
+            "Scots Slang Quiz",
+            "\"Which Clan Are You?\" personality tests"
+        ]
+    }
+} 

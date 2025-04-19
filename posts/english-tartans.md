@@ -1,5 +1,8 @@
 ---
 author: nick-fiddes
+categories:
+- '14'
+- '15'
 concept: An in-depth article about the history and development of English tartans,
   to be published on St George's day. This will focus on issues like similar patterns
   woven in England historically, and how the Celtic Fringe of England took on the

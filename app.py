@@ -3,12 +3,13 @@
 from flask import Flask, render_template, jsonify, request, url_for, send_from_directory
 import os
 import json
+import shutil
 from pathlib import Path
 import frontmatter
 import logging
 import subprocess
 import sys
-import datetime # Already imported, good.
+from datetime import datetime, timezone
 import re 
 import yaml
 from werkzeug.utils import secure_filename
@@ -22,6 +23,17 @@ WORKFLOW_STATUS_FILE = "workflow_status.json" # Main file for post status tracki
 IMAGE_LIBRARY_FILE = "image_library.json"
 UPLOAD_FOLDER = BASE_DIR / 'tmp'  # Add upload folder configuration
 IMAGES_DIR = BASE_DIR / 'images'  # Define images directory
+
+# Define workflow stages
+WORKFLOW_STAGES = [
+    'conceptualisation',
+    'authoring',
+    'metadata',
+    'images',
+    'validation',
+    'publishing_clancom',
+    'syndication'
+]
 
 # Create upload folder if it doesn't exist
 UPLOAD_FOLDER.mkdir(exist_ok=True)
@@ -37,6 +49,7 @@ app.config['UPLOAD_FOLDER'] = str(UPLOAD_FOLDER)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 app.config['POSTS_DIR'] = str(BASE_DIR / POSTS_DIR_NAME)
 app.config['IMAGES_DIR'] = str(IMAGES_DIR)
+app.config['DATA_DIR'] = str(DATA_DIR)  # Add DATA_DIR to app config
 
 # --- Add Static Route for Images (Development Only) ---
 @app.route('/images/<path:filename>')
@@ -79,6 +92,97 @@ def save_json_data(file_path: Path, data: dict):
     except Exception as e:
         logging.error(f"Unexpected error saving JSON data to {file_path}: {e}")
         return False
+
+def parse_post_markdown(content: str) -> dict:
+    """Parse a post's markdown content and return a dictionary of its data."""
+    try:
+        post = frontmatter.loads(content)
+        metadata = post.metadata
+        
+        # Ensure required fields exist
+        metadata.setdefault('title', '')
+        metadata.setdefault('concept', '')
+        metadata.setdefault('author', '')
+        metadata.setdefault('date', '')
+        metadata.setdefault('summary', '')
+        metadata.setdefault('sections', [])
+        metadata.setdefault('conclusion', {})
+        metadata.setdefault('headerImage', {})
+        metadata.setdefault('categories', [])
+        metadata.setdefault('tags', [])
+        
+        # Get list of all images referenced in the post
+        images = []
+        
+        # Add header image if it exists
+        if metadata['headerImage'].get('src'):
+            images.append({
+                'src': metadata['headerImage']['src'],
+                'alt': metadata['headerImage'].get('alt', ''),
+                'caption': metadata['headerImage'].get('caption', ''),
+                'imagePrompt': metadata['headerImage'].get('imagePrompt', ''),
+                'notes': metadata['headerImage'].get('notes', '')
+            })
+        
+        # Add section images
+        for section in metadata['sections']:
+            if section.get('image', {}).get('src'):
+                images.append({
+                    'src': section['image']['src'],
+                    'alt': section['image'].get('alt', ''),
+                    'caption': section['image'].get('caption', ''),
+                    'imagePrompt': section['image'].get('imagePrompt', ''),
+                    'notes': section['image'].get('notes', '')
+                })
+        
+        # Add conclusion image if it exists
+        if metadata['conclusion'].get('image', {}).get('src'):
+            images.append({
+                'src': metadata['conclusion']['image']['src'],
+                'alt': metadata['conclusion']['image'].get('alt', ''),
+                'caption': metadata['conclusion']['image'].get('caption', ''),
+                'imagePrompt': metadata['conclusion']['image'].get('imagePrompt', ''),
+                'notes': metadata['conclusion']['image'].get('notes', '')
+            })
+        
+        metadata['images'] = images
+        return metadata
+        
+    except Exception as e:
+        logging.error(f"Error parsing markdown content: {e}")
+        return {}
+
+def get_detailed_image_info(images: list) -> list:
+    """Get detailed information about each image in the list."""
+    detailed_images = []
+    for img in images:
+        if not img.get('src'):
+            continue
+            
+        image_info = {
+            'src': img['src'],
+            'alt': img.get('alt', ''),
+            'caption': img.get('caption', ''),
+            'imagePrompt': img.get('imagePrompt', ''),
+            'notes': img.get('notes', ''),
+            'exists': False,
+            'dimensions': None,
+            'size': None
+        }
+        
+        # Check if image file exists and get its details
+        try:
+            img_path = BASE_DIR / img['src'].lstrip('/')
+            if img_path.exists():
+                image_info['exists'] = True
+                # Could add image dimensions and size here if needed
+                image_info['size'] = img_path.stat().st_size
+        except Exception as e:
+            logging.error(f"Error getting image details for {img['src']}: {e}")
+            
+        detailed_images.append(image_info)
+        
+    return detailed_images
 
 # --- Flask Routes ---
 
@@ -173,7 +277,7 @@ def create_post():
         return jsonify({"success": False, "error": "Empty 'core_idea' provided"}), 400
 
     # Generate a temporary slug with timestamp
-    timestamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+    timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
     slug = f"new-{timestamp}"
 
     # Create the markdown file
@@ -191,7 +295,7 @@ def create_post():
 title: "New post"
 concept: "{core_idea}"
 layout: post.njk
-date: {datetime.datetime.now().strftime('%Y-%m-%d')}
+date: {datetime.now().strftime('%Y-%m-%d')}
 author: "default"
 tags:
   - post
@@ -236,7 +340,7 @@ conclusion:
                 "stages": {
                     "conceptualisation": {
                         "status": "complete",
-                        "last_updated": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds') + 'Z',
+                        "last_updated": datetime.now(timezone.utc).isoformat(timespec='seconds') + 'Z',
                         "concept": core_idea
                     },
                     "authoring": {
@@ -276,7 +380,7 @@ conclusion:
                         }
                     }
                 },
-                "last_updated": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds') + 'Z'
+                "last_updated": datetime.now(timezone.utc).isoformat(timespec='seconds') + 'Z'
             }
         save_json_data(workflow_status_path, workflow_data)
 
@@ -290,112 +394,92 @@ conclusion:
         logging.error(f"Error creating new post: {e}", exc_info=True)
         return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route('/admin/post/<string:slug>')
+@app.route('/admin/post/<slug>')
 def view_post_detail(slug):
-    """Display the detailed workflow management page for a single post."""
-    # Load the markdown file
-    markdown_path = os.path.join('posts', f'{slug}.md')
-    if not os.path.exists(markdown_path):
-        app.logger.warning(f"Markdown file not found: {markdown_path}")
-        metadata = {
-            'title': f'Post not found: {slug}',
-            'conclusion': {
-                'heading': 'Conclusion',
-                'text': ''
-            }
-        }
-    else:
+    """View and edit details for a specific post."""
+    try:
+        # Load the markdown file
+        md_file_path = os.path.join(app.config['POSTS_DIR'], f"{slug}.md")
+        if not os.path.exists(md_file_path):
+            flash(f"Post file not found: {md_file_path}", "error")
+            return redirect(url_for('index'))
+
+        with open(md_file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        # Initialize workflow status for this post if needed
+        workflow_status_path = Path(app.config['DATA_DIR']) / 'workflow_status.json'
+        workflow_status = load_json_data(workflow_status_path) or {}
+        if slug not in workflow_status:
+            workflow_status[slug] = {'stages': {}}
+        
+        post_status = workflow_status[slug]
+        
+        # Initialize missing stages with default values
+        for stage in WORKFLOW_STAGES:
+            if stage not in post_status['stages']:
+                post_status['stages'][stage] = {'status': 'pending'}
+                if stage == 'images':
+                    post_status['stages'][stage].update({
+                        'prompts_defined_status': 'pending',
+                        'generation_status': 'pending',
+                        'assets_prepared_status': 'pending',
+                        'metadata_integrated_status': 'pending',
+                        'watermarking_status': 'pending',
+                        'watermarking_used_in_publish': False,
+                        'watermarks': {}
+                    })
+                elif stage == 'validation':
+                    post_status['stages'][stage]['last_preview_ok'] = False
+                elif stage == 'syndication':
+                    post_status['stages'][stage].update({
+                        'instagram': {'overall_status': 'pending'},
+                        'facebook': {'overall_status': 'pending'}
+                    })
+        
+        # Save the updated workflow status
+        save_json_data(workflow_status_path, workflow_status)
+
+        # Load authors data
         try:
-            # Use frontmatter library instead of regex
-            post_fm = frontmatter.load(markdown_path)
-            metadata = post_fm.metadata
-            
-            # Initialize missing fields with default values
-            if 'conclusion' not in metadata:
-                metadata['conclusion'] = {
-                    'heading': 'Conclusion',
-                    'text': ''
-                }
-            
-            # Validate required fields
-            required_fields = ['title', 'subtitle', 'summary', 'sections']
-            missing_fields = [field for field in required_fields if field not in metadata]
-            if missing_fields:
-                app.logger.warning(f"Missing required fields in {slug}: {', '.join(missing_fields)}")
-                metadata['validation_errors'] = {
-                    'missing_fields': missing_fields,
-                    'message': f"Missing required fields: {', '.join(missing_fields)}"
-                }
-        except Exception as e:
-            app.logger.error(f"Error parsing front matter in {markdown_path}: {str(e)}")
-            metadata = {
-                'title': f'Error parsing post: {slug}',
-                'conclusion': {
-                    'heading': 'Conclusion',
-                    'text': ''
-                }
-            }
-
-    # Load workflow status
-    workflow_path = os.path.join('_data', 'workflow_status.json')
-    if os.path.exists(workflow_path):
-        with open(workflow_path, 'r') as f:
-            workflow_data = json.load(f)
-            status_data = workflow_data.get(slug, {})
-    else:
-        status_data = {}
-
-    # Initialize missing stages with default values
-    required_stages = {
-        'conceptualisation': {'status': 'pending', 'timestamp': None},
-        'authoring': {'status': 'pending', 'timestamp': None},
-        'metadata': {'status': 'pending', 'timestamp': None},
-        'images': {'status': 'pending', 'timestamp': None},
-        'validation': {'status': 'pending', 'timestamp': None},
-        'publishing_clancom': {'status': 'pending', 'timestamp': None},
-        'syndication': {'status': 'pending', 'timestamp': None}
-    }
-
-    if 'stages' not in status_data:
-        status_data['stages'] = {}
-
-    for stage, defaults in required_stages.items():
-        if stage not in status_data['stages']:
-            app.logger.info(f"Initialized missing stage '{stage}' for post '{slug}'")
-            status_data['stages'][stage] = defaults
-
-    # Load image library
-    image_library_path = os.path.join('_data', 'image_library.json')
-    if os.path.exists(image_library_path):
-        with open(image_library_path, 'r') as f:
-            image_library = json.load(f)
-    else:
-        image_library = {}
-
-    # Load authors data
-    authors_path = os.path.join('_data', 'authors.json')
-    app.logger.info(f"Loading authors from: {os.path.abspath(authors_path)}")
-    if os.path.exists(authors_path):
-        with open(authors_path, 'r') as f:
-            try:
+            authors_file = os.path.join(app.config['DATA_DIR'], 'authors.json')
+            app.logger.info(f"Loading authors from: {authors_file}")
+            with open(authors_file, 'r', encoding='utf-8') as f:
                 authors = json.load(f)
-                app.logger.info(f"Loaded authors data: {authors}")
-                app.logger.info(f"Authors type: {type(authors)}")
-                app.logger.info(f"Authors has items() method: {hasattr(authors, 'items')}")
-            except json.JSONDecodeError as e:
-                app.logger.error(f"Error decoding authors.json: {e}")
-                authors = {}
-    else:
-        app.logger.warning(f"Authors file not found at: {os.path.abspath(authors_path)}")
-        authors = {}
+            app.logger.info(f"Loaded authors data: {authors}")
+            app.logger.info(f"Authors type: {type(authors)}")
+            app.logger.info(f"Authors has items() method: {hasattr(authors, 'items')}")
+        except Exception as e:
+            app.logger.error(f"Error loading authors: {e}")
+            authors = {}
 
-    return render_template('admin_post_detail.html',
-                         post=metadata,
-                         status=status_data,
-                         image_library=image_library,
-                         authors=authors,  # Pass the dictionary directly
-                         slug=slug,
-                         config=app.config)
+        # Load categories data
+        try:
+            categories_file = os.path.join(app.config['DATA_DIR'], 'categories.json')
+            with open(categories_file, 'r', encoding='utf-8') as f:
+                categories = json.load(f)
+        except Exception as e:
+            app.logger.error(f"Error loading categories: {e}")
+            categories = {}
+
+        # Parse the markdown content
+        post_data = parse_post_markdown(content)
+        
+        # Get image details if available
+        images_detailed = get_detailed_image_info(post_data.get('images', []))
+
+        return render_template('admin_post_detail.html',
+                            post=post_data,
+                            slug=slug,
+                            status=post_status,
+                            authors=authors,
+                            categories=categories,
+                            images_detailed=images_detailed,
+                            config=app.config)
+
+    except Exception as e:
+        logging.error(f"Error loading post details: {e}", exc_info=True)
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 # --- NEW API Endpoint for Watermarking All Images ---
@@ -507,7 +591,7 @@ def publish_to_clan_api(slug):
             if 'stages' not in workflow_data[slug]: workflow_data[slug]['stages'] = {}
             if 'publishing_clancom' not in workflow_data[slug]['stages']: workflow_data[slug]['stages']['publishing_clancom'] = {}
 
-            update_time = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds') + 'Z'
+            update_time = datetime.now(timezone.utc).isoformat(timespec='seconds') + 'Z'
             workflow_data[slug]['last_updated'] = update_time
             workflow_data[slug]['stages']['publishing_clancom']['last_publish_attempt'] = update_time
 
@@ -621,7 +705,7 @@ def update_status_api(slug, stage_key):
         else:
              raise ValueError(f"Cannot set status: '{'/'.join(keys[:-1])}' is not a dictionary.")
 
-        post_entry['last_updated'] = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds') + 'Z'
+        post_entry['last_updated'] = datetime.now(timezone.utc).isoformat(timespec='seconds') + 'Z'
 
     except (ValueError, KeyError, TypeError) as e:
          logging.error(f"Error navigating/updating status structure for key '{stage_key}': {e}")
@@ -684,80 +768,59 @@ def restore_post(slug):
         logging.error(f"Error restoring post {slug}: {e}", exc_info=True)
         return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route('/api/update_metadata/<string:slug>', methods=['POST'])
+@app.route('/api/update_metadata/<slug>', methods=['POST'])
 def update_metadata(slug):
-    """Updates the metadata for a post."""
+    """Update post metadata."""
     try:
-        # Get the request data
         data = request.get_json()
-        if not data:
-            return jsonify({'success': False, 'error': 'No data provided'}), 400
-
-        # Validate required fields
-        required_fields = ['concept', 'title', 'subtitle', 'slug', 'author']
-        for field in required_fields:
-            if field not in data:
-                return jsonify({'success': False, 'error': f'Missing required field: {field}'}), 400
-
-        # Check if the post exists
-        md_file_path = BASE_DIR / POSTS_DIR_NAME / f"{slug}.md"
-        if not md_file_path.exists():
-            return jsonify({'success': False, 'error': 'Post not found'}), 404
-
-        # Load the current post
-        post = frontmatter.load(md_file_path)
-
-        # Update the metadata
-        post.metadata['concept'] = data['concept']
-        post.metadata['title'] = data['title']
-        post.metadata['subtitle'] = data['subtitle']
-        post.metadata['author'] = data['author']
-
-        # If the slug is being changed, we need to rename the file
-        if data['slug'] != slug:
-            # Check if the new slug already exists
-            new_md_file_path = BASE_DIR / POSTS_DIR_NAME / f"{data['slug']}.md"
-            if new_md_file_path.exists():
-                return jsonify({'success': False, 'error': 'A post with this slug already exists'}), 400
-
-            # Update the slug in metadata
-            post.metadata['slug'] = data['slug']
-
-            # Save the file with the new name
-            frontmatter.dump(post, new_md_file_path)
-
-            # Delete the old file
-            md_file_path.unlink()
-
-            # Update the workflow status file
-            workflow_status_path = DATA_DIR / WORKFLOW_STATUS_FILE
-            workflow_data = load_json_data(workflow_status_path)
-            if workflow_data and slug in workflow_data:
-                workflow_data[data['slug']] = workflow_data.pop(slug)
-                save_json_data(workflow_data, workflow_status_path)
-
-            # Update the image directory if it exists
-            old_images_dir = BASE_DIR / 'images' / 'posts' / slug
-            new_images_dir = BASE_DIR / 'images' / 'posts' / data['slug']
-            if old_images_dir.exists():
-                old_images_dir.rename(new_images_dir)
-
-        else:
-            # Just save the updated metadata
-            frontmatter.dump(post, md_file_path)
-
-        # Update workflow status for author
-        workflow_status_path = DATA_DIR / WORKFLOW_STATUS_FILE
-        workflow_data = load_json_data(workflow_status_path)
-        if workflow_data and slug in workflow_data:
-            workflow_data[slug]['stages']['metadata']['author_status'] = 'complete'
-            save_json_data(workflow_data, workflow_status_path)
-
-        return jsonify({'success': True})
-
+        
+        # Load the current post content
+        post_path = os.path.join(app.config['POSTS_DIR'], f"{slug}.md")
+        if not os.path.exists(post_path):
+            return jsonify({"success": False, "error": "Post not found"}), 404
+            
+        post = frontmatter.load(post_path)
+        
+        # Update fields if they exist in the request
+        fields_to_update = ['concept', 'title', 'subtitle', 'author', 'categories']
+        for field in fields_to_update:
+            if field in data:
+                if field == 'categories':
+                    # Convert category IDs to list if they're not already
+                    categories = data[field] if isinstance(data[field], list) else [data[field]]
+                    post.metadata[field] = categories
+                else:
+                    post.metadata[field] = data[field]
+        
+        # Save the updated content
+        with open(post_path, 'w', encoding='utf-8') as f:
+            f.write(frontmatter.dumps(post))
+        
+        # Update workflow status
+        workflow_status = load_json_data(DATA_DIR / WORKFLOW_STATUS_FILE)
+        if slug not in workflow_status:
+            workflow_status[slug] = {'stages': {}}
+        
+        # Update the last_updated timestamp
+        workflow_status[slug]['last_updated'] = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00Z')
+        
+        # If this is a concept update, update the conceptualisation stage
+        if 'concept' in data:
+            if 'conceptualisation' not in workflow_status[slug]['stages']:
+                workflow_status[slug]['stages']['conceptualisation'] = {}
+            
+            workflow_status[slug]['stages']['conceptualisation'].update({
+                'status': 'complete',
+                'last_updated': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00Z'),
+                'concept': data['concept']
+            })
+        
+        save_json_data(DATA_DIR / WORKFLOW_STATUS_FILE, workflow_status)
+        
+        return jsonify({"success": True})
     except Exception as e:
-        logging.error(f"Error updating metadata for post '{slug}': {e}", exc_info=True)
-        return jsonify({'success': False, 'error': str(e)}), 500
+        app.logger.error(f"Error updating metadata: {e}", exc_info=True)
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/api/update_content/<string:slug>', methods=['POST'])
 def update_content(slug):
@@ -873,10 +936,10 @@ def import_content(slug):
             workflow_data[slug]['stages']['authoring'] = {
                 'status': 'complete',
                 'text_format_status': 'complete',
-                'last_updated': datetime.datetime.now().isoformat()
+                'last_updated': datetime.utcnow().isoformat()
             }
             
-            save_json_data(workflow_data, DATA_DIR / WORKFLOW_STATUS_FILE)
+            save_json_data(DATA_DIR / WORKFLOW_STATUS_FILE, workflow_data)
             
             # Clean up the temporary file
             os.unlink(temp_path)

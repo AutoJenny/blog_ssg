@@ -505,6 +505,32 @@ This is the conclusion section.</pre>
                                 <input type="text" class="form-control" id="meta-keywords" value="{{ post.meta_keywords | default('') }}" data-field="meta_keywords">
                                 <div class="form-text">Comma-separated keywords for SEO</div>
                             </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Categories</label>
+                                <div class="row g-3">
+                                    {% for cat_id, category in categories.items() %}
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input category-checkbox" type="checkbox" 
+                                                   value="{{ cat_id }}" 
+                                                   id="category-{{ cat_id }}"
+                                                   {% if post.categories and cat_id in post.categories %}checked{% endif %}>
+                                            <label class="form-check-label" for="category-{{ cat_id }}" 
+                                                   title="{{ category.description }}">
+                                                {{ category.name }}
+                                                <i class="bi bi-info-circle-fill text-muted" 
+                                                   data-bs-toggle="tooltip" 
+                                                   data-bs-placement="right" 
+                                                   title="{{ category.description }}
+Examples: {{ category.examples | join(', ') }}"></i>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-text mt-2">Select all applicable categories for this post</div>
+                            </div>
                         </div>
                     </div>
 
@@ -555,12 +581,6 @@ This is the conclusion section.</pre>
                                 <label for="tags" class="form-label">Tags</label>
                                 <input type="text" class="form-control" id="tags" value="{{ post.tags | join(', ') | default('') }}" data-field="tags">
                                 <div class="form-text">Comma-separated tags for categorization</div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="categories" class="form-label">Categories</label>
-                                <input type="text" class="form-control" id="categories" value="{{ post.categories | join(', ') | default('') }}" data-field="categories">
-                                <div class="form-text">Comma-separated categories</div>
                             </div>
                         </div>
                     </div>
@@ -899,6 +919,13 @@ This is the conclusion section.</pre>
                         data[field] = element.value;
                     }
                 });
+
+                // Collect selected categories
+                const selectedCategories = [];
+                document.querySelectorAll('.category-checkbox:checked').forEach(checkbox => {
+                    selectedCategories.push(checkbox.value);
+                });
+                data.categories = selectedCategories;
 
                 console.log("[DEBUG] Collected data:", data);
 
@@ -1265,6 +1292,12 @@ This is the conclusion section.</pre>
                     }
                 });
             }
+        });
+
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
         });
     </script>
 </body>

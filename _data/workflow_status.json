@@ -119,6 +119,52 @@
             }
         }
     },
+    "english-tartans": {
+        "last_updated": "2025-04-19T08:52:51+00:00Z",
+        "stages": {
+            "conceptualisation": {
+                "status": "complete",
+                "last_updated": "2025-04-19T08:52:51+00:00Z",
+                "concept": "An in-depth article about the history and development of English tartans, to be published on St George's day. This will focus on issues like similar patterns woven in England historically, and how the Celtic Fringe of England took on the idea of tartans from Scotland, and also how some English families or other organisations have developed their own tartans."
+            },
+            "authoring": {
+                "status": "pending",
+                "text_format_status": "pending"
+            },
+            "metadata": {
+                "status": "pending",
+                "front_matter_status": "pending",
+                "tags_status": "pending",
+                "author_status": "pending"
+            },
+            "images": {
+                "status": "pending",
+                "prompts_defined_status": "pending",
+                "generation_status": "pending",
+                "assets_prepared_status": "pending",
+                "metadata_integrated_status": "pending",
+                "watermarking_status": "pending",
+                "watermarking_used_in_publish": false,
+                "watermarks": {}
+            },
+            "validation": {
+                "status": "pending",
+                "last_preview_ok": false
+            },
+            "publishing_clancom": {
+                "status": "pending"
+            },
+            "syndication": {
+                "status": "pending",
+                "instagram": {
+                    "overall_status": "pending"
+                },
+                "facebook": {
+                    "overall_status": "pending"
+                }
+            }
+        }
+    },
     "an-in-depth-article-about-the-history-and-developm": {
         "stages": {},
         "last_updated": "2025-04-18T15:22:09+00:00Z"

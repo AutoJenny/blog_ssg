@@ -43,6 +43,7 @@ class MetadataGenerator:
         response = self.provider.generate_text(prompt)
         if not response.error:
             response.text = self._validate_length(response.text.strip(), 60, "title")
+        response.prompt = prompt
         return response
     
     def generate_meta_description(self, content: str) -> LLMResponse:
@@ -66,6 +67,7 @@ class MetadataGenerator:
         response = self.provider.generate_text(prompt)
         if not response.error:
             response.text = self._validate_length(response.text.strip(), 160, "meta_description")
+        response.prompt = prompt
         return response
     
     def generate_keywords(self, content: str) -> LLMResponse:
@@ -92,6 +94,7 @@ class MetadataGenerator:
             # Ensure proper comma separation and limit to 10 keywords
             keywords = [k.strip() for k in response.text.split(',')][:10]
             response.text = ', '.join(keywords)
+        response.prompt = prompt
         return response
     
     def generate_subtitle(self, content: str, title: str) -> LLMResponse:
@@ -117,6 +120,7 @@ class MetadataGenerator:
         response = self.provider.generate_text(prompt)
         if not response.error:
             response.text = self._validate_length(response.text.strip(), 100, "subtitle")
+        response.prompt = prompt
         return response
     
     def generate_all_metadata(self, content: str, current_title: Optional[str] = None) -> Dict[str, str]:

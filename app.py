@@ -14,6 +14,12 @@ import re
 import yaml
 from werkzeug.utils import secure_filename
 
+# Import LLM modules
+from scripts.llm import MetadataGenerator
+from scripts.llm.config import load_config, save_config
+from scripts.llm.base import LLMConfig
+from scripts.llm.factory import LLMFactory
+
 # --- Configuration Constants ---
 BASE_DIR = Path(__file__).resolve().parent
 POSTS_DIR_NAME = "posts"
@@ -990,6 +996,94 @@ def debug_authors():
             except json.JSONDecodeError as e:
                 return jsonify({'error': f"Error decoding authors.json: {e}"})
     return jsonify({'error': f"Authors file not found at: {os.path.abspath(authors_path)}"})
+
+# --- LLM Management Routes ---
+@app.route('/admin/llm')
+def llm_management():
+    """LLM management interface."""
+    try:
+        # Load current LLM configuration
+        configs = load_config()
+        default_config = configs.get("default", LLMConfig(
+            provider_type="ollama",
+            model_name="mistral",
+            api_base="http://localhost:11434",
+            api_key=None
+        ))
+
+        # Create a metadata generator instance
+        generator = MetadataGenerator()
+        
+        # Extract prompt templates from the generator methods
+        example_content = "Example blog post content about Scottish heritage."
+        example_title = "Example Current Title"
+        
+        # Get the prompts by calling the methods but extracting just the prompt part
+        title_response = generator.generate_title(example_content, example_title)
+        meta_desc_response = generator.generate_meta_description(example_content)
+        keywords_response = generator.generate_keywords(example_content)
+
+        prompts = {
+            "title_generation": title_response.prompt if hasattr(title_response, 'prompt') else "Title generation prompt not available",
+            "meta_description": meta_desc_response.prompt if hasattr(meta_desc_response, 'prompt') else "Meta description prompt not available",
+            "keywords": keywords_response.prompt if hasattr(keywords_response, 'prompt') else "Keywords prompt not available"
+        }
+
+        return render_template('llm/admin_llm.html',
+                            config=default_config,
+                            prompts=prompts)
+    except Exception as e:
+        logging.error(f"Error loading LLM management interface: {e}", exc_info=True)
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/llm/config', methods=['POST'])
+def update_llm_config():
+    """Update LLM configuration."""
+    try:
+        data = request.get_json()
+        
+        # Create new config
+        new_config = LLMConfig(
+            provider_type=data.get('provider_type', 'ollama'),
+            model_name=data.get('model_name', 'mistral'),
+            api_base=data.get('api_base'),
+            api_key=data.get('api_key')  # None if not provided
+        )
+        
+        # Save configuration
+        configs = {"default": new_config}
+        save_config(configs, os.path.join(app.config['DATA_DIR'], 'llm_config.json'))
+        
+        return jsonify({"success": True})
+    except Exception as e:
+        logging.error(f"Error updating LLM config: {e}", exc_info=True)
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/llm/test', methods=['POST'])
+def test_llm():
+    """Test LLM with a prompt."""
+    try:
+        data = request.get_json()
+        prompt = data.get('prompt')
+        if not prompt:
+            return jsonify({"success": False, "error": "No prompt provided"}), 400
+            
+        # Create a provider instance
+        configs = load_config()
+        provider = LLMFactory.create_provider(configs["default"])
+        
+        # Generate response
+        response = provider.generate_text(prompt)
+        if response.error:
+            return jsonify({"success": False, "error": response.error}), 500
+            
+        return jsonify({
+            "success": True,
+            "response": response.text
+        })
+    except Exception as e:
+        logging.error(f"Error testing LLM: {e}", exc_info=True)
+        return jsonify({"success": False, "error": str(e)}), 500
 
 # --- Run the App ---
 if __name__ == '__main__':

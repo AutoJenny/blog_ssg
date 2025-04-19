@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Management - Blog Workflow</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #ccc;
+            --post-bg: #ffffff;
+            --post-border: #ddd;
+            --log-bg: #f8f8f8;
+            --help-bg: #ffffe0;
+            --code-bg: #eee;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --border-color: #444;
+            --post-bg: #2d2d2d;
+            --post-border: #444;
+            --log-bg: #2d2d2d;
+            --help-bg: #2d2d2d;
+            --code-bg: #3d3d3d;
+        }
+
+        body { 
+            font-family: sans-serif; 
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 32px;
+            height: 32px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+            transition: transform 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Blog Manager</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Posts</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin/llm">LLM Management</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <button class="theme-toggle" id="themeToggle" title="Toggle dark/light mode"></button>
+
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-8">LLM Management</h1>
+
+        <!-- Configuration Section -->
+        <div class="bg-white shadow rounded-lg p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Configuration</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-lg font-medium mb-3">Current Settings</h3>
+                    <div class="bg-gray-50 p-4 rounded">
+                        <p><strong>Provider:</strong> <span id="current-provider">{{ config.provider_type }}</span></p>
+                        <p><strong>Model:</strong> <span id="current-model">{{ config.model_name }}</span></p>
+                        <p><strong>API Base:</strong> <span id="current-api-base">{{ config.api_base }}</span></p>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium mb-3">Update Settings</h3>
+                    <form id="config-form" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Provider Type</label>
+                            <select name="provider_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                <option value="ollama" {% if config.provider_type == 'ollama' %}selected{% endif %}>Ollama</option>
+                                <option value="openai" {% if config.provider_type == 'openai' %}selected{% endif %}>OpenAI</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Model Name</label>
+                            <input type="text" name="model_name" value="{{ config.model_name }}" 
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">API Base URL</label>
+                            <input type="text" name="api_base" value="{{ config.api_base }}"
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">API Key</label>
+                            <input type="password" name="api_key" placeholder="Leave blank to keep current"
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                        </div>
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            Update Configuration
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Interface -->
+        <div class="bg-white shadow rounded-lg p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Test Interface</h2>
+            <form id="test-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Test Prompt</label>
+                    <textarea name="prompt" rows="4" 
+                              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                              placeholder="Enter a test prompt here..."></textarea>
+                </div>
+                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    Test LLM
+                </button>
+            </form>
+            <div id="test-result" class="mt-4 hidden">
+                <h3 class="text-lg font-medium mb-2">Result:</h3>
+                <pre class="bg-gray-50 p-4 rounded whitespace-pre-wrap"></pre>
+            </div>
+        </div>
+
+        <!-- Prompt Templates -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4">Prompt Templates</h2>
+            <div class="space-y-4">
+                <div class="border rounded p-4">
+                    <h3 class="text-lg font-medium mb-2">Title Generation</h3>
+                    <pre class="bg-gray-50 p-4 rounded text-sm whitespace-pre-wrap">{{ prompts.title_generation }}</pre>
+                    <button class="mt-2 text-blue-500 hover:text-blue-600">Edit Template</button>
+                </div>
+                <div class="border rounded p-4">
+                    <h3 class="text-lg font-medium mb-2">Meta Description</h3>
+                    <pre class="bg-gray-50 p-4 rounded text-sm whitespace-pre-wrap">{{ prompts.meta_description }}</pre>
+                    <button class="mt-2 text-blue-500 hover:text-blue-600">Edit Template</button>
+                </div>
+                <div class="border rounded p-4">
+                    <h3 class="text-lg font-medium mb-2">Keywords</h3>
+                    <pre class="bg-gray-50 p-4 rounded text-sm whitespace-pre-wrap">{{ prompts.keywords }}</pre>
+                    <button class="mt-2 text-blue-500 hover:text-blue-600">Edit Template</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const theme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // Form submission handlers
+        document.getElementById('config-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch('/api/llm/config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(Object.fromEntries(formData)),
+            });
+            const result = await response.json();
+            if (result.success) {
+                // Update displayed values
+                document.getElementById('current-provider').textContent = formData.get('provider_type');
+                document.getElementById('current-model').textContent = formData.get('model_name');
+                document.getElementById('current-api-base').textContent = formData.get('api_base');
+                alert('Configuration updated successfully');
+            } else {
+                alert('Error updating configuration: ' + result.error);
+            }
+        });
+
+        document.getElementById('test-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch('/api/llm/test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    prompt: formData.get('prompt')
+                }),
+            });
+            const result = await response.json();
+            const resultDiv = document.getElementById('test-result');
+            resultDiv.classList.remove('hidden');
+            resultDiv.querySelector('pre').textContent = result.success ? 
+                result.response : 'Error: ' + result.error;
+        });
+    </script>
+</body>
+</html> 

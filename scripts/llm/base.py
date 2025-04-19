@@ -22,10 +22,11 @@ class LLMProvider(ABC):
 class LLMResponse:
     """Standardized response object for LLM generations."""
     
-    def __init__(self, text: str, metadata: Optional[Dict[str, Any]] = None):
+    def __init__(self, text: str, metadata: Optional[Dict[str, Any]] = None, prompt: Optional[str] = None):
         self.text = text
         self.metadata = metadata or {}
         self.error = None
+        self.prompt = prompt
     
     def set_error(self, error: str) -> None:
         """Set an error message if generation failed."""
@@ -36,7 +37,8 @@ class LLMResponse:
         return {
             "text": self.text,
             "metadata": self.metadata,
-            "error": self.error
+            "error": self.error,
+            "prompt": self.prompt
         }
 
 class LLMConfig:

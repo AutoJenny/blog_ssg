@@ -1,8 +1,14 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 import os
 import yaml
 from datetime import datetime
 import pytz
+import re
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev')
@@ -24,9 +30,18 @@ def datetimeformat(value, format='%d %b %y : %H:%M'):
         return value
 
 def load_posts():
-    with open('posts.yaml', 'r') as file:
-        data = yaml.safe_load(file)
-        return data.get('posts', [])
+    try:
+        logger.debug("Loading posts from posts.yaml")
+        with open('posts.yaml', 'r') as file:
+            data = yaml.safe_load(file)
+            logger.debug(f"Loaded posts: {data}")
+            return data.get('posts', [])
+    except FileNotFoundError:
+        logger.debug("posts.yaml not found, returning empty list")
+        return []
+    except Exception as e:
+        logger.error(f"Error loading posts: {str(e)}")
+        return []
 
 @app.route('/')
 def index():
@@ -44,6 +59,101 @@ def post_detail(slug):
     if not post:
         return render_template('404.html'), 404
     return render_template('post_detail.html', post=post)
+
+@app.route('/posts/new', methods=['GET', 'POST'])
+def new_post():
+    if request.method == 'POST':
+        try:
+            logger.debug(f"Received form data: {request.form}")
+            
+            # Get form data
+            working_title = request.form.get('working_title', '').strip()
+            author = request.form.get('author', '').strip()
+            concept = request.form.get('concept', '').strip()
+            
+            logger.debug(f"Processed form data - Title: {working_title}, Author: {author}, Concept: {concept}")
+            
+            if not all([working_title, author, concept]):
+                logger.warning("Missing required fields")
+                return "Missing required fields", 400
+            
+            # Load existing posts
+            posts_data = load_posts()
+            logger.debug(f"Current posts data: {posts_data}")
+            
+            # Create new post with matching structure
+            new_post = {
+                'id': len(posts_data) + 1,
+                'title': working_title,  # Using working_title as initial title
+                'slug': generate_slug(working_title),
+                'author': author,
+                'categories': [],
+                'concept': concept,
+                'creation_date': datetime.now().strftime('%Y-%m-%d'),
+                'modified_date': datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                'header_image': None,
+                'status': 'development',
+                'clan_id': None,
+                'published_date': None,
+                'tags': []
+            }
+            
+            logger.debug(f"New post to be added: {new_post}")
+            
+            # Add new post to the list
+            posts_data.append(new_post)
+            
+            # Save updated posts
+            save_posts(posts_data)
+            
+            logger.debug("Post saved successfully, redirecting to posts list")
+            
+            # Redirect to posts list
+            return redirect(url_for('posts'))
+        except Exception as e:
+            logger.error(f"Error creating new post: {str(e)}")
+            return f"Error creating post: {str(e)}", 500
+    
+    return render_template('post_form.html')
+
+def generate_slug(text):
+    # Convert to lowercase and replace spaces with hyphens
+    slug = text.lower().replace(' ', '-')
+    # Remove any characters that aren't alphanumeric or hyphens
+    slug = re.sub(r'[^a-z0-9-]', '', slug)
+    # Remove multiple consecutive hyphens
+    slug = re.sub(r'-+', '-', slug)
+    # Remove leading/trailing hyphens
+    return slug.strip('-')
+
+def save_posts(posts):
+    try:
+        logger.debug(f"Saving posts: {posts}")
+        # Create a temporary file first
+        temp_file = 'posts.yaml.tmp'
+        with open(temp_file, 'w') as file:
+            yaml.dump({'posts': posts}, file, default_flow_style=False)
+        
+        # If successful, rename the temporary file to the actual file
+        import os
+        os.replace(temp_file, 'posts.yaml')
+        logger.debug("Posts saved successfully")
+    except Exception as e:
+        logger.error(f"Error saving posts: {str(e)}")
+        # Try to remove the temporary file if it exists
+        try:
+            os.remove(temp_file)
+        except:
+            pass
+        raise
+
+@app.route('/posts/<slug>/edit', methods=['GET'])
+def edit_post(slug):
+    posts_data = load_posts()
+    post = next((p for p in posts_data if p['slug'] == slug), None)
+    if not post:
+        return render_template('404.html'), 404
+    return render_template('post_form.html', post=post)
 
 @app.route('/llms')
 def llms():

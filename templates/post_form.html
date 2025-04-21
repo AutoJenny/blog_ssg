@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}New Post Draft{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/post_form.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Back button and title -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <a href="{{ url_for('posts') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Posts
+                </a>
+                <h1 class="mb-0">New Post Draft</h1>
+            </div>
+
+            <!-- Main form -->
+            <div class="card">
+                <div class="card-body">
+                    <form id="postForm" method="POST" action="{{ url_for('new_post') }}">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="working_title" class="form-label">Working Title</label>
+                                <input type="text" class="form-control" id="working_title" name="working_title" required>
+                                <div class="form-text">This can be changed later</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="author" class="form-label">Author</label>
+                                <select class="form-select" id="author" name="author" required>
+                                    <option value="">Select Author</option>
+                                    <option value="nick-fiddes">Nick Fiddes</option>
+                                    <option value="caitrin-stewart">Caitrin Stewart</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label for="concept" class="form-label">Concept</label>
+                                <textarea class="form-control" id="concept" name="concept" rows="3" required></textarea>
+                                <div class="form-text">Brief description of the post's main idea</div>
+                            </div>
+                        </div>
+
+                        <!-- Form actions -->
+                        <div class="d-flex justify-content-end mt-4">
+                            <button type="submit" class="btn btn-primary" id="saveBtn" disabled>
+                                <i class="bi bi-save"></i> Create Draft
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/post_form.js') }}"></script>
+{% endblock %} 

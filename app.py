@@ -7,6 +7,7 @@ import re
 import logging
 import json
 from pathlib import Path
+import frontmatter
 
 # Import LLM modules
 from scripts.llm import MetadataGenerator
@@ -565,6 +566,34 @@ def load_llm_prompts():
     except Exception as e:
         logger.error(f"Error loading LLM prompts: {e}")
         return {'prompts': {}}
+
+@app.route('/api/posts/<slug>/ideas', methods=['POST'])
+def update_ideas(slug):
+    """Update post ideas."""
+    try:
+        data = request.get_json()
+        if 'ideas' not in data:
+            return jsonify({"success": False, "error": "Missing ideas in request body"}), 400
+
+        # Load existing posts
+        posts_data = load_posts()
+        
+        # Find the post
+        post = next((p for p in posts_data if p['slug'] == slug), None)
+        if not post:
+            return jsonify({"success": False, "error": "Post not found"}), 404
+
+        # Update the ideas
+        post['ideas'] = data['ideas']
+        post['modified_date'] = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+
+        # Save the updated posts
+        save_posts(posts_data)
+
+        return jsonify({"success": True})
+    except Exception as e:
+        logger.error(f"Error updating ideas: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

@@ -31,6 +31,35 @@
         border-bottom-left-radius: 3px; 
         border-bottom-right-radius: 3px; 
     }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+        .workflow-stage summary {
+            background-color: var(--bs-dark);
+            color: var(--bs-light);
+        }
+        .workflow-stage[open] summary {
+            background-color: var(--bs-dark);
+            color: var(--bs-light);
+        }
+        .stage-content {
+            background-color: var(--bs-dark);
+            color: var(--bs-light);
+            border-color: var(--bs-gray-700);
+        }
+        .idea-item {
+            background-color: var(--bs-gray-800) !important;
+            border-color: var(--bs-gray-700) !important;
+        }
+        .idea-item .idea-input {
+            background-color: transparent !important;
+            color: var(--bs-light) !important;
+        }
+        .idea-item .idea-input::placeholder {
+            color: var(--bs-gray-500) !important;
+        }
+    }
+
     .traffic-light { 
         display: inline-block; 
         width: 12px; 
@@ -56,17 +85,15 @@
         margin-bottom: 8px;
         background-color: var(--bs-light);
     }
-    .idea-item input[type="text"] {
+    .idea-item .idea-input {
         flex-grow: 1;
         border: none;
         background: transparent;
+        color: var(--bs-body-color);
     }
-    .idea-item input[type="text"]:focus {
+    .idea-item .idea-input:focus {
         outline: none;
         box-shadow: none;
-    }
-    .idea-item .form-check {
-        margin: 0;
     }
     .idea-item .btn-remove {
         opacity: 0;
@@ -259,34 +286,14 @@
                         I. Conceptualisation
                     </summary>
                     <div class="stage-content">
-                        <div class="mb-3">
-                            <label for="slug" class="form-label">URL Slug</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="slug" value="{{ post.slug }}" data-field="slug" {% if post.status == 'published' %}readonly{% endif %}>
-                                <button class="btn btn-outline-secondary" type="button" id="edit-slug" {% if post.status == 'published' %}disabled{% endif %}>
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                            </div>
-                            <div class="form-text">
-                                {% if post.status == 'published' %}
-                                    <span class="text-warning"><i class="bi bi-exclamation-triangle-fill"></i> Warning: This post has been published. Changing the slug may break existing links.</span>
-                                {% else %}
-                                    The URL-friendly version of the title. Can only be changed before publication.
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <!-- Ideas field moved here -->
+                        <!-- Ideas field -->
                         <div class="mb-4">
                             <label class="form-label">Ideas to Include</label>
                             <div id="ideas-container">
                                 {% if post.ideas %}
                                     {% for idea in post.ideas %}
                                     <div class="idea-item">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="" id="idea-{{ loop.index0 }}" {% if idea.checked %}checked{% endif %}>
-                                        </div>
-                                        <input type="text" class="form-control" value="{{ idea.text }}" placeholder="Enter an idea...">
+                                        <input type="text" class="form-control idea-input" value="{{ idea.text }}" placeholder="Enter an idea...">
                                         <button type="button" class="btn btn-outline-danger btn-sm btn-remove">
                                             <i class="bi bi-trash"></i>
                                         </button>
@@ -765,25 +772,35 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Ideas management
+    // Ideas functionality
     const ideasContainer = document.getElementById('ideas-container');
     const addIdeaBtn = document.getElementById('add-idea');
+    const saveMetadataBtn = document.getElementById('save-metadata-concept');
+    const saveStatus = document.querySelector('.save-status');
 
+    // Add new idea
     addIdeaBtn.addEventListener('click', function() {
         const ideaItem = document.createElement('div');
-        ideaItem.className = 'idea-item';
+        ideaItem.className = 'idea-item d-flex align-items-center mb-2';
         ideaItem.innerHTML = `
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" checked>
-            </div>
-            <input type="text" class="form-control" placeholder="Enter an idea...">
+            <input type="text" class="form-control me-2 idea-input" placeholder="Enter an idea...">
             <button type="button" class="btn btn-outline-danger btn-sm btn-remove">
                 <i class="bi bi-trash"></i>
             </button>
         `;
         ideasContainer.appendChild(ideaItem);
+        
+        // Apply dark mode styles if needed
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            ideaItem.style.backgroundColor = 'var(--bs-gray-800)';
+            ideaItem.style.borderColor = 'var(--bs-gray-700)';
+            const input = ideaItem.querySelector('.idea-input');
+            input.style.backgroundColor = 'transparent';
+            input.style.color = 'var(--bs-light)';
+        }
     });
 
+    // Remove idea
     ideasContainer.addEventListener('click', function(e) {
         if (e.target.closest('.btn-remove')) {
             e.target.closest('.idea-item').remove();
@@ -791,12 +808,20 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Save ideas
-    function saveIdeas() {
-        const ideas = Array.from(ideasContainer.children).map(item => ({
-            text: item.querySelector('input[type="text"]').value,
-            checked: item.querySelector('input[type="checkbox"]').checked
-        }));
+    saveMetadataBtn.addEventListener('click', function() {
+        const ideas = [];
+        const ideaItems = ideasContainer.querySelectorAll('.idea-item');
+        
+        ideaItems.forEach(item => {
+            const input = item.querySelector('input[type="text"]');
+            if (input.value.trim()) {
+                ideas.push({
+                    text: input.value.trim()
+                });
+            }
+        });
 
+        // Save to server
         fetch(`/api/posts/${postSlug}/ideas`, {
             method: 'POST',
             headers: {
@@ -806,20 +831,18 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            if (!data.success) {
-                console.error('Failed to save ideas:', data.error);
+            if (data.success) {
+                saveStatus.textContent = 'Ideas saved successfully';
+                saveStatus.className = 'ms-2 text-success';
+            } else {
+                throw new Error(data.error || 'Failed to save ideas');
             }
         })
         .catch(error => {
             console.error('Error saving ideas:', error);
+            saveStatus.textContent = `Error: ${error.message}`;
+            saveStatus.className = 'ms-2 text-danger';
         });
-    }
-
-    // Debounced save
-    let saveTimeout;
-    ideasContainer.addEventListener('input', function() {
-        clearTimeout(saveTimeout);
-        saveTimeout = setTimeout(saveIdeas, 1000);
     });
 });
 </script>

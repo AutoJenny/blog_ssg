@@ -1,49 +1,51 @@
 tasks:
   generate_concept:
-    name: "Generate Blog Concept"
-    description: "Generate a concept paragraph for a Scottish heritage blog post"
-    icon: "bi-lightbulb"  # Bootstrap icon for the button
-    prompt_ref: "concept_generation"  # Reference to the prompt in llm_prompts.yaml
+    description: Generate a concept paragraph for a Scottish heritage blog post
+    icon: bi-lightbulb
     model_settings:
-      temperature: 0.7
       max_tokens: 200
-      top_p: 0.9
-      
-  generate_title:
-    name: "Generate Blog Title"
-    description: "Generate an engaging title for a Scottish heritage blog post"
-    icon: "bi-type-h1"  # Bootstrap icon for the button
-    prompt_ref: "title_generation"  # Reference to the prompt in llm_prompts.yaml
-    model_settings:
+      model_name: llama3.1:70b
       temperature: 0.7
-      max_tokens: 100
       top_p: 0.9
-      
-  generate_meta_description:
-    name: "Generate Meta Description"
-    description: "Generate a meta description for SEO purposes"
-    icon: "bi-card-text"  # Bootstrap icon for the button
-    prompt_ref: "meta_description"  # Reference to the prompt in llm_prompts.yaml
-    model_settings:
-      temperature: 0.7
-      max_tokens: 150
-      top_p: 0.9
-      
-  generate_keywords:
-    name: "Generate Keywords"
-    description: "Generate relevant keywords for SEO"
-    icon: "bi-tags"  # Bootstrap icon for the button
-    prompt_ref: "keywords"  # Reference to the prompt in llm_prompts.yaml
-    model_settings:
-      temperature: 0.7
-      max_tokens: 100
-      top_p: 0.9
-
+    name: Generate Blog Concept
+    prompt_ref: concept_generation
   generate_ideas:
-    name: Generate Post Ideas
-    description: Generate a list of interesting and important topics to include in a blog post
-    prompt_ref: generate_ideas
+    description: Generate a list of interesting and important topics to include in
+      a blog post
     model_settings:
-      temperature: 0.8
       max_tokens: 1000
-      top_p: 0.9 
+      model_name: default
+      temperature: 0.8
+      top_p: 0.9
+    name: Generate Post Ideas
+    prompt_ref: generate_ideas
+  generate_keywords:
+    description: Generate relevant keywords for SEO
+    icon: bi-tags
+    model_settings:
+      max_tokens: 100
+      model_name: default
+      temperature: 0.7
+      top_p: 0.9
+    name: Generate Keywords
+    prompt_ref: keywords
+  generate_meta_description:
+    description: Generate a meta description for SEO purposes
+    icon: bi-card-text
+    model_settings:
+      max_tokens: 150
+      model_name: default
+      temperature: 0.7
+      top_p: 0.9
+    name: Generate Meta Description
+    prompt_ref: meta_description
+  generate_title:
+    description: Generate an engaging title for a Scottish heritage blog post
+    icon: bi-type-h1
+    model_settings:
+      max_tokens: 100
+      model_name: default
+      temperature: 0.7
+      top_p: 0.9
+    name: Generate Blog Title
+    prompt_ref: title_generation

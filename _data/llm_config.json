@@ -1,0 +1,8 @@
+{
+  "default": {
+    "provider_type": "ollama",
+    "model_name": "llama3",
+    "api_base": "None",
+    "api_key": ""
+  }
+}

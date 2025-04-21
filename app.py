@@ -287,7 +287,11 @@ def llms():
             api_key=None
         ))
 
-        return render_template('llms.html', config=default_config)
+        # Load schema
+        with open('config/llm_schema.yaml', 'r') as f:
+            schema = yaml.safe_load(f)
+
+        return render_template('llms.html', config=default_config, schema=schema)
     except Exception as e:
         logging.error(f"Error loading LLM management interface: {e}", exc_info=True)
         return jsonify({"success": False, "error": str(e)}), 500
@@ -461,6 +465,21 @@ def load_llm_tasks():
         logger.error(f"Error loading LLM tasks: {e}")
         return {'tasks': {}}
 
+def get_task_model_config(task_config: dict, default_config: LLMConfig) -> LLMConfig:
+    """Get the model configuration for a task, handling overrides."""
+    model_settings = task_config.get('model_settings', {})
+    
+    # If task specifies a model name other than 'default', use it
+    if model_settings.get('model_name') != 'default':
+        return LLMConfig(
+            provider_type=default_config.provider_type,
+            model_name=model_settings['model_name'],
+            api_base=default_config.api_base,
+            api_key=default_config.api_key
+        )
+    
+    return default_config
+
 @app.route('/api/posts/<slug>/generate_concept', methods=['POST'])
 def generate_concept(slug):
     """Generate a concept for a post using the LLM."""
@@ -478,17 +497,20 @@ def generate_concept(slug):
         # Format the prompt with the title
         prompt = task_config['prompt'].format(title=data['title'])
 
-        # Load LLM configuration
+        # Load default LLM configuration
         configs = load_config()
-        config = configs.get("default", LLMConfig(
+        default_config = configs.get("default", LLMConfig(
             provider_type="ollama",
             model_name="llama3.1:70b",
             api_base="http://localhost:11434",
             api_key=None
         ))
 
+        # Get task-specific model configuration
+        task_model_config = get_task_model_config(task_config, default_config)
+
         # Create provider and generate
-        provider = LLMFactory.create_provider(config)
+        provider = LLMFactory.create_provider(task_model_config)
         response = provider.generate_text(
             prompt,
             temperature=task_config['model_settings']['temperature'],
@@ -540,6 +562,7 @@ def get_llm_actions():
             model_settings = task.get('model_settings', {})
             
             actions.append({
+                'id': task_id,
                 'name': task.get('name', task_id),
                 'description': task.get('description', ''),
                 'model_name': model_settings.get('model_name', 'default'),
@@ -552,6 +575,41 @@ def get_llm_actions():
     except Exception as e:
         logging.error(f"Error loading LLM actions: {str(e)}", exc_info=True)
         return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/llm/actions/update', methods=['POST'])
+def update_action_model():
+    try:
+        data = request.get_json()
+        if not data or 'action_id' not in data or 'model_name' not in data:
+            return jsonify({'error': 'Missing required fields: action_id and model_name'}), 400
+            
+        action_id = data['action_id']
+        model_name = data['model_name']
+        
+        # Load current actions
+        actions = load_llm_tasks()
+        
+        # Find and update the action
+        action_updated = False
+        for task_id, task in actions.get('tasks', {}).items():
+            if task_id == action_id:
+                task['model_settings'] = task.get('model_settings', {})
+                task['model_settings']['model_name'] = model_name
+                action_updated = True
+                break
+                
+        if not action_updated:
+            return jsonify({'error': f'Action with id {action_id} not found'}), 404
+            
+        # Save the updated actions
+        with open('_data/llm_tasks.yaml', 'w') as f:
+            yaml.dump(actions, f)
+        
+        return jsonify({'message': 'Action model updated successfully'})
+        
+    except Exception as e:
+        logger.error(f"Error updating action model: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/llm/prompts')
 def get_llm_prompts():
@@ -765,5 +823,75 @@ def generate_ideas(slug):
         logger.error(f"Error generating ideas: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500
 
+@app.route('/api/llm/settings', methods=['GET', 'POST'])
+def llm_settings():
+    if request.method == 'GET':
+        try:
+            configs = load_config()
+            default_config = configs.get("default", LLMConfig(
+                provider_type="ollama",
+                model_name="llama3.1:70b",
+                api_base="http://localhost:11434",
+                api_key=None
+            ))
+            return jsonify(default_config.to_dict())
+        except Exception as e:
+            logger.error(f"Error loading LLM settings: {str(e)}")
+            return jsonify({'error': str(e)}), 500
+    else:  # POST
+        try:
+            data = request.get_json()
+            if not data:
+                return jsonify({'error': 'No data provided'}), 400
+                
+            configs = load_config()
+            configs["default"] = LLMConfig(
+                provider_type=data.get('provider_type', 'ollama'),
+                model_name=data.get('model_name', 'llama3.1:70b'),
+                api_base=data.get('api_base', 'http://localhost:11434'),
+                api_key=data.get('api_key')
+            )
+            
+            save_config(configs, '_data/llm_config.json')
+            return jsonify({'message': 'Settings updated successfully'})
+        except Exception as e:
+            logger.error(f"Error updating LLM settings: {str(e)}")
+            return jsonify({'error': str(e)}), 500
+
+@app.route('/api/llm/config', methods=['GET', 'POST'])
+def llm_config():
+    if request.method == 'GET':
+        try:
+            configs = load_config()
+            default_config = configs.get("default", LLMConfig(
+                provider_type="ollama",
+                model_name="llama3.1:70b",
+                api_base="http://localhost:11434",
+                api_key=None
+            ))
+            return jsonify({"success": True, "config": default_config.to_dict()})
+        except Exception as e:
+            logger.error(f"Error loading LLM config: {str(e)}")
+            return jsonify({"success": False, "error": str(e)}), 500
+    else:  # POST
+        try:
+            data = request.get_json()
+            if not data:
+                return jsonify({"success": False, "error": "No data provided"}), 400
+                
+            configs = load_config()
+            configs["default"] = LLMConfig(
+                provider_type=data.get('provider_type', 'ollama'),
+                model_name=data.get('model_name', 'llama3.1:70b'),
+                api_base=data.get('api_base', 'http://localhost:11434'),
+                api_key=data.get('api_key')
+            )
+            
+            save_config(configs, '_data/llm_config.json')
+            return jsonify({"success": True, "config": configs["default"].to_dict()})
+        except Exception as e:
+            logger.error(f"Error updating LLM config: {str(e)}")
+            return jsonify({"success": False, "error": str(e)}), 500
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    app.run(debug=True, port=5001, host='0.0.0.0')

@@ -333,7 +333,17 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <tbody>
                                     <tr>
                                         <th>Model</th>
-                                        <td>${action.model_name}</td>
+                                        <td>
+                                            <select class="form-select form-select-sm model-select" 
+                                                    data-action-id="${action.id}">
+                                                <option value="default" ${action.model_name === 'default' ? 'selected' : ''}>Default</option>
+                                                <option value="llama3.1:70b" ${action.model_name === 'llama3.1:70b' ? 'selected' : ''}>Llama 3.1 70B</option>
+                                                <option value="mistral" ${action.model_name === 'mistral' ? 'selected' : ''}>Mistral</option>
+                                                <option value="custom">Custom...</option>
+                                            </select>
+                                            <input type="text" class="form-control form-control-sm mt-2 d-none custom-model-input" 
+                                                   placeholder="Enter custom model name">
+                                        </td>
                                     </tr>
                                     <tr>
                                         <th>Temperature</th>
@@ -349,13 +359,54 @@ document.addEventListener('DOMContentLoaded', function() {
                         <h6 class="mt-3">Prompt Reference</h6>
                         <div class="card bg-light">
                             <div class="card-body">
-                                <code>${action.prompt_ref}</code>
+                                <code>${action.id}</code>
                             </div>
                         </div>
                     </div>
                 </div>
             `;
             accordion.appendChild(accordionItem);
+        });
+
+        // Add event listeners for model selection
+        document.querySelectorAll('.model-select').forEach(select => {
+            select.addEventListener('change', async function() {
+                const actionId = this.dataset.actionId;
+                const modelName = this.value === 'custom' 
+                    ? this.nextElementSibling.value 
+                    : this.value;
+                
+                try {
+                    const response = await fetch('http://localhost:5001/api/llm/actions/update', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action_id: actionId,
+                            model_name: modelName
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        showAlert('Model updated successfully', 'success');
+                    } else {
+                        throw new Error('Failed to update model');
+                    }
+                } catch (error) {
+                    showAlert('Error updating model: ' + error.message, 'danger');
+                }
+            });
+        });
+
+        // Add event listeners for custom model input
+        document.querySelectorAll('.custom-model-input').forEach(input => {
+            input.addEventListener('change', function() {
+                const select = this.previousElementSibling;
+                if (select.value === 'custom') {
+                    select.dispatchEvent(new Event('change'));
+                }
+            });
         });
 
         // Hide loading spinner

@@ -6,7 +6,6 @@
     <title>LLM Management - Blog Workflow</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         :root {
             --bg-color: #ffffff;
@@ -17,6 +16,11 @@
             --log-bg: #f8f8f8;
             --help-bg: #ffffe0;
             --code-bg: #eee;
+            --nav-bg: #f8f9fa;
+            --nav-text: #333333;
+            --tab-active-bg: #ffffff;
+            --tab-active-text: #333333;
+            --tab-hover-bg: #e9ecef;
         }
 
         [data-theme="dark"] {
@@ -28,6 +32,11 @@
             --log-bg: #2d2d2d;
             --help-bg: #2d2d2d;
             --code-bg: #3d3d3d;
+            --nav-bg: #2d2d2d;
+            --nav-text: #e0e0e0;
+            --tab-active-bg: #3d3d3d;
+            --tab-active-text: #e0e0e0;
+            --tab-hover-bg: #4d4d4d;
         }
 
         body { 
@@ -38,11 +47,77 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
+        .navbar {
+            background-color: var(--nav-bg) !important;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-light .navbar-brand,
+        .navbar-light .nav-link {
+            color: var(--nav-text) !important;
+        }
+
+        .nav-tabs {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-tabs .nav-link {
+            color: var(--text-color);
+            background-color: transparent;
+            border: 1px solid transparent;
+            margin-bottom: -1px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            background-color: var(--tab-hover-bg);
+            border-color: var(--border-color);
+            isolation: isolate;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--tab-active-text);
+            background-color: var(--tab-active-bg);
+            border-color: var(--border-color) var(--border-color) var(--tab-active-bg);
+        }
+
+        .tab-content {
+            background-color: var(--post-bg);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            padding: 20px;
+            border-radius: 0 0 4px 4px;
+        }
+
+        .card {
+            background-color: var(--post-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            background-color: var(--nav-bg);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
         pre {
             background-color: var(--code-bg);
+            color: var(--text-color);
             padding: 1rem;
             border-radius: 4px;
             overflow-x: auto;
+        }
+
+        .form-control, .form-select {
+            background-color: var(--post-bg);
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: var(--post-bg);
+            border-color: #86b7fe;
+            color: var(--text-color);
         }
 
         .theme-toggle {
@@ -61,11 +136,44 @@
             color: var(--text-color);
             transition: transform 0.3s ease;
         }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-toggle::before {
+            content: '☀️';
+            font-size: 20px;
+        }
+
+        [data-theme="dark"] .theme-toggle::before {
+            content: '🌙';
+        }
+
+        .btn-primary {
+            background-color: #77aaff;
+            border-color: #77aaff;
+        }
+
+        .btn-primary:hover {
+            background-color: #4477cc;
+            border-color: #4477cc;
+        }
+
+        [data-theme="dark"] .btn-primary {
+            background-color: #4477cc;
+            border-color: #4477cc;
+        }
+
+        [data-theme="dark"] .btn-primary:hover {
+            background-color: #335599;
+            border-color: #335599;
+        }
     </style>
 </head>
 <body>
     <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+    <nav class="navbar navbar-expand-lg navbar-light mb-4">
         <div class="container-fluid">
             <a class="navbar-brand" href="/">Blog Manager</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -86,97 +194,153 @@
 
     <button class="theme-toggle" id="themeToggle" title="Toggle dark/light mode"></button>
 
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold mb-8">LLM Management</h1>
+    <div class="container">
+        <h1 class="mb-4">LLM Management</h1>
 
-        <!-- Configuration Section -->
-        <div class="bg-white shadow rounded-lg p-6 mb-8">
-            <h2 class="text-2xl font-semibold mb-4">Configuration</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <h3 class="text-lg font-medium mb-3">Current Settings</h3>
-                    <div class="bg-gray-50 p-4 rounded">
-                        <p><strong>Provider:</strong> <span id="current-provider">{{ config.provider_type }}</span></p>
-                        <p><strong>Model:</strong> <span id="current-model">{{ config.model_name }}</span></p>
-                        <p><strong>API Base:</strong> <span id="current-api-base">{{ config.api_base }}</span></p>
+        <!-- Tab Navigation -->
+        <ul class="nav nav-tabs mb-0" id="llmTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="config-tab" data-bs-toggle="tab" data-bs-target="#config" type="button" role="tab">
+                    Configuration
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="test-tab" data-bs-toggle="tab" data-bs-target="#test" type="button" role="tab">
+                    Test Interface
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="prompts-tab" data-bs-toggle="tab" data-bs-target="#prompts" type="button" role="tab">
+                    Prompt Templates
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Configuration Tab -->
+            <div class="tab-pane fade show active" id="config" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Current Settings</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Provider:</strong> <span id="current-provider">{{ config.provider_type }}</span></p>
+                                <p><strong>Model:</strong> <span id="current-model">{{ config.model_name }}</span></p>
+                                <p><strong>API Base:</strong> <span id="current-api-base">{{ config.api_base }}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Update Settings</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="config-form">
+                                    <div class="mb-3">
+                                        <label class="form-label">Provider Type</label>
+                                        <select name="provider_type" class="form-select">
+                                            <option value="ollama" {% if config.provider_type == 'ollama' %}selected{% endif %}>Ollama</option>
+                                            <option value="openai" {% if config.provider_type == 'openai' %}selected{% endif %}>OpenAI</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Model Name</label>
+                                        <input type="text" name="model_name" value="{{ config.model_name }}" class="form-control">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">API Base URL</label>
+                                        <input type="text" name="api_base" value="{{ config.api_base }}" class="form-control">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">API Key</label>
+                                        <input type="password" name="api_key" placeholder="Leave blank to keep current" class="form-control">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Update Configuration</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div>
-                    <h3 class="text-lg font-medium mb-3">Update Settings</h3>
-                    <form id="config-form" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Provider Type</label>
-                            <select name="provider_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                                <option value="ollama" {% if config.provider_type == 'ollama' %}selected{% endif %}>Ollama</option>
-                                <option value="openai" {% if config.provider_type == 'openai' %}selected{% endif %}>OpenAI</option>
-                            </select>
+            </div>
+
+            <!-- Test Interface Tab -->
+            <div class="tab-pane fade" id="test" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Test LLM Integration</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="test-form">
+                            <div class="mb-3">
+                                <label class="form-label">Test Prompt</label>
+                                <textarea name="prompt" rows="4" class="form-control" 
+                                          placeholder="Enter a test prompt here..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Test LLM</button>
+                        </form>
+                        <div id="test-result" class="mt-4 d-none">
+                            <h6>Result:</h6>
+                            <pre></pre>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Model Name</label>
-                            <input type="text" name="model_name" value="{{ config.model_name }}" 
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">API Base URL</label>
-                            <input type="text" name="api_base" value="{{ config.api_base }}"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">API Key</label>
-                            <input type="password" name="api_key" placeholder="Leave blank to keep current"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                        </div>
-                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                            Update Configuration
-                        </button>
-                    </form>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Test Interface -->
-        <div class="bg-white shadow rounded-lg p-6 mb-8">
-            <h2 class="text-2xl font-semibold mb-4">Test Interface</h2>
-            <form id="test-form" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Test Prompt</label>
-                    <textarea name="prompt" rows="4" 
-                              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                              placeholder="Enter a test prompt here..."></textarea>
-                </div>
-                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                    Test LLM
-                </button>
-            </form>
-            <div id="test-result" class="mt-4 hidden">
-                <h3 class="text-lg font-medium mb-2">Result:</h3>
-                <pre class="bg-gray-50 p-4 rounded whitespace-pre-wrap"></pre>
-            </div>
-        </div>
-
-        <!-- Prompt Templates -->
-        <div class="bg-white shadow rounded-lg p-6">
-            <h2 class="text-2xl font-semibold mb-4">Prompt Templates</h2>
-            <div class="space-y-4">
-                <div class="border rounded p-4">
-                    <h3 class="text-lg font-medium mb-2">Title Generation</h3>
-                    <pre class="bg-gray-50 p-4 rounded text-sm whitespace-pre-wrap">{{ prompts.title_generation }}</pre>
-                    <button class="mt-2 text-blue-500 hover:text-blue-600">Edit Template</button>
-                </div>
-                <div class="border rounded p-4">
-                    <h3 class="text-lg font-medium mb-2">Meta Description</h3>
-                    <pre class="bg-gray-50 p-4 rounded text-sm whitespace-pre-wrap">{{ prompts.meta_description }}</pre>
-                    <button class="mt-2 text-blue-500 hover:text-blue-600">Edit Template</button>
-                </div>
-                <div class="border rounded p-4">
-                    <h3 class="text-lg font-medium mb-2">Keywords</h3>
-                    <pre class="bg-gray-50 p-4 rounded text-sm whitespace-pre-wrap">{{ prompts.keywords }}</pre>
-                    <button class="mt-2 text-blue-500 hover:text-blue-600">Edit Template</button>
+            <!-- Prompt Templates Tab -->
+            <div class="tab-pane fade" id="prompts" role="tabpanel">
+                <div class="accordion" id="promptsAccordion">
+                    <!-- Title Generation Template -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#titlePrompt">
+                                Title Generation
+                            </button>
+                        </h2>
+                        <div id="titlePrompt" class="accordion-collapse collapse show" data-bs-parent="#promptsAccordion">
+                            <div class="accordion-body">
+                                <pre>{{ prompts.title_generation }}</pre>
+                                <button class="btn btn-primary btn-sm mt-2">Edit Template</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Meta Description Template -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#metaPrompt">
+                                Meta Description
+                            </button>
+                        </h2>
+                        <div id="metaPrompt" class="accordion-collapse collapse" data-bs-parent="#promptsAccordion">
+                            <div class="accordion-body">
+                                <pre>{{ prompts.meta_description }}</pre>
+                                <button class="btn btn-primary btn-sm mt-2">Edit Template</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Keywords Template -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#keywordsPrompt">
+                                Keywords
+                            </button>
+                        </h2>
+                        <div id="keywordsPrompt" class="accordion-collapse collapse" data-bs-parent="#promptsAccordion">
+                            <div class="accordion-body">
+                                <pre>{{ prompts.keywords }}</pre>
+                                <button class="btn btn-primary btn-sm mt-2">Edit Template</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Theme toggle functionality
         const themeToggle = document.getElementById('themeToggle');
@@ -194,42 +358,79 @@
         document.getElementById('config-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
-            const response = await fetch('/api/llm/config', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(Object.fromEntries(formData)),
-            });
-            const result = await response.json();
-            if (result.success) {
+            try {
+                const response = await fetch('/api/llm/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(Object.fromEntries(formData)),
+                });
+                
+                if (!response.ok) throw new Error('Failed to update configuration');
+                
+                const result = await response.json();
                 // Update displayed values
-                document.getElementById('current-provider').textContent = formData.get('provider_type');
-                document.getElementById('current-model').textContent = formData.get('model_name');
-                document.getElementById('current-api-base').textContent = formData.get('api_base');
+                document.getElementById('current-provider').textContent = result.provider_type;
+                document.getElementById('current-model').textContent = result.model_name;
+                document.getElementById('current-api-base').textContent = result.api_base;
+                
                 alert('Configuration updated successfully');
-            } else {
-                alert('Error updating configuration: ' + result.error);
+            } catch (error) {
+                alert('Error updating configuration: ' + error.message);
             }
         });
 
         document.getElementById('test-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
-            const response = await fetch('/api/llm/test', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    prompt: formData.get('prompt')
-                }),
-            });
-            const result = await response.json();
             const resultDiv = document.getElementById('test-result');
-            resultDiv.classList.remove('hidden');
-            resultDiv.querySelector('pre').textContent = result.success ? 
-                result.response : 'Error: ' + result.error;
+            const resultPre = resultDiv.querySelector('pre');
+            
+            try {
+                resultDiv.classList.remove('d-none');
+                resultPre.textContent = 'Testing...';
+                
+                const response = await fetch('/api/llm/test', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: formData.get('prompt')
+                    }),
+                });
+                
+                if (!response.ok) throw new Error('Test failed');
+                
+                const result = await response.json();
+                resultPre.textContent = result.response;
+            } catch (error) {
+                resultPre.textContent = 'Error: ' + error.message;
+            }
+        });
+
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Restore active tab on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const activeTab = localStorage.getItem('llmActiveTab');
+            if (activeTab) {
+                const tab = new bootstrap.Tab(document.querySelector(`#llmTabs button[data-bs-target="${activeTab}"]`));
+                tab.show();
+            }
+        });
+
+        // Save active tab
+        document.querySelectorAll('#llmTabs button').forEach(button => {
+            button.addEventListener('shown.bs.tab', (e) => {
+                const target = e.target.getAttribute('data-bs-target');
+                localStorage.setItem('llmActiveTab', target);
+            });
         });
     </script>
 </body>

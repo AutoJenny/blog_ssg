@@ -132,10 +132,10 @@
                 "text_format_status": "complete"
             },
             "metadata": {
-                "status": "pending",
-                "front_matter_status": "pending",
-                "tags_status": "pending",
-                "author_status": "pending"
+                "status": "complete",
+                "front_matter_status": "complete",
+                "tags_status": "complete",
+                "author_status": "complete"
             },
             "images": {
                 "status": "pending",
@@ -203,8 +203,7 @@
         "stages": {
             "conceptualisation": {
                 "status": "complete",
-                "last_updated": "2025-04-18T15:32:46+00:00Z",
-                "concept": "An in-depth article about the history and development of English tartans, to be published on St George's day. This will focus on issues like similar patterns woven in England historically, and how the Celtic Fringe of England took on the idea of tartans from Scotland, and also how some English families or other organisations have developed their own tartans."
+                "last_updated": "2025-04-18T15:32:46+00:00Z"
             },
             "images": {
                 "status": "pending"

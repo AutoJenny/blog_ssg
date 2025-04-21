@@ -16,6 +16,11 @@
             --log-bg: #f8f8f8;
             --help-bg: #ffffe0;
             --code-bg: #eee;
+            --nav-bg: #f8f9fa;
+            --nav-text: #333333;
+            --tab-active-bg: #ffffff;
+            --tab-active-text: #333333;
+            --tab-hover-bg: #e9ecef;
         }
 
         [data-theme="dark"] {
@@ -27,6 +32,11 @@
             --log-bg: #2d2d2d;
             --help-bg: #2d2d2d;
             --code-bg: #3d3d3d;
+            --nav-bg: #2d2d2d;
+            --nav-text: #e0e0e0;
+            --tab-active-bg: #3d3d3d;
+            --tab-active-text: #e0e0e0;
+            --tab-hover-bg: #4d4d4d;
         }
 
         body { 
@@ -37,10 +47,22 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
+        .navbar {
+            background-color: var(--nav-bg) !important;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .navbar-light .navbar-brand,
+        .navbar-light .nav-link {
+            color: var(--nav-text) !important;
+        }
+
         h1, h2 { 
             border-bottom: 1px solid var(--border-color); 
             padding-bottom: 5px; 
-            margin-bottom: 15px; 
+            margin-bottom: 15px;
+            color: var(--text-color);
         }
 
         #log-output { 
@@ -54,42 +76,59 @@
             font-size: 0.9em; 
             max-height: 400px; 
             overflow-y: auto; 
+            color: var(--text-color);
         }
 
         .post-list { 
             list-style: none; 
             padding: 0; 
+            margin: 0;
         }
 
-        .post-list li { 
+        .post-list-item {
             border: 1px solid var(--post-border); 
-            margin-bottom: 10px; 
-            padding: 10px; 
+            margin-bottom: 15px; 
+            padding: 0; 
             position: relative;
             background-color: var(--post-bg);
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
+            display: grid;
+            grid-template-columns: 150px minmax(400px, 1fr) 200px;
+            gap: 0;
+            min-height: 120px;
         }
 
-        .post-content {
-            flex: 1;
+        .post-list-item[data-status="Published"] {
+            background-color: rgba(40, 167, 69, 0.1) !important;
+        }
+
+        [data-theme="dark"] .post-list-item[data-status="Published"] {
+            background-color: rgba(40, 167, 69, 0.2) !important;
+        }
+
+        .deleted-post {
+            background-color: rgba(220, 53, 69, 0.1) !important;
+        }
+
+        [data-theme="dark"] .deleted-post {
+            background-color: rgba(220, 53, 69, 0.2) !important;
         }
 
         .post-thumbnail {
-            width: 120px;
-            height: 80px;
+            width: 150px;
+            height: 120px;
             object-fit: cover;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
+            border-radius: 0;
+            border: none;
+            border-right: 1px solid var(--border-color);
         }
 
         .post-thumbnail-placeholder {
-            width: 120px;
-            height: 80px;
+            width: 150px;
+            height: 120px;
             background-color: var(--code-bg);
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
+            border-radius: 0;
+            border: none;
+            border-right: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -99,18 +138,84 @@
             padding: 5px;
         }
 
-        .post-actions button { 
-            margin-right: 5px; 
-            background-color: #77aaff;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 3px;
-            cursor: pointer;
+        .post-content {
+            padding: 12px 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-        .post-actions button:hover {
-            background-color: #4477cc;
+        .post-title {
+            font-size: 1.1em;
+            margin-bottom: 6px;
+        }
+
+        .post-title a {
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .post-title a:hover {
+            text-decoration: underline;
+        }
+
+        .post-concept {
+            color: var(--text-color);
+            opacity: 0.7;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        [data-theme="dark"] .post-concept {
+            opacity: 0.6;
+        }
+
+        .post-slug {
+            font-size: 0.85em;
+            color: var(--text-color);
+            opacity: 0.8;
+            margin-top: auto;
+        }
+
+        .post-meta {
+            padding: 12px 15px;
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        [data-theme="dark"] .post-meta {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .post-status {
+            font-size: 0.9em;
+            text-align: right;
+        }
+
+        .post-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .post-actions button {
+            width: auto;
+            min-width: 120px;
+        }
+
+        .clan-link {
+            font-size: 0.85em;
+            margin-top: 5px;
+            color: #28a745;
+        }
+
+        [data-theme="dark"] .clan-link {
+            color: #3dd763;
         }
 
         .post-actions button:disabled {
@@ -155,6 +260,7 @@
             justify-content: center;
             color: var(--text-color);
             transition: transform 0.3s ease;
+            z-index: 1000;
         }
 
         .theme-toggle:hover {
@@ -198,38 +304,27 @@
             position: absolute;
             background-color: var(--help-bg);
             border: 1px solid var(--border-color);
+            padding: 10px;
             border-radius: 4px;
-            padding: 10px 15px;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
-            z-index: 10;
-            left: 25px;
-            top: 0;
-            width: 300px;
-            font-size: 0.9em;
-            line-height: 1.5;
-            letter-spacing: normal;
-            text-align: left;
+            max-width: 300px;
+            z-index: 1000;
             color: var(--text-color);
         }
 
-        .help-content code {
-            background-color: var(--code-bg);
-            padding: 0.1em 0.3em;
-            border-radius: 2px;
-            font-size: 0.95em;
-        }
-
-        .help-content.active {
+        .help-content.show {
             display: block;
         }
 
-        h2 > .help-trigger {
-            vertical-align: baseline;
+        .form-control {
+            background-color: var(--post-bg);
+            border-color: var(--border-color);
+            color: var(--text-color);
         }
 
-        h2 + .help-content {
-            top: 25px;
-            left: 0;
+        .form-control:focus {
+            background-color: var(--post-bg);
+            border-color: #86b7fe;
+            color: var(--text-color);
         }
 
         a {
@@ -238,19 +333,211 @@
         }
 
         a:hover {
+            color: #4477cc;
             text-decoration: underline;
         }
 
-        /* New Post Button Styles */
-        .new-post-button {
-            margin-left: 15px;
-            vertical-align: middle;
+        [data-theme="dark"] a {
+            color: #86b7fe;
         }
 
-        /* Modal Styles */
-        .modal-content {
-            background-color: var(--bg-color);
+        [data-theme="dark"] a:hover {
+            color: #acd2fe;
+        }
+
+        .alert {
+            background-color: var(--post-bg);
+            border-color: var(--border-color);
             color: var(--text-color);
+        }
+
+        .btn-primary {
+            background-color: #77aaff;
+            border-color: #77aaff;
+        }
+
+        .btn-primary:hover {
+            background-color: #4477cc;
+            border-color: #4477cc;
+        }
+
+        [data-theme="dark"] .btn-primary {
+            background-color: #4477cc;
+            border-color: #4477cc;
+        }
+
+        [data-theme="dark"] .btn-primary:hover {
+            background-color: #335599;
+            border-color: #335599;
+        }
+
+        /* Post Management Enhancements */
+        #post-management {
+            margin-top: 2rem;
+        }
+
+        .post-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .post-list-item {
+            display: flex;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .post-list-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .post-list-item.deleted-post {
+            opacity: 0.7;
+            background: var(--deleted-bg, #ffebee);
+        }
+
+        .post-thumbnail, .post-thumbnail-placeholder {
+            width: 150px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 6px;
+            background: var(--thumbnail-bg, #f5f5f5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .post-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .post-title {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .post-title a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .post-title a:hover {
+            color: var(--link-hover);
+        }
+
+        .post-concept {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .post-slug {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .post-slug code {
+            padding: 0.2rem 0.4rem;
+            background: var(--code-bg);
+            border-radius: 4px;
+            color: var(--code-color);
+        }
+
+        .post-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-width: 200px;
+        }
+
+        .post-status {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .clan-link {
+            display: inline-block;
+            margin-top: 0.5rem;
+            color: var(--link-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .clan-link:hover {
+            text-decoration: underline;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .post-actions button {
+            flex: 1;
+            min-width: 120px;
+            transition: all 0.2s ease;
+        }
+
+        .post-actions button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* New Post Button Enhancement */
+        .new-post-button {
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .new-post-button i {
+            font-size: 1.1em;
+        }
+
+        /* Log Section Enhancement */
+        #log-section {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: var(--log-bg, #f8f9fa);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        #log-output {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 1rem;
+            background: var(--code-bg);
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* Modal Enhancements */
+        .modal-content {
+            background: var(--card-bg);
+            border-color: var(--border-color);
         }
 
         .modal-header {
@@ -261,27 +548,76 @@
             border-top-color: var(--border-color);
         }
 
-        .form-control {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            border-color: var(--border-color);
+        /* Help Content Enhancement */
+        .help-trigger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--help-bg, #e9ecef);
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        .form-control:focus {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            border-color: var(--border-color);
-            box-shadow: 0 0 0 0.25rem rgba(119, 170, 255, 0.25);
+        .help-trigger:hover {
+            background: var(--help-hover-bg, #dee2e6);
+            color: var(--text-primary);
         }
 
-        [data-theme="dark"] .text-muted {
-            color: #888 !important;
+        .help-content {
+            display: none;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            background: var(--help-content-bg, #f8f9fa);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .help-content.active {
+            display: block;
+        }
+
+        /* Dark Mode Specific Adjustments */
+        @media (prefers-color-scheme: dark) {
+            .post-list-item {
+                background: var(--card-bg-dark, #2d2d2d);
+            }
+            
+            .post-thumbnail-placeholder {
+                background: var(--thumbnail-bg-dark, #3d3d3d);
+            }
+            
+            .post-list-item.deleted-post {
+                background: var(--deleted-bg-dark, #3d2c2c);
+            }
+            
+            #log-section {
+                background: var(--log-bg-dark, #2d2d2d);
+            }
+            
+            .help-trigger {
+                background: var(--help-bg-dark, #3d3d3d);
+            }
+            
+            .help-trigger:hover {
+                background: var(--help-hover-bg-dark, #4d4d4d);
+            }
+            
+            .help-content {
+                background: var(--help-content-bg-dark, #2d2d2d);
+            }
         }
     </style>
 </head>
 <body>
     <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+    <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="/">Blog Manager</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -300,7 +636,7 @@
         </div>
     </nav>
 
-    <button class="theme-toggle" id="themeToggle" title="Toggle dark/light mode"></button>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
 
     <div class="container">
         <h1 class="d-inline-block">Blog Workflow Manager</h1>
@@ -325,55 +661,57 @@
             </h2>
 
             <div id="post-list-container">
-                {% if posts %}
-                    <ul class="post-list">
-                        {% for post in posts %}
-                            <li class="post-list-item {% if post.deleted %}deleted-post{% endif %}" data-post-slug="{{ post.slug }}" {% if post.deleted %}style="display: none;"{% endif %}>
-                                <div class="post-content">
-                                    <strong><a href="{{ url_for('view_post_detail', slug=post.slug) }}">{{ post.title }}</a></strong>
-                                    {% if post.concept %}
-                                    <br>
-                                    <small class="text-muted concept-text">{{ post.concept }}</small>
-                                    {% endif %}
-                                    <br>
-                                    <small>Slug: <code>{{ post.slug }}</code></small>
-                                    <a href="vscode://file/{{ config.BASE_DIR }}/posts/{{ post.slug }}.md" title="Edit Markdown File in VS Code" style="font-size: 0.8em; margin-left: 5px;">(Edit MD)</a>
-                                    <br>
-                                    <span class="status-clancom">Clan.com Status: {{ post.clan_com_status }}</span>
+                <ul class="post-list">
+                {% for post in posts %}
+                    <li class="post-list-item {% if post.deleted %}deleted-post{% endif %}" 
+                        data-post-slug="{{ post.slug }}"
+                        data-status="{{ post.clan_com_status.split('(')[0].strip() }}"
+                        {% if post.deleted and not show_deleted %}style="display: none;"{% endif %}>
+                        
+                        {% if post.headerImageId %}
+                            <img src="/images/posts/{{ post.slug }}/{{ post.slug }}_{% if post.slug == 'quaich-traditions' %}header-collage{% else %}header{% endif %}.jpg" 
+                                 alt="{{ post.title }} thumbnail" 
+                                 class="post-thumbnail"
+                                 onerror="this.parentNode.innerHTML = '<div class=\'post-thumbnail-placeholder\'>No thumbnail available</div>';">
+                        {% else %}
+                            <div class="post-thumbnail-placeholder">No thumbnail available</div>
+                        {% endif %}
 
-                                    <div class="post-actions" style="margin-top: 10px;">
-                                        <button class="publish-clan-button" data-slug="{{ post.slug }}">Publish/Update Clan.com</button>
-                                        <button class="delete-post-button" data-slug="{{ post.slug }}">{% if post.deleted %}Restore{% else %}Delete{% endif %}</button>
-                                        {# --- ADDED: Help Trigger and Content for Publish Button --- #}
-                                        <span class="help-trigger" data-help-id="publish-help-{{ post.slug }}" title="Help for Publish/Update Clan.com Button">?</span>
-                                        <div class="help-content" id="publish-help-{{ post.slug }}">
-                                            {% include 'help/publish_clan_help.njk' %}
-                                        </div>
-                                        {# --- END HELP --- #}
-
-                                        <a href="http://localhost:8080/{{ post.slug }}/" target="_blank" style="margin-left: 10px;">Preview Locally</a>
-                                        {# --- ADDED: Help Trigger and Content for Preview Link --- #}
-                                        <span class="help-trigger" data-help-id="preview-help-{{ post.slug }}" title="Help for Preview Locally Link">?</span>
-                                        <div class="help-content" id="preview-help-{{ post.slug }}">
-                                             {% include 'help/preview_local_help.njk' %}
-                                        </div>
-                                        {# --- END HELP --- #}
-                                    </div>
-                                </div>
-                                {% if post.headerImageId %}
-                                    <img src="/images/posts/{{ post.slug }}/{{ post.slug }}_{% if post.slug == 'quaich-traditions' %}header-collage{% else %}header{% endif %}.jpg" 
-                                         alt="{{ post.title }} thumbnail" 
-                                         class="post-thumbnail"
-                                         onerror="console.error('Failed to load image:', this.src); const placeholder = document.createElement('div'); placeholder.className = 'post-thumbnail-placeholder'; placeholder.textContent = 'No thumbnail available'; this.parentNode.replaceChild(placeholder, this);">
-                                {% else %}
-                                    <div class="post-thumbnail-placeholder">No thumbnail available</div>
+                        <div class="post-content">
+                            <div>
+                                <h3 class="post-title">
+                                    <a href="{{ url_for('view_post_detail', slug=post.slug) }}">{{ post.title }}</a>
+                                </h3>
+                                {% if post.concept %}
+                                <div class="post-concept">{{ post.concept }}</div>
                                 {% endif %}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                     <p>No posts found in the '{{ config.POSTS_DIR if config else 'posts' }}' directory.</p>
-                {% endif %}
+                            </div>
+                            <div class="post-slug">
+                                <code>{{ post.slug }}</code>
+                                <a href="http://localhost:8080/{{ post.slug }}/" target="_blank" class="ms-2">Preview Locally</a>
+                            </div>
+                        </div>
+
+                        <div class="post-meta">
+                            <div class="post-status">
+                                Status: {{ post.clan_com_status }}
+                                {% if "Published" in post.clan_com_status %}
+                                <br>
+                                <a href="https://clan.com/blog/{{ post.slug }}" target="_blank" class="clan-link">View Live →</a>
+                                {% endif %}
+                            </div>
+                            <div class="post-actions">
+                                <button class="publish-clan-button btn btn-primary btn-sm" data-slug="{{ post.slug }}">
+                                    Publish/Update Clan.com
+                                </button>
+                                <button class="delete-post-button btn btn-danger btn-sm" data-slug="{{ post.slug }}">
+                                    {% if post.deleted %}Restore{% else %}Delete{% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+                </ul>
             </div>
         </section>
 
@@ -538,7 +876,6 @@
         
         if (currentTheme === 'dark') {
             document.body.setAttribute('data-theme', 'dark');
-            themeToggle.textContent = 'Toggle Light Mode';
         }
 
         themeToggle.addEventListener('click', () => {
@@ -546,11 +883,9 @@
             if (currentTheme === 'dark') {
                 document.body.removeAttribute('data-theme');
                 localStorage.setItem('theme', 'light');
-                themeToggle.textContent = 'Toggle Dark Mode';
             } else {
                 document.body.setAttribute('data-theme', 'dark');
                 localStorage.setItem('theme', 'dark');
-                themeToggle.textContent = 'Toggle Light Mode';
             }
         });
 
@@ -585,6 +920,29 @@
             })
             .catch(error => {
                 logMessage(`Error creating post: ${error.message}`, true);
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show/hide deleted posts based on toggle
+            const showDeletedToggle = document.getElementById('showDeletedToggle');
+            const deletedPosts = document.querySelectorAll('.deleted-post');
+            
+            showDeletedToggle.addEventListener('change', function() {
+                deletedPosts.forEach(post => {
+                    post.style.display = this.checked ? '' : 'none';
+                });
+            });
+
+            // Set initial state based on localStorage
+            if (localStorage.getItem('showDeleted') === 'true') {
+                showDeletedToggle.checked = true;
+                deletedPosts.forEach(post => post.style.display = '');
+            }
+
+            // Save state to localStorage
+            showDeletedToggle.addEventListener('change', function() {
+                localStorage.setItem('showDeleted', this.checked);
             });
         });
     </script>

@@ -580,11 +580,10 @@ def get_llm_actions():
 def update_action_model():
     try:
         data = request.get_json()
-        if not data or 'action_id' not in data or 'model_name' not in data:
-            return jsonify({'error': 'Missing required fields: action_id and model_name'}), 400
+        if not data or 'action_id' not in data:
+            return jsonify({'error': 'Missing required field: action_id'}), 400
             
         action_id = data['action_id']
-        model_name = data['model_name']
         
         # Load current actions
         actions = load_llm_tasks()
@@ -594,7 +593,19 @@ def update_action_model():
         for task_id, task in actions.get('tasks', {}).items():
             if task_id == action_id:
                 task['model_settings'] = task.get('model_settings', {})
-                task['model_settings']['model_name'] = model_name
+                
+                # Update model name if provided
+                if 'model_name' in data:
+                    task['model_settings']['model_name'] = data['model_name']
+                
+                # Update temperature if provided
+                if 'temperature' in data:
+                    task['model_settings']['temperature'] = data['temperature']
+                
+                # Update max tokens if provided
+                if 'max_tokens' in data:
+                    task['model_settings']['max_tokens'] = data['max_tokens']
+                
                 action_updated = True
                 break
                 
@@ -605,7 +616,7 @@ def update_action_model():
         with open('_data/llm_tasks.yaml', 'w') as f:
             yaml.dump(actions, f)
         
-        return jsonify({'message': 'Action model updated successfully'})
+        return jsonify({'message': 'Action updated successfully'})
         
     except Exception as e:
         logger.error(f"Error updating action model: {str(e)}")

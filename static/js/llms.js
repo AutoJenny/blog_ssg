@@ -347,11 +347,25 @@ document.addEventListener('DOMContentLoaded', function() {
                                     </tr>
                                     <tr>
                                         <th>Temperature</th>
-                                        <td>${action.temperature}</td>
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <input type="number" class="form-control temperature-input" 
+                                                       value="${action.temperature}" min="0" max="2" step="0.1"
+                                                       data-action-id="${action.id}">
+                                                <button class="btn btn-outline-secondary save-temperature" type="button">Save</button>
+                                            </div>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <th>Max Tokens</th>
-                                        <td>${action.max_tokens}</td>
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <input type="number" class="form-control max-tokens-input" 
+                                                       value="${action.max_tokens}" min="1" step="1"
+                                                       data-action-id="${action.id}">
+                                                <button class="btn btn-outline-secondary save-max-tokens" type="button">Save</button>
+                                            </div>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -395,6 +409,66 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 } catch (error) {
                     showAlert('Error updating model: ' + error.message, 'danger');
+                }
+            });
+        });
+
+        // Add event listeners for temperature updates
+        document.querySelectorAll('.save-temperature').forEach(button => {
+            button.addEventListener('click', async function() {
+                const input = this.parentElement.querySelector('.temperature-input');
+                const actionId = input.dataset.actionId;
+                const temperature = parseFloat(input.value);
+                
+                try {
+                    const response = await fetch('http://localhost:5001/api/llm/actions/update', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action_id: actionId,
+                            temperature: temperature
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        showAlert('Temperature updated successfully', 'success');
+                    } else {
+                        throw new Error('Failed to update temperature');
+                    }
+                } catch (error) {
+                    showAlert('Error updating temperature: ' + error.message, 'danger');
+                }
+            });
+        });
+
+        // Add event listeners for max tokens updates
+        document.querySelectorAll('.save-max-tokens').forEach(button => {
+            button.addEventListener('click', async function() {
+                const input = this.parentElement.querySelector('.max-tokens-input');
+                const actionId = input.dataset.actionId;
+                const maxTokens = parseInt(input.value);
+                
+                try {
+                    const response = await fetch('http://localhost:5001/api/llm/actions/update', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action_id: actionId,
+                            max_tokens: maxTokens
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        showAlert('Max tokens updated successfully', 'success');
+                    } else {
+                        throw new Error('Failed to update max tokens');
+                    }
+                } catch (error) {
+                    showAlert('Error updating max tokens: ' + error.message, 'danger');
                 }
             });
         });

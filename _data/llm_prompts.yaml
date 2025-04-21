@@ -1,0 +1,93 @@
+prompts:
+  concept_generation:
+    name: "Blog Concept Generation"
+    description: "Generate a concept paragraph for a Scottish heritage blog post"
+    template: |
+      You are writing a concept paragraph for a Scottish heritage blog post. 
+      The target audience is people worldwide with an interest in Scottish heritage, culture, and history.
+      
+      The concept should:
+      - Be engaging and informative
+      - Provide depth and context about the topic
+      - Appeal to both casual readers and heritage enthusiasts
+      - Be written in a clear, accessible style
+      - Be no more than one paragraph
+      - Focus on the cultural and historical significance of the topic
+      
+      Title: {title}
+      
+      Please write a concept paragraph that explores this topic in depth while maintaining broad appeal.
+    variables:
+      - name: "title"
+        description: "The title of the blog post"
+        required: true
+        
+  title_generation:
+    name: "Blog Title Generation"
+    description: "Generate an engaging title for a Scottish heritage blog post"
+    template: |
+      You are generating a title for a Scottish heritage blog post.
+      The target audience is people worldwide with an interest in Scottish heritage, culture, and history.
+      
+      The title should:
+      - Be engaging and attention-grabbing
+      - Reflect the cultural and historical significance of the topic
+      - Be clear and descriptive
+      - Be no more than 10 words
+      - Appeal to both casual readers and heritage enthusiasts
+      
+      Content: {content}
+      Current Title: {current_title}
+      
+      Please generate a compelling title that captures the essence of the content.
+    variables:
+      - name: "content"
+        description: "The content of the blog post"
+        required: true
+      - name: "current_title"
+        description: "The current title (if any)"
+        required: false
+        
+  meta_description:
+    name: "Meta Description Generation"
+    description: "Generate a meta description for SEO purposes"
+    template: |
+      You are writing a meta description for a Scottish heritage blog post.
+      The target audience is people worldwide with an interest in Scottish heritage, culture, and history.
+      
+      The meta description should:
+      - Be concise and informative (150-160 characters)
+      - Include relevant keywords naturally
+      - Encourage clicks from search results
+      - Accurately represent the content
+      - Be written in a clear, accessible style
+      
+      Content: {content}
+      
+      Please write a compelling meta description that accurately represents the content.
+    variables:
+      - name: "content"
+        description: "The content of the blog post"
+        required: true
+        
+  keywords:
+    name: "Keyword Generation"
+    description: "Generate relevant keywords for SEO"
+    template: |
+      You are generating keywords for a Scottish heritage blog post.
+      The target audience is people worldwide with an interest in Scottish heritage, culture, and history.
+      
+      The keywords should:
+      - Be relevant to Scottish heritage and culture
+      - Include specific historical terms and locations
+      - Be commonly searched terms
+      - Include variations and related terms
+      - Be appropriate for the content
+      
+      Content: {content}
+      
+      Please generate a list of relevant keywords, separated by commas.
+    variables:
+      - name: "content"
+        description: "The content of the blog post"
+        required: true 

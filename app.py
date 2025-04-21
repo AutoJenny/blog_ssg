@@ -222,34 +222,21 @@ def edit_post(slug):
 
 @app.route('/llms')
 def llms():
-    # Load current LLM configuration
-    configs = load_config()
-    default_config = configs.get("default", LLMConfig(
-        provider_type="ollama",
-        model_name="mistral",
-        api_base="http://localhost:11434",
-        api_key=None
-    ))
+    """LLM management interface."""
+    try:
+        # Load current LLM configuration
+        configs = load_config()
+        default_config = configs.get("default", LLMConfig(
+            provider_type="ollama",
+            model_name="mistral",
+            api_base="http://localhost:11434",
+            api_key=None
+        ))
 
-    # Create a metadata generator instance
-    generator = MetadataGenerator()
-    
-    # Extract prompt templates from the generator methods
-    example_content = "Example blog post content about Scottish heritage."
-    example_title = "Example Current Title"
-    
-    # Get the prompts by calling the methods but extracting just the prompt part
-    title_response = generator.generate_title(example_content, example_title)
-    meta_desc_response = generator.generate_meta_description(example_content)
-    keywords_response = generator.generate_keywords(example_content)
-
-    prompts = {
-        "title_generation": title_response.prompt if hasattr(title_response, 'prompt') else "Title generation prompt not available",
-        "meta_description": meta_desc_response.prompt if hasattr(meta_desc_response, 'prompt') else "Meta description prompt not available",
-        "keywords": keywords_response.prompt if hasattr(keywords_response, 'prompt') else "Keywords prompt not available"
-    }
-
-    return render_template('llms.html', config=default_config, prompts=prompts)
+        return render_template('llms.html', config=default_config)
+    except Exception as e:
+        logging.error(f"Error loading LLM management interface: {e}", exc_info=True)
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/preview')
 def preview():
@@ -481,6 +468,50 @@ def generate_concept(slug):
     except Exception as e:
         logger.error(f"Error generating concept: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/llm/prompts')
+def get_llm_prompts():
+    """Get all LLM prompts from YAML files."""
+    try:
+        # Load prompts from YAML files
+        prompts = []
+        
+        # Load task prompts
+        llm_tasks = load_llm_tasks()
+        for task_id, task in llm_tasks['tasks'].items():
+            # Get the prompt reference
+            prompt_ref = task.get('prompt_ref')
+            if not prompt_ref:
+                continue
+                
+            # Load the actual prompt from llm_prompts.yaml
+            llm_prompts = load_llm_prompts()
+            prompt_template = llm_prompts['prompts'].get(prompt_ref, {})
+            
+            if prompt_template:
+                prompts.append({
+                    'name': task['name'],
+                    'description': task['description'],
+                    'template': prompt_template['template'],
+                    'variables': prompt_template.get('variables', [])
+                })
+            
+        return jsonify({"success": True, "prompts": prompts})
+    except Exception as e:
+        logging.error(f"Error loading LLM prompts: {str(e)}", exc_info=True)
+        return jsonify({"success": False, "error": str(e)}), 500
+
+def load_llm_prompts():
+    """Load LLM prompt templates from YAML file."""
+    prompts_path = Path('_data/llm_prompts.yaml')
+    try:
+        if prompts_path.exists():
+            with open(prompts_path, 'r') as f:
+                return yaml.safe_load(f)
+        return {'prompts': {}}
+    except Exception as e:
+        logger.error(f"Error loading LLM prompts: {e}")
+        return {'prompts': {}}
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

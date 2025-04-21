@@ -10,163 +10,54 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <!-- Back button and title -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <a href="{{ url_for('posts') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i> Back to Posts
-                </a>
-                <h1 class="mb-0">LLM Management</h1>
-            </div>
-
-            <!-- Tab Navigation -->
+            <h1 class="mb-4">LLM Management</h1>
+            
+            <!-- Navigation Tabs -->
             <ul class="nav nav-tabs mb-4" id="llmTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab">
-                        <i class="bi bi-gear"></i> Settings
-                    </button>
+                    <a class="nav-link active" id="config-tab" data-bs-toggle="tab" href="#config" role="tab">
+                        <i class="bi bi-gear"></i> Configuration
+                    </a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="testing-tab" data-bs-toggle="tab" data-bs-target="#testing" type="button" role="tab">
-                        <i class="bi bi-code-slash"></i> Testing
-                    </button>
+                    <a class="nav-link" id="prompts-tab" data-bs-toggle="tab" href="#prompts" role="tab">
+                        <i class="bi bi-chat-quote"></i> Prompts
+                    </a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="prompts-tab" data-bs-toggle="tab" data-bs-target="#prompts" type="button" role="tab">
-                        <i class="bi bi-chat-square-text"></i> Prompts
-                    </button>
+                    <a class="nav-link" id="test-tab" data-bs-toggle="tab" href="#test" role="tab">
+                        <i class="bi bi-play-circle"></i> Test
+                    </a>
                 </li>
             </ul>
 
             <!-- Tab Content -->
-            <div class="tab-content">
-                <!-- Settings Tab -->
-                <div class="tab-pane fade show active" id="settings" role="tabpanel">
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="card-title mb-0">Current Settings</h5>
-                                </div>
-                                <div class="card-body">
-                                    <p><strong>Provider:</strong> <span id="current-provider">{{ config.provider_type }}</span></p>
-                                    <p><strong>Model:</strong> <span id="current-model">{{ config.model_name }}</span></p>
-                                    <p><strong>API Base:</strong> <span id="current-api-base">{{ config.api_base }}</span></p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="card-title mb-0">Update Settings</h5>
-                                </div>
-                                <div class="card-body">
-                                    <form id="settings-form">
-                                        <div class="mb-3">
-                                            <label class="form-label">Provider Type</label>
-                                            <select name="provider_type" class="form-select">
-                                                <option value="ollama" {% if config.provider_type == 'ollama' %}selected{% endif %}>Ollama</option>
-                                                <option value="openai" {% if config.provider_type == 'openai' %}selected{% endif %}>OpenAI</option>
-                                            </select>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Model Name</label>
-                                            <select name="model_name" class="form-select">
-                                                <option value="mistral:latest" {% if config.model_name == 'mistral:latest' %}selected{% endif %}>Mistral (Latest)</option>
-                                                <option value="deepseek-coder:latest" {% if config.model_name == 'deepseek-coder:latest' %}selected{% endif %}>Deepseek Coder (Latest)</option>
-                                                <option value="llama2:latest" {% if config.model_name == 'llama2:latest' %}selected{% endif %}>Llama 2 (Latest)</option>
-                                                <option value="mixtral:latest" {% if config.model_name == 'mixtral:latest' %}selected{% endif %}>Mixtral (Latest)</option>
-                                                <option value="custom">Custom Model</option>
-                                            </select>
-                                            <input type="text" name="custom_model_name" class="form-control mt-2 d-none" placeholder="Enter custom model name">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">API Base URL</label>
-                                            <input type="text" name="api_base" value="{{ config.api_base }}" class="form-control">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">API Key</label>
-                                            <input type="password" name="api_key" placeholder="Leave blank to keep current" class="form-control">
-                                        </div>
-                                        <button type="submit" class="btn btn-primary">Update Settings</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Testing Tab -->
-                <div class="tab-pane fade" id="testing" role="tabpanel">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">Test LLM Integration</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <small class="text-muted" id="provider-info">Using {{ config.provider_type }} with {{ config.model_name }}</small>
-                            </div>
-                            <form id="test-form">
-                                <div class="mb-3">
-                                    <label class="form-label">Test Prompt</label>
-                                    <textarea id="test-prompt" name="prompt" rows="4" class="form-control" 
-                                              placeholder="Enter a test prompt here..."></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Test LLM</button>
-                            </form>
-                            <div id="test-result" class="mt-4 d-none">
-                                <h6>Result:</h6>
-                                <pre class="bg-light p-3 rounded"></pre>
-                            </div>
-                        </div>
-                    </div>
+            <div class="tab-content" id="llmTabContent">
+                <!-- Configuration Tab -->
+                <div class="tab-pane fade show active" id="config" role="tabpanel">
+                    {% include "llms/config.html" %}
                 </div>
 
                 <!-- Prompts Tab -->
                 <div class="tab-pane fade" id="prompts" role="tabpanel">
-                    <div class="accordion" id="promptsAccordion">
-                        <!-- Title Generation Template -->
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#titlePrompt">
-                                    Title Generation
-                                </button>
-                            </h2>
-                            <div id="titlePrompt" class="accordion-collapse collapse show" data-bs-parent="#promptsAccordion">
-                                <div class="accordion-body">
-                                    <pre class="bg-light p-3 rounded">{{ prompts.title_generation }}</pre>
-                                    <button class="btn btn-primary btn-sm mt-2">Edit Template</button>
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="prompts-loading" class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
                                 </div>
+                                <p class="mt-2">Loading prompts...</p>
                             </div>
-                        </div>
-                        <!-- Meta Description Template -->
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#metaPrompt">
-                                    Meta Description
-                                </button>
-                            </h2>
-                            <div id="metaPrompt" class="accordion-collapse collapse" data-bs-parent="#promptsAccordion">
-                                <div class="accordion-body">
-                                    <pre class="bg-light p-3 rounded">{{ prompts.meta_description }}</pre>
-                                    <button class="btn btn-primary btn-sm mt-2">Edit Template</button>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Keywords Template -->
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#keywordsPrompt">
-                                    Keywords
-                                </button>
-                            </h2>
-                            <div id="keywordsPrompt" class="accordion-collapse collapse" data-bs-parent="#promptsAccordion">
-                                <div class="accordion-body">
-                                    <pre class="bg-light p-3 rounded">{{ prompts.keywords }}</pre>
-                                    <button class="btn btn-primary btn-sm mt-2">Edit Template</button>
-                                </div>
+                            <div class="accordion" id="promptsAccordion">
+                                <!-- Prompts will be loaded here -->
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Test Tab -->
+                <div class="tab-pane fade" id="test" role="tabpanel">
+                    {% include "llms/test.html" %}
                 </div>
             </div>
         </div>
@@ -175,5 +66,64 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/llms.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load prompts when the prompts tab is clicked
+    document.getElementById('prompts-tab').addEventListener('click', function() {
+        if (!document.querySelector('.prompt-loaded')) {
+            const loadingIndicator = document.getElementById('prompts-loading');
+            const accordion = document.getElementById('promptsAccordion');
+            
+            loadingIndicator.classList.remove('d-none');
+            accordion.classList.add('d-none');
+            
+            fetch('/api/llm/prompts')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        data.prompts.forEach((prompt, index) => {
+                            const item = document.createElement('div');
+                            item.className = 'accordion-item';
+                            item.innerHTML = `
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#prompt${index}">
+                                        ${prompt.name}
+                                    </button>
+                                </h2>
+                                <div id="prompt${index}" class="accordion-collapse collapse">
+                                    <div class="accordion-body">
+                                        <p class="text-muted">${prompt.description}</p>
+                                        <pre class="bg-light p-3">${prompt.template}</pre>
+                                        <h6>Variables:</h6>
+                                        <ul>
+                                            ${prompt.variables.map(v => `
+                                                <li>
+                                                    <strong>${v.name}</strong>
+                                                    ${v.required ? '<span class="badge bg-danger">required</span>' : ''}
+                                                    <p class="text-muted small">${v.description}</p>
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+                            `;
+                            accordion.appendChild(item);
+                        });
+                        accordion.classList.add('prompt-loaded');
+                    } else {
+                        throw new Error(data.error || 'Failed to load prompts');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading prompts:', error);
+                    alert('Failed to load prompts: ' + error.message);
+                })
+                .finally(() => {
+                    loadingIndicator.classList.add('d-none');
+                    accordion.classList.remove('d-none');
+                });
+        }
+    });
+});
+</script>
 {% endblock %} 

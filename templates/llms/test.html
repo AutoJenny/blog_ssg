@@ -1,0 +1,87 @@
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Test LLM</h5>
+            </div>
+            <div class="card-body">
+                <form id="test-form">
+                    <div class="mb-3">
+                        <label class="form-label">Test Prompt</label>
+                        <textarea name="prompt" class="form-control" rows="4" placeholder="Enter a test prompt..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Test LLM</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Test Results</h5>
+            </div>
+            <div class="card-body">
+                <div id="test-results" class="test-results">
+                    <div class="test-result-header">
+                        <span class="test-status">Status: <span id="test-status">Ready</span></span>
+                        <span class="test-time">Time: <span id="test-time">-</span></span>
+                    </div>
+                    <div id="test-output" class="test-output"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const testForm = document.getElementById('test-form');
+    const testOutput = document.getElementById('test-output');
+    const testStatus = document.getElementById('test-status');
+    const testTime = document.getElementById('test-time');
+
+    testForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const prompt = testForm.querySelector('textarea[name="prompt"]').value;
+        if (!prompt) {
+            alert('Please enter a test prompt');
+            return;
+        }
+
+        // Reset test results
+        testOutput.innerHTML = '';
+        testStatus.textContent = 'Testing...';
+        testTime.textContent = '-';
+        
+        const startTime = Date.now();
+
+        fetch('/api/llm/test', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ prompt })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const endTime = Date.now();
+            const duration = (endTime - startTime) / 1000;
+            
+            testTime.textContent = `${duration.toFixed(2)}s`;
+            
+            if (data.success) {
+                testStatus.textContent = 'Success';
+                testOutput.innerHTML = `<pre>${data.response}</pre>`;
+            } else {
+                testStatus.textContent = 'Error';
+                testOutput.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+            }
+        })
+        .catch(error => {
+            testStatus.textContent = 'Error';
+            testOutput.innerHTML = `<div class="alert alert-danger">Failed to test LLM: ${error.message}</div>`;
+        });
+    });
+});
+</script> 

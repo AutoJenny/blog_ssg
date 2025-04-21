@@ -3,22 +3,38 @@ tasks:
     name: "Generate Blog Concept"
     description: "Generate a concept paragraph for a Scottish heritage blog post"
     icon: "bi-lightbulb"  # Bootstrap icon for the button
-    prompt: |
-      You are writing a concept paragraph for a Scottish heritage blog post. 
-      The target audience is people worldwide with an interest in Scottish heritage, culture, and history.
-      
-      The concept should:
-      - Be engaging and informative
-      - Provide depth and context about the topic
-      - Appeal to both casual readers and heritage enthusiasts
-      - Be written in a clear, accessible style
-      - Be no more than one paragraph
-      - Focus on the cultural and historical significance of the topic
-      
-      Title: {title}
-      
-      Please write a concept paragraph that explores this topic in depth while maintaining broad appeal.
+    prompt_ref: "concept_generation"  # Reference to the prompt in llm_prompts.yaml
     model_settings:
       temperature: 0.7
       max_tokens: 200
+      top_p: 0.9
+      
+  generate_title:
+    name: "Generate Blog Title"
+    description: "Generate an engaging title for a Scottish heritage blog post"
+    icon: "bi-type-h1"  # Bootstrap icon for the button
+    prompt_ref: "title_generation"  # Reference to the prompt in llm_prompts.yaml
+    model_settings:
+      temperature: 0.7
+      max_tokens: 100
+      top_p: 0.9
+      
+  generate_meta_description:
+    name: "Generate Meta Description"
+    description: "Generate a meta description for SEO purposes"
+    icon: "bi-card-text"  # Bootstrap icon for the button
+    prompt_ref: "meta_description"  # Reference to the prompt in llm_prompts.yaml
+    model_settings:
+      temperature: 0.7
+      max_tokens: 150
+      top_p: 0.9
+      
+  generate_keywords:
+    name: "Generate Keywords"
+    description: "Generate relevant keywords for SEO"
+    icon: "bi-tags"  # Bootstrap icon for the button
+    prompt_ref: "keywords"  # Reference to the prompt in llm_prompts.yaml
+    model_settings:
+      temperature: 0.7
+      max_tokens: 100
       top_p: 0.9 

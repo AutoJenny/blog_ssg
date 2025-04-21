@@ -1,0 +1,103 @@
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Current Settings</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Provider:</strong> <span id="current-provider">{{ config.provider_type }}</span></p>
+                <p><strong>Model:</strong> <span id="current-model">{{ config.model_name }}</span></p>
+                <p><strong>API Base:</strong> <span id="current-api-base">{{ config.api_base }}</span></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Update Settings</h5>
+            </div>
+            <div class="card-body">
+                <form id="settings-form">
+                    <div class="mb-3">
+                        <label class="form-label">Provider Type</label>
+                        <select name="provider_type" class="form-select">
+                            <option value="ollama" {% if config.provider_type == 'ollama' %}selected{% endif %}>Ollama</option>
+                            <option value="openai" {% if config.provider_type == 'openai' %}selected{% endif %}>OpenAI</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Model Name</label>
+                        <select name="model_name" class="form-select">
+                            <option value="mistral:latest" {% if config.model_name == 'mistral:latest' %}selected{% endif %}>Mistral (Latest)</option>
+                            <option value="deepseek-coder:latest" {% if config.model_name == 'deepseek-coder:latest' %}selected{% endif %}>Deepseek Coder (Latest)</option>
+                            <option value="llama2:latest" {% if config.model_name == 'llama2:latest' %}selected{% endif %}>Llama 2 (Latest)</option>
+                            <option value="mixtral:latest" {% if config.model_name == 'mixtral:latest' %}selected{% endif %}>Mixtral (Latest)</option>
+                            <option value="custom">Custom Model</option>
+                        </select>
+                        <input type="text" name="custom_model_name" class="form-control mt-2 d-none" placeholder="Enter custom model name">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">API Base URL</label>
+                        <input type="text" name="api_base" value="{{ config.api_base }}" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">API Key</label>
+                        <input type="password" name="api_key" placeholder="Leave blank to keep current" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Settings</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const settingsForm = document.getElementById('settings-form');
+    const modelSelect = settingsForm.querySelector('select[name="model_name"]');
+    const customModelInput = settingsForm.querySelector('input[name="custom_model_name"]');
+
+    // Show/hide custom model input
+    modelSelect.addEventListener('change', function() {
+        customModelInput.classList.toggle('d-none', this.value !== 'custom');
+    });
+
+    // Handle form submission
+    settingsForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+        
+        if (data.model_name === 'custom') {
+            data.model_name = data.custom_model_name;
+        }
+        delete data.custom_model_name;
+        
+        fetch('/api/llm/config', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update current settings display
+                document.getElementById('current-provider').textContent = data.config.provider_type;
+                document.getElementById('current-model').textContent = data.config.model_name;
+                document.getElementById('current-api-base').textContent = data.config.api_base;
+                
+                alert('Settings updated successfully!');
+            } else {
+                alert('Failed to update settings: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to update settings. Please try again.');
+        });
+    });
+});
+</script> 

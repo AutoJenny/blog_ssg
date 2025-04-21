@@ -4,48 +4,59 @@
 {% set title = "CLAN.com Blog" %}
 
 {% block content %}
-
     <h1>{{ title }}</h1>
 
-    {# Check if the 'post' collection exists and has items #}
-    {% if collections.post and collections.post.length > 0 %}
+    {# Check if posts data exists #}
+    {% if posts.posts and posts.posts.length > 0 %}
         <ul class="post-list">
-            {# Loop through posts (Sorted descending by date in .eleventy.js) #}
-            {% for post in collections.post %}
+            {# Loop through posts (Already sorted by date in posts.json) #}
+            {% for post in posts.posts %}
                 <li class="post-list-item">
-                    <h2><a href="{{ post.url | url }}">{{ post.data.title }}</a></h2>
-
-                    {# --- Display Post Meta: Date and Author Lookup --- #}
+                    <h2><a href="/{{ post.slug }}/">{{ post.title }}</a></h2>
+                    
+                    {# Post Meta: Date and Author #}
                     <p class="post-meta">
                         {% if post.date %}
-                           <span class="post-meta__date">
-                               <time datetime="{{ post.date | htmlDateString }}">{{ post.date | readableDate }}</time>
-                           </span>
+                            <span class="post-meta__date">
+                                <time datetime="{{ post.date }}">{{ post.date | readableDate }}</time>
+                            </span>
                         {% endif %}
-                        {# UPDATED: Check if author key exists in post AND in global authors data #}
-                        {% if post.data.author and authors[post.data.author] %}
-                           <span class="post-meta__separator"> | </span>
-                           <span class="post-meta__author">
-                               {# UPDATED: Look up name from global authors data #}
-                               By {{ authors[post.data.author].name }}
-                               {# Example future link: <a href="{{ authors[post.data.author].bioPageUrl | url }}">{{ authors[post.data.author].name }}</a> #}
-                           </span>
+                        {% if post.author and authors[post.author] %}
+                            <span class="post-meta__separator"> | </span>
+                            <span class="post-meta__author">
+                                By {{ authors[post.author].name }}
+                            </span>
+                        {% endif %}
+                        {% if post.status.overall %}
+                            <span class="post-meta__separator"> | </span>
+                            <span class="post-meta__status">
+                                Status: {{ post.status.overall | capitalize }}
+                            </span>
                         {% endif %}
                     </p>
-                    {# --- End Post Meta --- #}
 
-                    {# Display summary #}
-                    {% if post.data.summary %}
-                       <div class="post-summary">
-                           {{ post.data.summary | safe }}
-                       </div>
+                    {# Display summary if it exists #}
+                    {% if post.summary %}
+                        <div class="post-summary">
+                            {{ post.summary | safe }}
+                        </div>
                     {% endif %}
 
+                    {# Display header image if it exists #}
+                    {% if post.headerImage and post.headerImage.src %}
+                        <div class="post-header-image">
+                            <img src="{{ post.headerImage.src | url }}" 
+                                 alt="{{ post.headerImage.alt }}"
+                                 {% if post.headerImage.caption %}title="{{ post.headerImage.caption }}"{% endif %}>
+                            {% if post.headerImage.caption %}
+                                <figcaption>{{ post.headerImage.caption }}</figcaption>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                 </li>
             {% endfor %}
         </ul>
     {% else %}
         <p>No blog posts found yet!</p>
     {% endif %}
-
 {% endblock %}

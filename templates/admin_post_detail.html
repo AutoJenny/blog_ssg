@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {# Title uses metadata passed from Flask #}
-    <title>Manage: {{ post.title | default('Unknown Post') }} - Blog Workflow</title>
+    <title>{{ post.title }} - Blog Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -235,149 +237,144 @@
     </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/">Blog Manager</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Posts</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/admin/llm">LLM Management</a>
-                    </li>
-                </ul>
-            </div>
+    <header class="admin-header">
+        <div class="header-left">
+            <h1>Blog Admin</h1>
+            <nav>
+                <a href="/">Posts</a>
+                <a href="/admin/llm">LLM Management</a>
+            </nav>
         </div>
-    </nav>
+        <div class="header-right">
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </header>
 
-    <button class="theme-toggle" id="themeToggle" title="Toggle dark/light mode"></button>
-    <div class="container"> {# Wrap content in container for Bootstrap #}
-        <p class="back-link mt-3"><a href="{{ url_for('index') }}">← Back to Post List</a></p>
+    <main class="admin-content">
+        <div class="container"> {# Wrap content in container for Bootstrap #}
+            <p class="back-link mt-3"><a href="{{ url_for('index') }}">← Back to Post List</a></p>
 
-        <h1>Manage: {{ post.title | default('Post Details') }}</h1>
-        <p><strong>Slug:</strong> <code>{{ slug }}</code>
-            <a href="vscode://file/{{ config.BASE_DIR_STR }}/posts/{{ slug }}.md" title="Edit Markdown File in VS Code" class="ms-2">
-                <i class="bi bi-pencil-square"></i> (Edit MD)
-            </a>
-         </p>
+            <h1>Manage: {{ post.title | default('Post Details') }}</h1>
+            <p><strong>Slug:</strong> <code>{{ slug }}</code>
+                <a href="vscode://file/{{ config.BASE_DIR_STR }}/posts/{{ slug }}.md" title="Edit Markdown File in VS Code" class="ms-2">
+                    <i class="bi bi-pencil-square"></i> (Edit MD)
+                </a>
+             </p>
 
-         <section id="workflow-stages">
-            <h2>Workflow Stages <span class="help-trigger" data-help-id="manage-posts-main-help" title="Help for Manage Posts Section">?</span></h2>
-             <div class="help-content" id="manage-posts-main-help">{% include 'help/manage_posts_help.njk' %}</div>
-    
-            {# --- Stage I: Conceptualisation --- #}
-            <details class="workflow-stage" data-stage-key="conceptualisation">
-                <summary>
-                    <span class="traffic-light" data-status="{{ status.stages.conceptualisation.status | default('pending') }}"></span>
-                    I. Conceptualisation
-                </summary>
-                <div class="stage-content">
-                    <div class="mb-3">
-                        <label for="concept" class="form-label">Core Idea</label>
-                        <textarea class="form-control" id="concept" rows="3" data-field="concept">{{ post.concept | default('') }}</textarea>
-                        <div class="form-text">The core idea or concept of the post</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="title" class="form-label">Title</label>
-                        <input type="text" class="form-control" id="title" value="{{ post.title | default('') }}" data-field="title">
-                        <div class="form-text">The main title of the post</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="subtitle" class="form-label">Subtitle</label>
-                        <input type="text" class="form-control" id="subtitle" value="{{ post.subtitle | default('') }}" data-field="subtitle">
-                        <div class="form-text">A brief subtitle or description</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="slug" class="form-label">URL Slug</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="slug" value="{{ slug }}" data-field="slug" {% if status.stages.publishing_clancom.status == 'complete' %}readonly{% endif %}>
-                            <button class="btn btn-outline-secondary" type="button" id="edit-slug" {% if status.stages.publishing_clancom.status == 'complete' %}disabled{% endif %}>
-                                <i class="bi bi-pencil"></i>
-                            </button>
+             <section id="workflow-stages">
+                <h2>Workflow Stages <span class="help-trigger" data-help-id="manage-posts-main-help" title="Help for Manage Posts Section">?</span></h2>
+                 <div class="help-content" id="manage-posts-main-help">{% include 'help/manage_posts_help.njk' %}</div>
+        
+                {# --- Stage I: Conceptualisation --- #}
+                <details class="workflow-stage" data-stage-key="conceptualisation">
+                    <summary>
+                        <span class="traffic-light" data-status="{{ status.stages.conceptualisation.status | default('pending') }}"></span>
+                        I. Conceptualisation
+                    </summary>
+                    <div class="stage-content">
+                        <div class="mb-3">
+                            <label for="concept" class="form-label">Core Idea</label>
+                            <textarea class="form-control" id="concept" rows="3" data-field="concept">{{ post.concept | default('') }}</textarea>
+                            <div class="form-text">The core idea or concept of the post</div>
                         </div>
-                        <div class="form-text">
-                            {% if status.stages.publishing_clancom.status == 'complete' %}
-                                <span class="text-warning"><i class="bi bi-exclamation-triangle-fill"></i> Warning: This post has been published. Changing the slug may break existing links.</span>
-                            {% else %}
-                                The URL-friendly version of the title. Can only be changed before publication.
-                            {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title" value="{{ post.title | default('') }}" data-field="title">
+                            <div class="form-text">The main title of the post</div>
                         </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <button type="button" class="btn btn-primary save-metadata-button" id="save-metadata-concept">Save Changes</button>
-                        <span class="ms-2 text-muted save-status"></span>
-                    </div>
-
-                    <p>
-                        <strong>Status:</strong> <code class="status-text">{{ status.stages.conceptualisation.status | default('pending') }}</code>
-                        {% set current_status = status.stages.conceptualisation.status | default('pending') %}
-                        {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="conceptualisation" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
-                        {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="conceptualisation" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
-                    </p>
-                </div>
-            </details>
-    
-            {# --- Stage II: Authoring --- #}
-            <details class="workflow-stage" data-stage-key="authoring">
-                <summary>
-                    <span class="traffic-light" data-status="{{ status.stages.authoring.status | default('pending') }}"></span>
-                    II. Content Authoring & Structuring
-                </summary>
-                <div class="stage-content">
-                    <div class="card mb-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Import Content</h5>
-                            <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#importFormatModal">
-                                <i class="bi bi-info-circle"></i> Format Info
-                            </button>
+                        
+                        <div class="mb-3">
+                            <label for="subtitle" class="form-label">Subtitle</label>
+                            <input type="text" class="form-control" id="subtitle" value="{{ post.subtitle | default('') }}" data-field="subtitle">
+                            <div class="form-text">A brief subtitle or description</div>
                         </div>
-                        <div class="card-body">
-                            <form id="importContentForm" enctype="multipart/form-data">
-                                <div class="mb-3">
-                                    <label for="contentFile" class="form-label">Upload HTML or Markdown file</label>
-                                    <input type="file" class="form-control" id="contentFile" name="file" accept=".html,.htm,.md,.markdown" required>
-                                    <div class="form-text">Supported formats: HTML (.html, .htm) or Markdown (.md, .markdown)</div>
-                                </div>
-                                <div id="importError" class="alert alert-danger d-none mb-3"></div>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-upload me-1"></i>Import Content
+                        
+                        <div class="mb-3">
+                            <label for="slug" class="form-label">URL Slug</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="slug" value="{{ slug }}" data-field="slug" {% if status.stages.publishing_clancom.status == 'complete' %}readonly{% endif %}>
+                                <button class="btn btn-outline-secondary" type="button" id="edit-slug" {% if status.stages.publishing_clancom.status == 'complete' %}disabled{% endif %}>
+                                    <i class="bi bi-pencil"></i>
                                 </button>
-                            </form>
+                            </div>
+                            <div class="form-text">
+                                {% if status.stages.publishing_clancom.status == 'complete' %}
+                                    <span class="text-warning"><i class="bi bi-exclamation-triangle-fill"></i> Warning: This post has been published. Changing the slug may break existing links.</span>
+                                {% else %}
+                                    The URL-friendly version of the title. Can only be changed before publication.
+                                {% endif %}
+                            </div>
                         </div>
+
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-primary save-metadata-button" id="save-metadata-concept">Save Changes</button>
+                            <span class="ms-2 text-muted save-status"></span>
+                        </div>
+
+                        <p>
+                            <strong>Status:</strong> <code class="status-text">{{ status.stages.conceptualisation.status | default('pending') }}</code>
+                            {% set current_status = status.stages.conceptualisation.status | default('pending') %}
+                            {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="conceptualisation" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
+                            {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="conceptualisation" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
+                        </p>
                     </div>
-
-                    <!-- Import Format Info Modal -->
-                    <div class="modal fade" id="importFormatModal" tabindex="-1" aria-labelledby="importFormatModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="importFormatModalLabel">Content Import Format Guide</h5>
-                                    <div class="ms-auto me-2">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary copy-guide" title="Copy Format Guide to Clipboard">
-                                            <i class="bi bi-clipboard"></i> Copy Guide
-                                        </button>
+                </details>
+        
+                {# --- Stage II: Authoring --- #}
+                <details class="workflow-stage" data-stage-key="authoring">
+                    <summary>
+                        <span class="traffic-light" data-status="{{ status.stages.authoring.status | default('pending') }}"></span>
+                        II. Content Authoring & Structuring
+                    </summary>
+                    <div class="stage-content">
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Import Content</h5>
+                                <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#importFormatModal">
+                                    <i class="bi bi-info-circle"></i> Format Info
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <form id="importContentForm" enctype="multipart/form-data">
+                                    <div class="mb-3">
+                                        <label for="contentFile" class="form-label">Upload HTML or Markdown file</label>
+                                        <input type="file" class="form-control" id="contentFile" name="file" accept=".html,.htm,.md,.markdown" required>
+                                        <div class="form-text">Supported formats: HTML (.html, .htm) or Markdown (.md, .markdown)</div>
                                     </div>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <h6>Supported Formats</h6>
-                                    <ul>
-                                        <li>Markdown (.md) - Uses standard Markdown syntax</li>
-                                        <li>HTML (.html) - Uses standard HTML tags</li>
-                                    </ul>
+                                    <div id="importError" class="alert alert-danger d-none mb-3"></div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-upload me-1"></i>Import Content
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
 
-                                    <h6 class="mt-3">Required Structure</h6>
-                                    <p>Your content should follow this structure:</p>
-                                    <pre class="example-code">
+                        <!-- Import Format Info Modal -->
+                        <div class="modal fade" id="importFormatModal" tabindex="-1" aria-labelledby="importFormatModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="importFormatModalLabel">Content Import Format Guide</h5>
+                                        <div class="ms-auto me-2">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary copy-guide" title="Copy Format Guide to Clipboard">
+                                                <i class="bi bi-clipboard"></i> Copy Guide
+                                            </button>
+                                        </div>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <h6>Supported Formats</h6>
+                                        <ul>
+                                            <li>Markdown (.md) - Uses standard Markdown syntax</li>
+                                            <li>HTML (.html) - Uses standard HTML tags</li>
+                                        </ul>
+
+                                        <h6 class="mt-3">Required Structure</h6>
+                                        <p>Your content should follow this structure:</p>
+                                        <pre class="example-code">
 # Title (optional, will be ignored)
 ## Summary
 [Your summary text here]
@@ -393,17 +390,17 @@
 ## Conclusion
 [Conclusion text]</pre>
 
-                                    <h6 class="mt-3">Formatting Guidelines</h6>
-                                    <ul>
-                                        <li>Use <code>##</code> for section headings in Markdown</li>
-                                        <li>Use <code>&lt;h2&gt;</code> for section headings in HTML</li>
-                                        <li>Content can include basic HTML tags (p, b, i, ul, li)</li>
-                                        <li>Each section should have a heading and content</li>
-                                        <li>The last section will be treated as the conclusion</li>
-                                    </ul>
+                                        <h6 class="mt-3">Formatting Guidelines</h6>
+                                        <ul>
+                                            <li>Use <code>##</code> for section headings in Markdown</li>
+                                            <li>Use <code>&lt;h2&gt;</code> for section headings in HTML</li>
+                                            <li>Content can include basic HTML tags (p, b, i, ul, li)</li>
+                                            <li>Each section should have a heading and content</li>
+                                            <li>The last section will be treated as the conclusion</li>
+                                        </ul>
 
-                                    <h6 class="mt-3">Example Markdown</h6>
-                                    <pre class="example-code">
+                                        <h6 class="mt-3">Example Markdown</h6>
+                                        <pre class="example-code">
 ## Summary
 This is a brief summary of the article.
 
@@ -415,134 +412,134 @@ This is the main content section.
 
 ## Conclusion
 This is the conclusion section.</pre>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <h3>Summary</h3>
-                        <div class="mb-3">
-                            <label for="summary" class="form-label">Post Summary</label>
-                            <textarea class="form-control" id="summary" rows="3" data-field="summary">{{ post.summary | default('') }}</textarea>
-                            <div class="form-text">A brief summary of the post that will appear at the top</div>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <h3>Content Sections</h3>
-                        <div id="sections-container">
-                            {% if post.sections %}
-                                {% for section in post.sections %}
-                                <div class="section-item mb-4 p-3 border rounded" data-section-index="{{ loop.index0 }}">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <h4 class="mb-0">Section {{ loop.index }}</h4>
-                                        <button type="button" class="btn btn-sm btn-outline-danger delete-section" data-section-index="{{ loop.index0 }}">
-                                            <i class="bi bi-trash"></i> Delete
-                                        </button>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Heading</label>
-                                        <input type="text" class="form-control section-heading" value="{{ section.heading | default('') }}" data-field="heading">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Content</label>
-                                        <textarea class="form-control section-content" rows="5" data-field="text">{{ section.text | default('') }}</textarea>
-                                        <div class="form-text">Use HTML tags for formatting (p, b, i, ul, li)</div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                     </div>
                                 </div>
-                                {% endfor %}
-                            {% endif %}
+                            </div>
                         </div>
-                        <button type="button" class="btn btn-outline-primary" id="add-section">
-                            <i class="bi bi-plus-circle"></i> Add Section
-                        </button>
-                    </div>
 
-                    <div class="mb-4">
-                        <h3>Conclusion</h3>
+                        <div class="mb-4">
+                            <h3>Summary</h3>
+                            <div class="mb-3">
+                                <label for="summary" class="form-label">Post Summary</label>
+                                <textarea class="form-control" id="summary" rows="3" data-field="summary">{{ post.summary | default('') }}</textarea>
+                                <div class="form-text">A brief summary of the post that will appear at the top</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h3>Content Sections</h3>
+                            <div id="sections-container">
+                                {% if post.sections %}
+                                    {% for section in post.sections %}
+                                    <div class="section-item mb-4 p-3 border rounded" data-section-index="{{ loop.index0 }}">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h4 class="mb-0">Section {{ loop.index }}</h4>
+                                            <button type="button" class="btn btn-sm btn-outline-danger delete-section" data-section-index="{{ loop.index0 }}">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Heading</label>
+                                            <input type="text" class="form-control section-heading" value="{{ section.heading | default('') }}" data-field="heading">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Content</label>
+                                            <textarea class="form-control section-content" rows="5" data-field="text">{{ section.text | default('') }}</textarea>
+                                            <div class="form-text">Use HTML tags for formatting (p, b, i, ul, li)</div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <button type="button" class="btn btn-outline-primary" id="add-section">
+                                <i class="bi bi-plus-circle"></i> Add Section
+                            </button>
+                        </div>
+
+                        <div class="mb-4">
+                            <h3>Conclusion</h3>
+                            <div class="mb-3">
+                                <label for="conclusion-heading" class="form-label">Conclusion Heading</label>
+                                <input type="text" class="form-control" id="conclusion-heading" value="{{ post.conclusion.heading | default('') }}" data-field="conclusion.heading">
+                            </div>
+                            <div class="mb-3">
+                                <label for="conclusion-text" class="form-label">Conclusion Text</label>
+                                <textarea class="form-control" id="conclusion-text" rows="3" data-field="conclusion.text">{{ post.conclusion.text | default('') }}</textarea>
+                                <div class="form-text">Use HTML tags for formatting (p, b, i, ul, li)</div>
+                            </div>
+                        </div>
+
                         <div class="mb-3">
-                            <label for="conclusion-heading" class="form-label">Conclusion Heading</label>
-                            <input type="text" class="form-control" id="conclusion-heading" value="{{ post.conclusion.heading | default('') }}" data-field="conclusion.heading">
+                            <button type="button" class="btn btn-primary" id="save-content">Save Content</button>
+                            <span class="ms-2 text-muted" id="save-content-status"></span>
                         </div>
-                        <div class="mb-3">
-                            <label for="conclusion-text" class="form-label">Conclusion Text</label>
-                            <textarea class="form-control" id="conclusion-text" rows="3" data-field="conclusion.text">{{ post.conclusion.text | default('') }}</textarea>
-                            <div class="form-text">Use HTML tags for formatting (p, b, i, ul, li)</div>
-                        </div>
+
+                        <p>
+                            <strong>Status:</strong> <code class="status-text">{{ status.stages.authoring.status | default('pending') }}</code>
+                            {% set current_status = status.stages.authoring.status | default('pending') %}
+                            {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="authoring" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
+                            {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="authoring" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
+                        </p>
+                        <p><strong>HTML Formatting Status:</strong> <span class="traffic-light" data-status="{{ status.stages.authoring.text_format_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.authoring.text_format_status | default('pending') }}</code></p>
                     </div>
+                </details>
+        
+                {# --- Stage III: Metadata & File Setup --- #}
+                <details class="workflow-stage" data-stage-key="metadata">
+                    <summary>
+                        <span class="traffic-light" data-status="{{ status.stages.metadata.status | default('pending') }}"></span>
+                        III. Metadata & File Setup
+                    </summary>
+                    <div class="stage-content">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Post Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="final-title" class="form-label">Final Title</label>
+                                    <input type="text" class="form-control" id="final-title" value="{{ post.title | default('') }}" data-field="title">
+                                    <div class="form-text">The final, SEO-optimized title for the post</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="final-subtitle" class="form-label">Subtitle</label>
+                                    <input type="text" class="form-control" id="final-subtitle" value="{{ post.subtitle | default('') }}" data-field="subtitle">
+                                    <div class="form-text">A compelling subtitle that complements the title</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="meta-description" class="form-label">Meta Description</label>
+                                    <textarea class="form-control" id="meta-description" rows="2" data-field="meta_description">{{ post.meta_description | default('') }}</textarea>
+                                    <div class="form-text">A concise description for search engines (150-160 characters)</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="meta-keywords" class="form-label">Meta Keywords</label>
+                                    <input type="text" class="form-control" id="meta-keywords" value="{{ post.meta_keywords | default('') }}" data-field="meta_keywords">
+                                    <div class="form-text">Comma-separated keywords for SEO</div>
+                                </div>
 
-                    <div class="mb-3">
-                        <button type="button" class="btn btn-primary" id="save-content">Save Content</button>
-                        <span class="ms-2 text-muted" id="save-content-status"></span>
-                    </div>
-
-                    <p>
-                        <strong>Status:</strong> <code class="status-text">{{ status.stages.authoring.status | default('pending') }}</code>
-                        {% set current_status = status.stages.authoring.status | default('pending') %}
-                        {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="authoring" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
-                        {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="authoring" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
-                    </p>
-                    <p><strong>HTML Formatting Status:</strong> <span class="traffic-light" data-status="{{ status.stages.authoring.text_format_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.authoring.text_format_status | default('pending') }}</code></p>
-                </div>
-            </details>
-    
-            {# --- Stage III: Metadata & File Setup --- #}
-            <details class="workflow-stage" data-stage-key="metadata">
-                <summary>
-                    <span class="traffic-light" data-status="{{ status.stages.metadata.status | default('pending') }}"></span>
-                    III. Metadata & File Setup
-                </summary>
-                <div class="stage-content">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0">Post Information</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label for="final-title" class="form-label">Final Title</label>
-                                <input type="text" class="form-control" id="final-title" value="{{ post.title | default('') }}" data-field="title">
-                                <div class="form-text">The final, SEO-optimized title for the post</div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="final-subtitle" class="form-label">Subtitle</label>
-                                <input type="text" class="form-control" id="final-subtitle" value="{{ post.subtitle | default('') }}" data-field="subtitle">
-                                <div class="form-text">A compelling subtitle that complements the title</div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="meta-description" class="form-label">Meta Description</label>
-                                <textarea class="form-control" id="meta-description" rows="2" data-field="meta_description">{{ post.meta_description | default('') }}</textarea>
-                                <div class="form-text">A concise description for search engines (150-160 characters)</div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="meta-keywords" class="form-label">Meta Keywords</label>
-                                <input type="text" class="form-control" id="meta-keywords" value="{{ post.meta_keywords | default('') }}" data-field="meta_keywords">
-                                <div class="form-text">Comma-separated keywords for SEO</div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Categories</label>
-                                <div class="row g-3">
-                                    {% for cat_id, category in categories.items() %}
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input category-checkbox" type="checkbox" 
-                                                   value="{{ cat_id }}" 
-                                                   id="category-{{ cat_id }}"
-                                                   {% if post.categories and cat_id in post.categories %}checked{% endif %}>
-                                            <label class="form-check-label" for="category-{{ cat_id }}" 
-                                                   title="{{ category.description }}">
-                                                {{ category.name }}
-                                                <i class="bi bi-info-circle-fill text-muted" 
-                                                   data-bs-toggle="tooltip" 
-                                                   data-bs-placement="right" 
-                                                   title="{{ category.description }}
+                                <div class="mb-3">
+                                    <label class="form-label">Categories</label>
+                                    <div class="row g-3">
+                                        {% for cat_id, category in categories.items() %}
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input category-checkbox" type="checkbox" 
+                                                       value="{{ cat_id }}" 
+                                                       id="category-{{ cat_id }}"
+                                                       {% if post.categories and cat_id in post.categories %}checked{% endif %}>
+                                                <label class="form-check-label" for="category-{{ cat_id }}" 
+                                                       title="{{ category.description }}">
+                                                    {{ category.name }}
+                                                    <i class="bi bi-info-circle-fill text-muted" 
+                                                       data-bs-toggle="tooltip" 
+                                                       data-bs-placement="right" 
+                                                       title="{{ category.description }}
 Examples: {{ category.examples | join(', ') }}"></i>
                                             </label>
                                         </div>
@@ -552,358 +549,359 @@ Examples: {{ category.examples | join(', ') }}"></i>
                                 <div class="form-text mt-2">Select all applicable categories for this post</div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0">Author & Dates</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label for="author" class="form-label">Author</label>
-                                <select class="form-select" id="author" data-field="author">
-                                    <option value="">Select an author...</option>
-                                    {% for author_key, author in authors.items() %}
-                                    <option value="{{ author_key }}" {% if post.author == author_key %}selected{% endif %}>{{ author.name }}</option>
-                                    {% endfor %}
-                                </select>
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Author & Dates</h5>
                             </div>
-                            
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label for="created-date" class="form-label">Created Date</label>
-                                        <input type="date" class="form-control" id="created-date" value="{{ post.created_date | default('') }}" data-field="created_date" readonly>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="author" class="form-label">Author</label>
+                                    <select class="form-select" id="author" data-field="author">
+                                        <option value="">Select an author...</option>
+                                        {% for author_key, author in authors.items() %}
+                                        <option value="{{ author_key }}" {% if post.author == author_key %}selected{% endif %}>{{ author.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="created-date" class="form-label">Created Date</label>
+                                            <input type="date" class="form-control" id="created-date" value="{{ post.created_date | default('') }}" data-field="created_date" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="published-date" class="form-label">Published Date</label>
+                                            <input type="date" class="form-control" id="published-date" value="{{ post.published_date | default('') }}" data-field="published_date">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="updated-date" class="form-label">Last Updated</label>
+                                            <input type="date" class="form-control" id="updated-date" value="{{ post.updated_date | default('') }}" data-field="updated_date" readonly>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label for="published-date" class="form-label">Published Date</label>
-                                        <input type="date" class="form-control" id="published-date" value="{{ post.published_date | default('') }}" data-field="published_date">
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label for="updated-date" class="form-label">Last Updated</label>
-                                        <input type="date" class="form-control" id="updated-date" value="{{ post.updated_date | default('') }}" data-field="updated_date" readonly>
-                                    </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Tags & Categories</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="tags" class="form-label">Tags</label>
+                                    <input type="text" class="form-control" id="tags" value="{{ post.tags | join(', ') | default('') }}" data-field="tags">
+                                    <div class="form-text">Comma-separated tags for categorization</div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0">Tags & Categories</h5>
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-primary save-metadata-button" id="save-metadata-details">Save Metadata</button>
+                            <span class="ms-2 text-muted save-status"></span>
                         </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label for="tags" class="form-label">Tags</label>
-                                <input type="text" class="form-control" id="tags" value="{{ post.tags | join(', ') | default('') }}" data-field="tags">
-                                <div class="form-text">Comma-separated tags for categorization</div>
-                            </div>
+
+                        <p>
+                            <strong>Overall Status:</strong> <code class="status-text">{{ status.stages.metadata.status | default('pending') }}</code>
+                            {% set current_status = status.stages.metadata.status | default('pending') %}
+                            {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="metadata" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
+                            {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="metadata" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
+                        </p>
+                        <p><strong>Front Matter Populated:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.front_matter_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.front_matter_status | default('pending') }}</code></p>
+                        <p><strong>Tags Defined:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.tags_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.tags_status | default('pending') }}</code></p>
+                        <p><strong>Author Assigned:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.author_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.author_status | default('pending') }}</code></p>
+                    </div>
+                </details>
+        
+                {# --- Stage IV: Image Workflow --- #}
+                <details class="workflow-stage" data-stage-key="images">
+                    <summary>
+                        <span class="traffic-light" data-status="{{ status.stages.images.status | default('pending') }}"></span>
+                        IV. Image Workflow
+                    </summary>
+                    <div class="stage-content">
+
+                        {# --- Informational Text about New Workflow --- #}
+                        <div class="alert alert-info small" role="alert">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            Image processing (optimization to WEBP, watermarking) is now handled by running the
+                            <code>scripts/process_imported_image.py</code> script manually from the command line for each new image placed in
+                            <code>_SOURCE_MEDIA/_IMPORT_IMAGES/</code>. This script updates the Image Library and creates the necessary published and watermarked files.
+                            Statuses below reflect the data recorded in the Image Library and Workflow files.
                         </div>
-                    </div>
+                        {# --- End Informational Text --- #}
 
-                    <div class="mb-3">
-                        <button type="button" class="btn btn-primary save-metadata-button" id="save-metadata-details">Save Metadata</button>
-                        <span class="ms-2 text-muted save-status"></span>
-                    </div>
-
-                    <p>
-                        <strong>Overall Status:</strong> <code class="status-text">{{ status.stages.metadata.status | default('pending') }}</code>
-                        {% set current_status = status.stages.metadata.status | default('pending') %}
-                        {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="metadata" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
-                        {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="metadata" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
-                    </p>
-                    <p><strong>Front Matter Populated:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.front_matter_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.front_matter_status | default('pending') }}</code></p>
-                    <p><strong>Tags Defined:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.tags_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.tags_status | default('pending') }}</code></p>
-                    <p><strong>Author Assigned:</strong> <span class="traffic-light" data-status="{{ status.stages.metadata.author_status | default('pending') }}"></span> <code class="status-text">{{ status.stages.metadata.author_status | default('pending') }}</code></p>
-                </div>
-            </details>
-    
-            {# --- Stage IV: Image Workflow --- #}
-            <details class="workflow-stage" data-stage-key="images">
-                <summary>
-                    <span class="traffic-light" data-status="{{ status.stages.images.status | default('pending') }}"></span>
-                    IV. Image Workflow
-                </summary>
-                <div class="stage-content">
-
-                    {# --- Informational Text about New Workflow --- #}
-                    <div class="alert alert-info small" role="alert">
-                        <i class="bi bi-info-circle-fill me-2"></i>
-                        Image processing (optimization to WEBP, watermarking) is now handled by running the
-                        <code>scripts/process_imported_image.py</code> script manually from the command line for each new image placed in
-                        <code>_SOURCE_MEDIA/_IMPORT_IMAGES/</code>. This script updates the Image Library and creates the necessary published and watermarked files.
-                        Statuses below reflect the data recorded in the Image Library and Workflow files.
-                    </div>
-                    {# --- End Informational Text --- #}
-
-                    {# Status line WITHOUT old Watermark All button #}
-                    <div class="d-flex justify-content-between align-items-center p-2 mb-3 bg-light rounded flex-wrap">
-                        <span class="me-3 mb-1 mb-md-0">
-                            <strong>Overall Image Status:</strong> <code class="status-text">{{ status.stages.images.status | default('pending') }}</code>
-                            {# Optionally add clickable status updates here later #}
-                        </span>
-                        {# Optional Manual Override Buttons for Overall Stage #}
-                        <span>
-                            {% set current_status = status.stages.images.status | default('pending') %}
-                            {% if current_status != 'complete' %}
-                                <button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="images" data-new-status="complete" title="Mark this stage as fully complete (Manual Override)">Mark Complete</button>
-                            {% endif %}
-                            {% if current_status != 'pending' %}
-                                <button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="images" data-new-status="pending" title="Reset status to pending">Mark Pending</button>
-                            {% endif %}
-                        </span>
-                    </div>
-
-                    {# Display Calculated Sub-Statuses #}
-                    <p class="mb-1"><small>
-                        Prompts Defined: <span class="traffic-light" data-status="{{ status.stages.images.prompts_defined_status | default('pending') }}"></span>
-                        | Assets Prepared: <span class="traffic-light" data-status="{{ status.stages.images.assets_prepared_status | default('pending') }}"></span>
-                        | Metadata Integrated: <span class="traffic-light" data-status="{{ status.stages.images.metadata_integrated_status | default('pending') }}"></span>
-                        {# Add clickable triggers here later if desired #}
-                    </small></p>
-
-
-                    {# --- Loop through detailed image list passed from Flask --- #}
-                    {% if images_detailed %}
-                    <ul class="image-detail-list list-unstyled mt-3"> {# Added mt-3 #}
-                    {% for img_info in images_detailed %}
-                    {# --- Start of individual image item --- #}
-                    <li class="mb-3 p-3 border rounded">
-                        <div class="d-flex flex-column flex-md-row align-items-md-start">
-
-                            {# --- Left Column: Metadata --- #}
-                            <div class="flex-grow-1 me-md-3">
-
-                                {% if img_info.error %}
-                                    <p class="text-danger mb-0"><strong>Error:</strong> Image ID <code>{{ img_info.id }}</code> - {{ img_info.error }}</p>
-                                {% else %}
-                                    {# ID and Description #}
-                                    <p class="mb-1">
-                                        <code>{{ img_info.id }}</code> :
-                                        {% set original_desc = img_info.description %}
-                                        {% set sep_section = ' section image for ' %}{% set sep_header = ' header image for ' %}{% set sep_conclusion = ' conclusion image for ' %}
-                                        {% if sep_section in original_desc %}{% set cleaned_desc = original_desc.split(sep_section, 1)[0] %}
-                                        {% elif sep_header in original_desc %}{% set cleaned_desc = original_desc.split(sep_header, 1)[0] %}
-                                        {% elif sep_conclusion in original_desc %}{% set cleaned_desc = original_desc.split(sep_conclusion, 1)[0] %}
-                                        {% else %}{% set cleaned_desc = original_desc %}{% endif %}
-                                        <strong>{{ cleaned_desc | trim | default('(No Description)') }}</strong>
-                                    </p>
-
-                                    {# Filename #}
-                                    <p class="mb-1"><small>
-                                        <strong>Filename (Published):</strong> <code>{{ img_info.filename_local | default('N/A') }}</code> {# Assumes filename_local is the published one #}
-                                        {% if img_info.filename_local %}
-                                            <a href="#" class="ms-1" onclick="navigator.clipboard.writeText('{{ img_info.filename_local }}'); alert('Filename copied!'); return false;" title="Copy Filename">
-                                                <i class="bi bi-clipboard small"></i></a>
-                                        {% endif %}
-                                    </small></p>
-
-                                    {# Public URL (Derived) #}
-                                    {% if img_info.filename_local %}
-                                        {% set public_url = "https://static.clan.com/media/blog/" + img_info.filename_local %} {# Derived URL #}
-                                        <p class="mb-3"><small>
-                                            <strong>Est. URL:</strong> <a href="{{ public_url }}" target="_blank">{{ public_url }}</a>
-                                            <a href="#" class="ms-1" onclick="navigator.clipboard.writeText('{{ public_url }}'); alert('URL copied!'); return false;" title="Copy Public URL">
-                                                <i class="bi bi-clipboard small"></i></a>
-                                        </small></p>
-                                    {% else %}<div class="mb-3"></div>{% endif %}
-
-                                    {# Prompt #}
-                                    <div class="mb-3">
-                                        <p class="mb-1">
-                                            <strong>Prompt:</strong> <span class="traffic-light" data-status="{{ img_info.prompt_status }}"></span> <code class="status-text">{{ img_info.prompt_status }}</code>
-                                            {# Add clickable status here later #}
-                                        </p>
-                                        <textarea readonly class="form-control form-control-sm" style="min-height: 60px; font-size: 0.85em;">{{ img_info.prompt | default('No prompt defined.') }}</textarea>
-                                    </div>
-
-                                    {# Meta Alt #}
-                                    <div class="mb-3">
-                                         <p class="mb-1">
-                                            <strong>Alt Text:</strong> <span class="traffic-light" data-status="{{ 'complete' if img_info.alt else 'pending' }}"></span> <code class="status-text">{{ 'complete' if img_info.alt else 'pending' }}</code>
-                                            {# Add clickable status here later #}
-                                         </p>
-                                         <textarea readonly class="form-control form-control-sm" style="min-height: 40px; font-size: 0.85em;">{{ img_info.alt | default('(No alt text)') }}</textarea>
-                                    </div>
-
-                                    {# Caption #}
-                                    <div class="mb-3">
-                                        <p class="mb-1">
-                                            <strong>Caption:</strong> <span class="traffic-light" data-status="{{ 'complete' if img_info.blog_caption else 'pending' }}"></span> <code class="status-text">{{ 'complete' if img_info.blog_caption else 'pending' }}</code>
-                                            {# Add clickable status here later #}
-                                        </p>
-                                        <textarea readonly class="form-control form-control-sm" style="min-height: 40px; font-size: 0.85em;">{{ img_info.blog_caption | default('(No caption)') }}</textarea>
-                                    </div>
-
-                                    {# --- Individual Watermark Status --- #}
-                                    <div class="mb-3">
-                                        <p class="mb-0"> {# Reduced bottom margin #}
-                                            <strong>Watermark Applied?:</strong>
-                                            <span class="traffic-light" data-status="{{ img_info.watermarking_status | default('pending') }}"></span>
-                                            <code class="status-text status-trigger"
-                                                  data-slug="{{ slug }}"
-                                                  data-stage-key="images.watermarks.{{ img_info.id }}"
-                                                  style="cursor: pointer;" title="Click to cycle status (if JS implemented)">
-                                                {{ img_info.watermarking_status | default('pending') }}
-                                            </code>
-                                            {# JS needed to make this clickable later (Priority 4) #}
-                                        </p>
-                                    </div>
-                                    {# --- End Individual Watermark Status --- #}
-
-
-                                    {# Notes #}
-                                    {% if img_info.notes %}
-                                    <div class="mb-0">
-                                        <p class="mb-1"><strong>Notes:</strong></p>
-                                         <textarea readonly class="form-control form-control-sm" style="min-height: 40px; font-size: 0.85em;">{{ img_info.notes }}</textarea>
-                                    </div>
-                                    {% endif %}
-
-                                {% endif %} {# End of no error check #}
-                            </div> {# End Left Column #}
-
-                            {# --- Right Column: Image Thumbnail/Placeholder --- #}
-                            <div class="flex-shrink-0 mt-3 mt-md-0" style="width: 250px; max-width: 100%;">
-                                 {% if img_info.display_url %} {# Use display_url generated by app.py #}
-                                    <img src="{{ img_info.display_url }}" alt="Thumbnail for {{ img_info.id }}" class="img-thumbnail w-100" style="max-width: 250px;">
-                                 {% elif img_info.error %}
-                                    <div class="border rounded bg-light d-flex align-items-center justify-content-center text-muted w-100" style="min-height: 150px; aspect-ratio: 16 / 9; max-width: 250px;">
-                                        <span>Error Loading Image Info</span>
-                                    </div>
-                                 {% else %}
-                                    <div class="border rounded bg-light d-flex align-items-center justify-content-center text-muted w-100" style="min-height: 150px; aspect-ratio: 16 / 9; max-width: 250px;">
-                                        <span>Image Not Found / Not Processed</span>
-                                    </div>
-                                 {% endif %}
-                            </div> {# End Right Column #}
-
-                        </div> {# End Flex Container #}
-                    </li> {# --- End of individual image item --- #}
-                    {% endfor %}
-                    </ul>
-                    {% else %}
-                    <p>No images referenced by this post.</p>
-                    {% endif %}
-                    {# --- END Image Loop Comment --- #}
-                </div>
-            </details>
-
-            {# --- Other Stages (Validation, Publishing, Syndication) remain the same --- #}
-            {# ... #}    
-            {# --- Stage V: Local Validation --- #}
-            <details class="workflow-stage" data-stage-key="validation">
-                <summary>
-                    <span class="traffic-light" data-status="{{ status.stages.validation.status | default('pending') }}"></span>
-                    V. Local Validation
-                </summary>
-                <div class="stage-content">
-                    <p>Run `npm start` and preview the post locally at `http://localhost:8080/{{ slug }}/`. Check everything thoroughly.</p>
-                    <p>
-                        <strong>Status:</strong> <code class="status-text">{{ status.stages.validation.status | default('pending') }}</code>
-                         {% set current_status = status.stages.validation.status | default('pending') %}
-                         {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="validation" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
-                         {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="validation" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
-                    </p>
-                    <p><strong>Last Preview OK:</strong> {{ 'Yes' if status.stages.validation.last_preview_ok else 'No / Not Yet Run' }}</p>
-                     <p class="mt-3">
-                         <a href="http://localhost:8080/{{ slug }}/" target="_blank" class="btn btn-sm btn-primary">Preview Locally Now</a>
-                         <span class="help-trigger" data-help-id="preview-help-{{ slug }}" title="Help for Preview Locally Link">?</span>
-                         <div class="help-content" id="preview-help-{{ slug }}">{% include 'help/preview_local_help.njk' %}</div>
-                     </p>
-                </div>
-            </details>
-    
-            {# --- Stage VI: Publishing (Clan.com) --- #}
-            <details class="workflow-stage" data-stage-key="publishing_clancom">
-                <summary>
-                    <span class="traffic-light" data-status="{{ status.stages.publishing_clancom.status | default('pending') }}"></span>
-                    VI. Publishing (Clan.com)
-                </summary>
-                <div class="stage-content">
-                    <p>Uses the interface button to run `post_to_clan.py` script.</p>
-                    <p>
-                        <strong>Status:</strong> <code class="status-text">{{ status.stages.publishing_clancom.status | default('pending') }}</code>
-                         {% if status.stages.publishing_clancom.status == 'complete' or status.stages.publishing_clancom.status == 'error' %}
-                             <button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="publishing_clancom" data-new-status="pending" title="Reset status to allow re-publishing">Mark Pending</button>
-                         {% endif %}
-                    </p>
-                    <p><strong>Clan.com Post ID:</strong> <code>{{ status.stages.publishing_clancom.post_id | default('N/A') }}</code></p>
-                    <p><strong>Last Attempt:</strong> {{ status.stages.publishing_clancom.last_publish_attempt | default('N/A') }}</p>
-                    <p><strong>Last Error:</strong> <code class="text-danger">{{ status.stages.publishing_clancom.last_error | default('None') }}</code></p> {# Use text-danger #}
-                    <p class="mt-3">
-                        {# Determine overall watermark status for ALL images #}
-                        {% set all_watermarked = true %}
-                        {% if not images_detailed %} {# If no images, consider watermarking done #}
-                            {% set all_watermarked = true %}
-                        {% else %}
-                            {% for img_info in images_detailed %}
-                                {% if img_info.watermarking_status != 'complete' %}
-                                    {% set all_watermarked = false %}
+                        {# Status line WITHOUT old Watermark All button #}
+                        <div class="d-flex justify-content-between align-items-center p-2 mb-3 bg-light rounded flex-wrap">
+                            <span class="me-3 mb-1 mb-md-0">
+                                <strong>Overall Image Status:</strong> <code class="status-text">{{ status.stages.images.status | default('pending') }}</code>
+                                {# Optionally add clickable status updates here later #}
+                            </span>
+                            {# Optional Manual Override Buttons for Overall Stage #}
+                            <span>
+                                {% set current_status = status.stages.images.status | default('pending') %}
+                                {% if current_status != 'complete' %}
+                                    <button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="images" data-new-status="complete" title="Mark this stage as fully complete (Manual Override)">Mark Complete</button>
                                 {% endif %}
-                            {% endfor %}
+                                {% if current_status != 'pending' %}
+                                    <button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="images" data-new-status="pending" title="Reset status to pending">Mark Pending</button>
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        {# Display Calculated Sub-Statuses #}
+                        <p class="mb-1"><small>
+                            Prompts Defined: <span class="traffic-light" data-status="{{ status.stages.images.prompts_defined_status | default('pending') }}"></span>
+                            | Assets Prepared: <span class="traffic-light" data-status="{{ status.stages.images.assets_prepared_status | default('pending') }}"></span>
+                            | Metadata Integrated: <span class="traffic-light" data-status="{{ status.stages.images.metadata_integrated_status | default('pending') }}"></span>
+                            {# Add clickable triggers here later if desired #}
+                        </small></p>
+
+
+                        {# --- Loop through detailed image list passed from Flask --- #}
+                        {% if images_detailed %}
+                        <ul class="image-detail-list list-unstyled mt-3"> {# Added mt-3 #}
+                        {% for img_info in images_detailed %}
+                        {# --- Start of individual image item --- #}
+                        <li class="mb-3 p-3 border rounded">
+                            <div class="d-flex flex-column flex-md-row align-items-md-start">
+
+                                {# --- Left Column: Metadata --- #}
+                                <div class="flex-grow-1 me-md-3">
+
+                                    {% if img_info.error %}
+                                        <p class="text-danger mb-0"><strong>Error:</strong> Image ID <code>{{ img_info.id }}</code> - {{ img_info.error }}</p>
+                                    {% else %}
+                                        {# ID and Description #}
+                                        <p class="mb-1">
+                                            <code>{{ img_info.id }}</code> :
+                                            {% set original_desc = img_info.description %}
+                                            {% set sep_section = ' section image for ' %}{% set sep_header = ' header image for ' %}{% set sep_conclusion = ' conclusion image for ' %}
+                                            {% if sep_section in original_desc %}{% set cleaned_desc = original_desc.split(sep_section, 1)[0] %}
+                                            {% elif sep_header in original_desc %}{% set cleaned_desc = original_desc.split(sep_header, 1)[0] %}
+                                            {% elif sep_conclusion in original_desc %}{% set cleaned_desc = original_desc.split(sep_conclusion, 1)[0] %}
+                                            {% else %}{% set cleaned_desc = original_desc %}{% endif %}
+                                            <strong>{{ cleaned_desc | trim | default('(No Description)') }}</strong>
+                                        </p>
+
+                                        {# Filename #}
+                                        <p class="mb-1"><small>
+                                            <strong>Filename (Published):</strong> <code>{{ img_info.filename_local | default('N/A') }}</code> {# Assumes filename_local is the published one #}
+                                            {% if img_info.filename_local %}
+                                                <a href="#" class="ms-1" onclick="navigator.clipboard.writeText('{{ img_info.filename_local }}'); alert('Filename copied!'); return false;" title="Copy Filename">
+                                                    <i class="bi bi-clipboard small"></i></a>
+                                            {% endif %}
+                                        </small></p>
+
+                                        {# Public URL (Derived) #}
+                                        {% if img_info.filename_local %}
+                                            {% set public_url = "https://static.clan.com/media/blog/" + img_info.filename_local %} {# Derived URL #}
+                                            <p class="mb-3"><small>
+                                                <strong>Est. URL:</strong> <a href="{{ public_url }}" target="_blank">{{ public_url }}</a>
+                                                <a href="#" class="ms-1" onclick="navigator.clipboard.writeText('{{ public_url }}'); alert('URL copied!'); return false;" title="Copy Public URL">
+                                                    <i class="bi bi-clipboard small"></i></a>
+                                            </small></p>
+                                        {% else %}<div class="mb-3"></div>{% endif %}
+
+                                        {# Prompt #}
+                                        <div class="mb-3">
+                                            <p class="mb-1">
+                                                <strong>Prompt:</strong> <span class="traffic-light" data-status="{{ img_info.prompt_status }}"></span> <code class="status-text">{{ img_info.prompt_status }}</code>
+                                                {# Add clickable status here later #}
+                                            </p>
+                                            <textarea readonly class="form-control form-control-sm" style="min-height: 60px; font-size: 0.85em;">{{ img_info.prompt | default('No prompt defined.') }}</textarea>
+                                        </div>
+
+                                        {# Meta Alt #}
+                                        <div class="mb-3">
+                                             <p class="mb-1">
+                                                <strong>Alt Text:</strong> <span class="traffic-light" data-status="{{ 'complete' if img_info.alt else 'pending' }}"></span> <code class="status-text">{{ 'complete' if img_info.alt else 'pending' }}</code>
+                                                {# Add clickable status here later #}
+                                             </p>
+                                             <textarea readonly class="form-control form-control-sm" style="min-height: 40px; font-size: 0.85em;">{{ img_info.alt | default('(No alt text)') }}</textarea>
+                                        </div>
+
+                                        {# Caption #}
+                                        <div class="mb-3">
+                                            <p class="mb-1">
+                                                <strong>Caption:</strong> <span class="traffic-light" data-status="{{ 'complete' if img_info.blog_caption else 'pending' }}"></span> <code class="status-text">{{ 'complete' if img_info.blog_caption else 'pending' }}</code>
+                                                {# Add clickable status here later #}
+                                            </p>
+                                            <textarea readonly class="form-control form-control-sm" style="min-height: 40px; font-size: 0.85em;">{{ img_info.blog_caption | default('(No caption)') }}</textarea>
+                                        </div>
+
+                                        {# --- Individual Watermark Status --- #}
+                                        <div class="mb-3">
+                                            <p class="mb-0"> {# Reduced bottom margin #}
+                                                <strong>Watermark Applied?:</strong>
+                                                <span class="traffic-light" data-status="{{ img_info.watermarking_status | default('pending') }}"></span>
+                                                <code class="status-text status-trigger"
+                                                      data-slug="{{ slug }}"
+                                                      data-stage-key="images.watermarks.{{ img_info.id }}"
+                                                      style="cursor: pointer;" title="Click to cycle status (if JS implemented)">
+                                                    {{ img_info.watermarking_status | default('pending') }}
+                                                </code>
+                                                {# JS needed to make this clickable later (Priority 4) #}
+                                            </p>
+                                        </div>
+                                        {# --- End Individual Watermark Status --- #}
+
+
+                                        {# Notes #}
+                                        {% if img_info.notes %}
+                                        <div class="mb-0">
+                                            <p class="mb-1"><strong>Notes:</strong></p>
+                                             <textarea readonly class="form-control form-control-sm" style="min-height: 40px; font-size: 0.85em;">{{ img_info.notes }}</textarea>
+                                        </div>
+                                        {% endif %}
+
+                                    {% endif %} {# End of no error check #}
+                                </div> {# End Left Column #}
+
+                                {# --- Right Column: Image Thumbnail/Placeholder --- #}
+                                <div class="flex-shrink-0 mt-3 mt-md-0" style="width: 250px; max-width: 100%;">
+                                     {% if img_info.display_url %} {# Use display_url generated by app.py #}
+                                        <img src="{{ img_info.display_url }}" alt="Thumbnail for {{ img_info.id }}" class="img-thumbnail w-100" style="max-width: 250px;">
+                                     {% elif img_info.error %}
+                                        <div class="border rounded bg-light d-flex align-items-center justify-content-center text-muted w-100" style="min-height: 150px; aspect-ratio: 16 / 9; max-width: 250px;">
+                                            <span>Error Loading Image Info</span>
+                                        </div>
+                                     {% else %}
+                                        <div class="border rounded bg-light d-flex align-items-center justify-content-center text-muted w-100" style="min-height: 150px; aspect-ratio: 16 / 9; max-width: 250px;">
+                                            <span>Image Not Found / Not Processed</span>
+                                        </div>
+                                     {% endif %}
+                                </div> {# End Right Column #}
+
+                            </div> {# End Flex Container #}
+                        </li> {# --- End of individual image item --- #}
+                        {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p>No images referenced by this post.</p>
                         {% endif %}
-    
-                         {% set validation_status = status.stages.validation.status | default('pending') %}
-                         {% set validation_done = validation_status == 'complete' %}
-                         {% set ready_to_publish = all_watermarked and validation_done %}
-    
-                         <button class="publish-clan-button btn btn-success" data-slug="{{ slug }}" {# Use btn-success #}
-                                 {{ 'disabled' if not ready_to_publish }}
-                                 title="{{ 'Publish or Update post on Clan.com' if ready_to_publish else 'Complete Image Watermarking and Local Validation first' }}">
-                             <i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now
-                         </button>
-                         <span class="help-trigger" data-help-id="publish-help-{{ slug }}" title="Help for Publish/Update Clan.com Button">?</span>
-                         <div class="help-content" id="publish-help-{{ slug }}">{% include 'help/publish_clan_help.njk' %}</div>
-                         {# Display dependency status #}
-                         <small class="ms-2 d-block mt-1 text-muted">
-                             (Requires: Validation <span class="traffic-light" data-status="{{ validation_status }}"></span> |
-                             Watermarking <span class="traffic-light" data-status="{{ 'complete' if all_watermarked else 'pending' }}"></span>)
-                        </small>
-                    </p>
-                    {% if status.stages.publishing_clancom.post_id %}
-                        <p><a href="https://clan.com/blog/{{ slug }}.html" target="_blank">View Live Post (Check URL structure)</a></p> {# Adjust URL structure if needed #}
-                    {% endif %}
-                </div>
-            </details>
-    
-            {# --- Stage VII: Social Media Syndication (Future) --- #}
-            <details class="workflow-stage" data-stage-key="syndication">
-                <summary>
-                    <span class="traffic-light" data-status="{{ status.stages.syndication.status | default('pending') }}"></span>
-                    VII. Social Media Syndication (Future)
-                </summary>
-                <div class="stage-content">
-                    <p>Prepare platform-specific content and run the syndication script.</p>
-                    <p>
-                        <strong>Overall Status:</strong> <code class="status-text">{{ status.stages.syndication.status | default('pending') }}</code>
-                        {% set current_status = status.stages.syndication.status | default('pending') %}
-                        {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="syndication" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
-                        {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="syndication" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
-                    </p>
-                    <p><strong>Instagram:</strong> <span class="traffic-light" data-status="{{ status.stages.syndication.instagram.overall_status | default('pending') if status.stages.syndication.instagram is defined else 'pending' }}"></span> <code class="status-text">{{ status.stages.syndication.instagram.overall_status | default('pending') if status.stages.syndication.instagram is defined else 'pending' }}</code></p>
-                    <p><strong>Facebook:</strong> <span class="traffic-light" data-status="{{ status.stages.syndication.facebook.overall_status | default('pending') if status.stages.syndication.facebook is defined else 'pending' }}"></span> <code class="status-text">{{ status.stages.syndication.facebook.overall_status | default('pending') if status.stages.syndication.facebook is defined else 'pending' }}</code></p>
-                    <p class="mt-3">
-                        <button class="syndicate-button btn btn-sm btn-secondary" data-slug="{{ slug }}" data-platform="instagram" disabled title="Instagram syndication not yet implemented">Syndicate to Instagram</button>
-                        <button class="syndicate-button btn btn-sm btn-secondary" data-slug="{{ slug }}" data-platform="facebook" disabled title="Facebook syndication not yet implemented">Syndicate to Facebook</button>
-                        <span class="help-trigger" data-help-id="syndicate-help-{{ slug }}" title="Help for Syndication">?</span>
-                        <div class="help-content" id="syndicate-help-{{ slug }}">{% include 'help/syndicate_help.njk' %}</div>
-                    </p>
-                </div>
-            </details>
-    
-        </section>
+                        {# --- END Image Loop Comment --- #}
+                    </div>
+                </details>
 
-        <section id="log-section" style="margin-top: 30px;">
-            <h2>Action Log / Output</h2>
-            <pre id="log-output" class="bg-light border rounded p-2">(Action output will appear here)</pre> {# Use bg-light etc #}
-        </section>
+                {# --- Other Stages (Validation, Publishing, Syndication) remain the same --- #}
+                {# ... #}    
+                {# --- Stage V: Local Validation --- #}
+                <details class="workflow-stage" data-stage-key="validation">
+                    <summary>
+                        <span class="traffic-light" data-status="{{ status.stages.validation.status | default('pending') }}"></span>
+                        V. Local Validation
+                    </summary>
+                    <div class="stage-content">
+                        <p>Run `npm start` and preview the post locally at `http://localhost:8080/{{ slug }}/`. Check everything thoroughly.</p>
+                        <p>
+                            <strong>Status:</strong> <code class="status-text">{{ status.stages.validation.status | default('pending') }}</code>
+                             {% set current_status = status.stages.validation.status | default('pending') %}
+                             {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="validation" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
+                             {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="validation" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
+                        </p>
+                        <p><strong>Last Preview OK:</strong> {{ 'Yes' if status.stages.validation.last_preview_ok else 'No / Not Yet Run' }}</p>
+                         <p class="mt-3">
+                             <a href="http://localhost:8080/{{ slug }}/" target="_blank" class="btn btn-sm btn-primary">Preview Locally Now</a>
+                             <span class="help-trigger" data-help-id="preview-help-{{ slug }}" title="Help for Preview Locally Link">?</span>
+                             <div class="help-content" id="preview-help-{{ slug }}">{% include 'help/preview_local_help.njk' %}</div>
+                         </p>
+                    </div>
+                </details>
+        
+                {# --- Stage VI: Publishing (Clan.com) --- #}
+                <details class="workflow-stage" data-stage-key="publishing_clancom">
+                    <summary>
+                        <span class="traffic-light" data-status="{{ status.stages.publishing_clancom.status | default('pending') }}"></span>
+                        VI. Publishing (Clan.com)
+                    </summary>
+                    <div class="stage-content">
+                        <p>Uses the interface button to run `post_to_clan.py` script.</p>
+                        <p>
+                            <strong>Status:</strong> <code class="status-text">{{ status.stages.publishing_clancom.status | default('pending') }}</code>
+                             {% if status.stages.publishing_clancom.status == 'complete' or status.stages.publishing_clancom.status == 'error' %}
+                                 <button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="publishing_clancom" data-new-status="pending" title="Reset status to allow re-publishing">Mark Pending</button>
+                             {% endif %}
+                        </p>
+                        <p><strong>Clan.com Post ID:</strong> <code>{{ status.stages.publishing_clancom.post_id | default('N/A') }}</code></p>
+                        <p><strong>Last Attempt:</strong> {{ status.stages.publishing_clancom.last_publish_attempt | default('N/A') }}</p>
+                        <p><strong>Last Error:</strong> <code class="text-danger">{{ status.stages.publishing_clancom.last_error | default('None') }}</code></p> {# Use text-danger #}
+                        <p class="mt-3">
+                            {# Determine overall watermark status for ALL images #}
+                            {% set all_watermarked = true %}
+                            {% if not images_detailed %} {# If no images, consider watermarking done #}
+                                {% set all_watermarked = true %}
+                            {% else %}
+                                {% for img_info in images_detailed %}
+                                    {% if img_info.watermarking_status != 'complete' %}
+                                        {% set all_watermarked = false %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+            
+                             {% set validation_status = status.stages.validation.status | default('pending') %}
+                             {% set validation_done = validation_status == 'complete' %}
+                             {% set ready_to_publish = all_watermarked and validation_done %}
+            
+                             <button class="publish-clan-button btn btn-success" data-slug="{{ slug }}" {# Use btn-success #}
+                                     {{ 'disabled' if not ready_to_publish }}
+                                     title="{{ 'Publish or Update post on Clan.com' if ready_to_publish else 'Complete Image Watermarking and Local Validation first' }}">
+                                 <i class="bi bi-cloud-upload"></i> Publish/Update Clan.com Now
+                             </button>
+                             <span class="help-trigger" data-help-id="publish-help-{{ slug }}" title="Help for Publish/Update Clan.com Button">?</span>
+                             <div class="help-content" id="publish-help-{{ slug }}">{% include 'help/publish_clan_help.njk' %}</div>
+                             {# Display dependency status #}
+                             <small class="ms-2 d-block mt-1 text-muted">
+                                 (Requires: Validation <span class="traffic-light" data-status="{{ validation_status }}"></span> |
+                                 Watermarking <span class="traffic-light" data-status="{{ 'complete' if all_watermarked else 'pending' }}"></span>)
+                            </small>
+                        </p>
+                        {% if status.stages.publishing_clancom.post_id %}
+                            <p><a href="https://clan.com/blog/{{ slug }}.html" target="_blank">View Live Post (Check URL structure)</a></p> {# Adjust URL structure if needed #}
+                        {% endif %}
+                    </div>
+                </details>
+        
+                {# --- Stage VII: Social Media Syndication (Future) --- #}
+                <details class="workflow-stage" data-stage-key="syndication">
+                    <summary>
+                        <span class="traffic-light" data-status="{{ status.stages.syndication.status | default('pending') }}"></span>
+                        VII. Social Media Syndication (Future)
+                    </summary>
+                    <div class="stage-content">
+                        <p>Prepare platform-specific content and run the syndication script.</p>
+                        <p>
+                            <strong>Overall Status:</strong> <code class="status-text">{{ status.stages.syndication.status | default('pending') }}</code>
+                            {% set current_status = status.stages.syndication.status | default('pending') %}
+                            {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ slug }}" data-stage="syndication" data-new-status="complete" title="Mark this stage as fully complete">Mark Complete</button>{% endif %}
+                            {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ slug }}" data-stage="syndication" data-new-status="pending" title="Reset status to pending">Mark Pending</button>{% endif %}
+                        </p>
+                        <p><strong>Instagram:</strong> <span class="traffic-light" data-status="{{ status.stages.syndication.instagram.overall_status | default('pending') if status.stages.syndication.instagram is defined else 'pending' }}"></span> <code class="status-text">{{ status.stages.syndication.instagram.overall_status | default('pending') if status.stages.syndication.instagram is defined else 'pending' }}</code></p>
+                        <p><strong>Facebook:</strong> <span class="traffic-light" data-status="{{ status.stages.syndication.facebook.overall_status | default('pending') if status.stages.syndication.facebook is defined else 'pending' }}"></span> <code class="status-text">{{ status.stages.syndication.facebook.overall_status | default('pending') if status.stages.syndication.facebook is defined else 'pending' }}</code></p>
+                        <p class="mt-3">
+                            <button class="syndicate-button btn btn-sm btn-secondary" data-slug="{{ slug }}" data-platform="instagram" disabled title="Instagram syndication not yet implemented">Syndicate to Instagram</button>
+                            <button class="syndicate-button btn btn-sm btn-secondary" data-slug="{{ slug }}" data-platform="facebook" disabled title="Facebook syndication not yet implemented">Syndicate to Facebook</button>
+                            <span class="help-trigger" data-help-id="syndicate-help-{{ slug }}" title="Help for Syndication">?</span>
+                            <div class="help-content" id="syndicate-help-{{ slug }}">{% include 'help/syndicate_help.njk' %}</div>
+                        </p>
+                    </div>
+                </details>
+        
+            </section>
 
-    </div> {# End container #}
+            <section id="log-section" style="margin-top: 30px;">
+                <h2>Action Log / Output</h2>
+                <pre id="log-output" class="bg-light border rounded p-2">(Action output will appear here)</pre> {# Use bg-light etc #}
+            </section>
+
+        </div> {# End container #}
+
+    </main>
 
     <script>
         const logOutput = document.getElementById('log-output');
@@ -1038,30 +1036,25 @@ Examples: {{ category.examples | join(', ') }}"></i>
         });
 
         // Theme toggle functionality
-        const themeToggle = document.getElementById('themeToggle');
-        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-        
-        // Check for saved theme preference or use system preference
-        const currentTheme = localStorage.getItem('theme') || 
-                           (prefersDarkScheme.matches ? 'dark' : 'light');
-        
-        if (currentTheme === 'dark') {
-            document.body.setAttribute('data-theme', 'dark');
-            themeToggle.textContent = 'Toggle Light Mode';
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const themeIcon = themeToggle.querySelector('i');
+
+        function updateThemeIcon(isDark) {
+            themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
         }
 
         themeToggle.addEventListener('click', () => {
-            const currentTheme = document.body.getAttribute('data-theme');
-            if (currentTheme === 'dark') {
-                document.body.removeAttribute('data-theme');
-                localStorage.setItem('theme', 'light');
-                themeToggle.textContent = 'Toggle Dark Mode';
-            } else {
-                document.body.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-                themeToggle.textContent = 'Toggle Light Mode';
-            }
+            const isDark = html.getAttribute('data-theme') === 'dark';
+            html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+            updateThemeIcon(!isDark);
         });
+
+        // Initialize theme from localStorage
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme === 'dark');
 
         // Content Authoring & Structuring functionality
         document.getElementById('add-section').addEventListener('click', function() {

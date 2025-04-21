@@ -84,6 +84,19 @@ def load_json_data(file_path: Path):
         logging.error(f"Unexpected error loading JSON data from {file_path}: {e}")
         return None # Indicate critical error
 
+def load_authors():
+    """Load authors data from _data/authors.json"""
+    authors_file = DATA_DIR / 'authors.json'
+    try:
+        authors_data = load_json_data(authors_file)
+        if authors_data is None:
+            logging.error("Failed to load authors data")
+            return {}
+        return authors_data
+    except Exception as e:
+        logging.error(f"Error loading authors data: {e}")
+        return {}
+
 def save_json_data(file_path: Path, data: dict):
     """Saves the given dictionary as JSON to the specified absolute file path."""
     logging.info(f"Attempting to save JSON data to: {file_path}")
@@ -190,83 +203,37 @@ def get_detailed_image_info(images: list) -> list:
         
     return detailed_images
 
+def load_posts_data():
+    """Load posts data from _data/posts.json"""
+    posts_file = os.path.join(os.path.dirname(__file__), '_data', 'posts.json')
+    try:
+        with open(posts_file, 'r') as f:
+            data = json.load(f)
+            return data.get('posts', [])
+    except Exception as e:
+        app.logger.error(f"Error loading posts data: {e}")
+        return []
+
 # --- Flask Routes ---
 
 @app.route('/')
 def index():
-    """Renders the main admin interface page, loading post data."""
-    logging.info("Processing index route '/'...")
-    posts_list = []
-    posts_dir_path = BASE_DIR / POSTS_DIR_NAME
-    workflow_status_path = DATA_DIR / WORKFLOW_STATUS_FILE
-
-    workflow_data = load_json_data(workflow_status_path)
-    if workflow_data is None:
-        logging.error("Critical error loading workflow data, post status will be unavailable.")
-        workflow_data = {}
-    elif not workflow_data:
-        logging.warning(f"Workflow data file '{WORKFLOW_STATUS_FILE}' not found. Statuses unavailable.")
-
-    try:
-        logging.info(f"Scanning directory: {posts_dir_path}")
-        if not posts_dir_path.is_dir():
-             logging.error(f"Posts directory not found: {posts_dir_path}")
-             raise FileNotFoundError
-
-        for filename in sorted(os.listdir(posts_dir_path), reverse=True): # Sort in reverse for newest first
-            if filename.endswith(".md"):
-                file_path = posts_dir_path / filename
-                logging.debug(f"Processing file: {filename}")
-                try:
-                    post_fm = frontmatter.load(file_path)
-                    metadata = post_fm.metadata
-                    slug = Path(filename).stem
-                    title = metadata.get('title', f"Untitled ({slug})")
-                    deleted = metadata.get('deleted', False)
-
-                    # Get clan.com status from workflow data
-                    post_workflow_data = workflow_data.get(slug, {})
-                    clan_com_stage = post_workflow_data.get('stages', {}).get('publishing_clancom', {})
-                    clan_com_post_id = clan_com_stage.get('post_id')
-                    clan_com_status_val = clan_com_stage.get('status', 'pending')
-
-                    # Determine display status
-                    if clan_com_post_id and clan_com_status_val == 'complete':
-                        clan_com_status_display = f"Published (ID: {clan_com_post_id})"
-                    elif clan_com_status_val == 'error':
-                         error_msg = clan_com_stage.get('last_error', 'Unknown Error')
-                         clan_com_status_display = f"Error: {error_msg[:50]}" # Show snippet of error
-                         if len(error_msg) > 50: clan_com_status_display += "..."
-                    else:
-                        clan_com_status_display = "Not Published / Pending"
-
-                    # Add post data to list
-                    posts_list.append({
-                        'slug': slug,
-                        'title': title,
-                        'concept': metadata.get('concept', ''),
-                        'clan_com_status': clan_com_status_display,
-                        'headerImageId': metadata.get('headerImageId', slug),
-                        'deleted': deleted,
-                        'date': metadata.get('date', '')
-                    })
-                except Exception as e:
-                    logging.error(f"Error processing markdown file {filename}: {e}", exc_info=True)
-
-        # Sort by date, newest first
-        posts_list.sort(key=lambda x: x['date'] if x['date'] else '', reverse=True)
-        logging.info(f"Found and processed {len(posts_list)} posts.")
-
-    except FileNotFoundError:
-        logging.error(f"Posts directory not found: {posts_dir_path}")
-    except Exception as e:
-        logging.error(f"Error listing or processing posts directory: {e}", exc_info=True)
-
-    return render_template(
-            'admin_index.html',
-            posts=posts_list,
-            config=app.config
-           )
+    """Main blog index route"""
+    app.logger.info("Processing index route '/'...")
+    
+    # Load posts from posts.json
+    posts = load_posts_data()
+    
+    # Sort posts by date in descending order
+    posts.sort(key=lambda x: x.get('date', ''), reverse=True)
+    
+    # Load authors data for displaying author names
+    authors = load_authors()
+    
+    # Get current year for the footer
+    current_year = datetime.now().year
+    
+    return render_template('index.html', posts=posts, authors=authors, current_year=current_year)
 
 @app.route('/api/create_post', methods=['POST'])
 def create_post():

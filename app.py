@@ -282,7 +282,7 @@ def llms():
         configs = load_config()
         default_config = configs.get("default", LLMConfig(
             provider_type="ollama",
-            model_name="mistral",
+            model_name="llama3.1:70b",
             api_base="http://localhost:11434",
             api_key=None
         ))
@@ -314,7 +314,7 @@ def test_llm():
         configs = load_config()
         config = configs.get("default", LLMConfig(
             provider_type="ollama",
-            model_name="mistral",
+            model_name="llama3.1:70b",
             api_base="http://localhost:11434",
             api_key=None
         ))
@@ -482,7 +482,7 @@ def generate_concept(slug):
         configs = load_config()
         config = configs.get("default", LLMConfig(
             provider_type="ollama",
-            model_name="mistral",
+            model_name="llama3.1:70b",
             api_base="http://localhost:11434",
             api_key=None
         ))
@@ -523,6 +523,36 @@ def generate_concept(slug):
         logger.error(f"Error generating concept: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500
 
+@app.route('/api/llm/actions')
+def get_llm_actions():
+    """Get all LLM actions from YAML files."""
+    try:
+        # Load tasks from YAML files
+        actions = []
+        
+        # Load task configurations
+        llm_tasks = load_llm_tasks()
+        if not llm_tasks or 'tasks' not in llm_tasks:
+            return jsonify({"success": False, "error": "No tasks found in configuration"}), 404
+            
+        for task_id, task in llm_tasks['tasks'].items():
+            # Get model settings with defaults
+            model_settings = task.get('model_settings', {})
+            
+            actions.append({
+                'name': task.get('name', task_id),
+                'description': task.get('description', ''),
+                'model_name': model_settings.get('model_name', 'default'),
+                'temperature': model_settings.get('temperature', 0.7),
+                'max_tokens': model_settings.get('max_tokens', 1000),
+                'prompt_ref': task.get('prompt_ref', '')
+            })
+            
+        return jsonify({"success": True, "actions": actions})
+    except Exception as e:
+        logging.error(f"Error loading LLM actions: {str(e)}", exc_info=True)
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @app.route('/api/llm/prompts')
 def get_llm_prompts():
     """Get all LLM prompts from YAML files."""
@@ -530,25 +560,18 @@ def get_llm_prompts():
         # Load prompts from YAML files
         prompts = []
         
-        # Load task prompts
-        llm_tasks = load_llm_tasks()
-        for task_id, task in llm_tasks['tasks'].items():
-            # Get the prompt reference
-            prompt_ref = task.get('prompt_ref')
-            if not prompt_ref:
-                continue
-                
-            # Load the actual prompt from llm_prompts.yaml
-            llm_prompts = load_llm_prompts()
-            prompt_template = llm_prompts['prompts'].get(prompt_ref, {})
+        # Load prompt configurations
+        llm_prompts = load_llm_prompts()
+        if not llm_prompts or 'prompts' not in llm_prompts:
+            return jsonify({"success": False, "error": "No prompts found in configuration"}), 404
             
-            if prompt_template:
-                prompts.append({
-                    'name': task['name'],
-                    'description': task['description'],
-                    'template': prompt_template['template'],
-                    'variables': prompt_template.get('variables', [])
-                })
+        for prompt_id, prompt in llm_prompts['prompts'].items():
+            prompts.append({
+                'name': prompt.get('name', prompt_id),
+                'description': prompt.get('description', ''),
+                'template': prompt.get('template', ''),
+                'variables': prompt.get('variables', [])
+            })
             
         return jsonify({"success": True, "prompts": prompts})
     except Exception as e:
@@ -593,6 +616,153 @@ def update_ideas(slug):
         return jsonify({"success": True})
     except Exception as e:
         logger.error(f"Error updating ideas: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/posts/<slug>/generate_ideas', methods=['POST'])
+def generate_ideas(slug):
+    """Generate ideas for a post using the LLM."""
+    try:
+        logger.info(f"Starting to generate ideas for post: {slug}")
+        
+        # Load existing posts
+        posts_data = load_posts()
+        logger.info(f"Loaded {len(posts_data)} posts")
+        
+        # Find the post
+        post = next((p for p in posts_data if p['slug'] == slug), None)
+        if not post:
+            logger.error(f"Post not found: {slug}")
+            return jsonify({"success": False, "error": "Post not found"}), 404
+
+        # Load LLM task configuration
+        llm_tasks = load_llm_tasks()
+        task_config = llm_tasks['tasks'].get('generate_ideas')
+        if not task_config:
+            logger.error("LLM task configuration not found")
+            return jsonify({"success": False, "error": "LLM task configuration not found"}), 500
+
+        # Load prompts
+        llm_prompts = load_llm_prompts()
+        prompt_template = llm_prompts['prompts'].get(task_config['prompt_ref'])
+        if not prompt_template:
+            logger.error("Prompt template not found")
+            return jsonify({"success": False, "error": "Prompt template not found"}), 500
+
+        # Format the prompt with the title and concept
+        prompt = prompt_template['template'].format(
+            title=post['title'],
+            concept=post['concept']
+        )
+        logger.info(f"Formatted prompt: {prompt[:100]}...")
+
+        # Load LLM configuration
+        configs = load_config()
+        if not configs or "default" not in configs:
+            logger.error("LLM configuration not found")
+            return jsonify({"success": False, "error": "LLM configuration not found"}), 500
+            
+        config = configs["default"]
+        if not isinstance(config, LLMConfig):
+            logger.error("Invalid LLM configuration")
+            return jsonify({"success": False, "error": "Invalid LLM configuration"}), 500
+
+        logger.info(f"Using LLM config: {config.to_dict()}")
+
+        try:
+            # Create provider and generate
+            provider = LLMFactory.create_provider(config)
+            if not provider:
+                logger.error("Failed to create LLM provider")
+                return jsonify({"success": False, "error": "Failed to create LLM provider"}), 500
+
+            logger.info("Created LLM provider, generating text...")
+            response = provider.generate_text(
+                prompt,
+                temperature=task_config['model_settings']['temperature'],
+                max_tokens=task_config['model_settings']['max_tokens'],
+                top_p=task_config['model_settings']['top_p'],
+                timeout=300  # Increase timeout to 300 seconds for the 70B model
+            )
+
+            if response.error:
+                logger.error(f"Error from LLM: {response.error}")
+                return jsonify({"success": False, "error": response.error}), 500
+
+            logger.info("Received response from LLM, parsing...")
+
+            # Parse the response
+            try:
+                # Clean the response text
+                response_text = response.text.strip()
+                logger.info(f"Response text: {response_text[:100]}...")
+                
+                # Try to find JSON array in the response
+                json_start = response_text.find('[')
+                json_end = response_text.rfind(']') + 1
+                if json_start >= 0 and json_end > json_start:
+                    json_str = response_text[json_start:json_end]
+                    logger.info(f"Found JSON array: {json_str[:100]}...")
+                    ideas = json.loads(json_str)
+                else:
+                    logger.info("No JSON array found, parsing as text")
+                    # If no JSON array found, parse as text
+                    ideas = []
+                    for line in response_text.split('\n'):
+                        line = line.strip()
+                        if line and not line.startswith('#'):
+                            # Remove any numbering or bullet points
+                            line = re.sub(r'^[\d\.\-\*]+', '', line).strip()
+                            if line:
+                                # Try to extract category if present
+                                category_match = re.search(r'\[(historical|cultural|practical|technical|comparative|future)\]$', line)
+                                if category_match:
+                                    category = category_match.group(1)
+                                    text = line[:category_match.start()].strip()
+                                else:
+                                    category = 'uncategorized'
+                                    text = line
+                                ideas.append({
+                                    "text": text,
+                                    "category": category
+                                })
+
+                # Validate ideas structure
+                if not isinstance(ideas, list):
+                    raise ValueError("Response is not a list")
+                
+                for idea in ideas:
+                    if not isinstance(idea, dict):
+                        raise ValueError("Idea is not a dictionary")
+                    if "text" not in idea:
+                        raise ValueError("Idea missing 'text' field")
+                    if "category" not in idea:
+                        idea["category"] = "uncategorized"
+
+                logger.info(f"Successfully parsed {len(ideas)} ideas")
+
+            except Exception as e:
+                logger.error(f"Error parsing response: {str(e)}")
+                return jsonify({"success": False, "error": f"Error parsing response: {str(e)}"}), 500
+
+            # Update the post with new ideas
+            post['ideas'] = ideas
+            post['modified_date'] = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+
+            # Save the updated posts
+            save_posts(posts_data)
+            logger.info("Successfully saved updated posts")
+
+            return jsonify({
+                "success": True,
+                "ideas": ideas
+            })
+
+        except Exception as e:
+            logger.error(f"Error generating ideas: {str(e)}")
+            return jsonify({"success": False, "error": str(e)}), 500
+
+    except Exception as e:
+        logger.error(f"Error generating ideas: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 if __name__ == '__main__':

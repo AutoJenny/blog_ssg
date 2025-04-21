@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, setting up event listeners...');
+    
     // Initialize Bootstrap tooltips
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -64,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const testResult = document.getElementById('test-result');
     const testButton = document.querySelector('#test-form button[type="submit"]');
 
-    if (testForm) {
+    if (testForm && testPrompt && testResult && testButton) {
         // Handle form submission
         testForm.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -81,11 +83,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Update provider info when settings change
         const updateProviderInfo = () => {
-            const provider = document.getElementById('current-provider').textContent;
-            const model = document.getElementById('current-model').textContent;
+            const provider = document.getElementById('current-provider');
+            const model = document.getElementById('current-model');
             const providerInfo = document.getElementById('provider-info');
-            if (providerInfo) {
-                providerInfo.textContent = `Using ${provider} with ${model}`;
+            if (provider && model && providerInfo) {
+                providerInfo.textContent = `Using ${provider.textContent} with ${model.textContent}`;
             }
         };
 
@@ -94,6 +96,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function runTest() {
+        if (!testPrompt || !testResult || !testButton) return;
+        
         const prompt = testPrompt.value.trim();
         if (!prompt) {
             showAlert('Please enter a test prompt', 'warning');
@@ -135,10 +139,11 @@ document.addEventListener('DOMContentLoaded', function() {
     editButtons.forEach(button => {
         button.addEventListener('click', function() {
             const templateId = this.dataset.templateId;
-            const templateContent = document.getElementById(`template-${templateId}`).textContent;
+            const templateContent = document.getElementById(`template-${templateId}`);
+            if (!templateContent) return;
             
             // Create modal for editing
-            const modal = createEditModal(templateId, templateContent);
+            const modal = createEditModal(templateId, templateContent.textContent);
             document.body.appendChild(modal);
             new bootstrap.Modal(modal).show();
         });
@@ -153,22 +158,26 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         
         const container = document.querySelector('.container-fluid');
-        container.insertBefore(alertDiv, container.firstChild);
-        
-        // Auto-dismiss after 5 seconds
-        setTimeout(() => {
-            alertDiv.classList.remove('show');
-            setTimeout(() => alertDiv.remove(), 150);
-        }, 5000);
+        if (container) {
+            container.insertBefore(alertDiv, container.firstChild);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                alertDiv.classList.remove('show');
+                setTimeout(() => alertDiv.remove(), 150);
+            }, 5000);
+        }
     }
 
     function updateCurrentSettings(settings) {
-        document.getElementById('current-provider').textContent = settings.provider_type;
-        document.getElementById('current-model').textContent = settings.model_name;
-        document.getElementById('current-api-base').textContent = settings.api_base;
-        
-        // Update provider info in testing tab
+        const provider = document.getElementById('current-provider');
+        const model = document.getElementById('current-model');
+        const apiBase = document.getElementById('current-api-base');
         const providerInfo = document.getElementById('provider-info');
+        
+        if (provider) provider.textContent = settings.provider_type;
+        if (model) model.textContent = settings.model_name;
+        if (apiBase) apiBase.textContent = settings.api_base;
         if (providerInfo) {
             providerInfo.textContent = `Using ${settings.provider_type} with ${settings.model_name}`;
         }
@@ -214,7 +223,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 
                 if (response.ok) {
-                    document.getElementById(`template-${templateId}`).textContent = newContent;
+                    const templateElement = document.getElementById(`template-${templateId}`);
+                    if (templateElement) {
+                        templateElement.textContent = newContent;
+                    }
                     bootstrap.Modal.getInstance(modal).hide();
                     showAlert('Prompt template updated successfully', 'success');
                 } else {
@@ -226,5 +238,205 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         return modal;
+    }
+
+    // Load actions
+    async function loadActions() {
+        try {
+            console.log('Loading actions...');
+            const response = await fetch('/api/llm/actions');
+            console.log('Response status:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('Received data:', data);
+            
+            if (data.success) {
+                displayActions(data.actions);
+            } else {
+                throw new Error(data.error || 'Failed to load actions');
+            }
+        } catch (error) {
+            console.error('Error loading actions:', error);
+            const loadingIndicator = document.getElementById('actions-loading');
+            if (loadingIndicator) {
+                loadingIndicator.innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        Failed to load actions: ${error.message}
+                    </div>
+                `;
+            }
+        }
+    }
+
+    // Load prompts
+    async function loadPrompts() {
+        try {
+            console.log('Loading prompts...');
+            const response = await fetch('/api/llm/prompts');
+            console.log('Response status:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('Received data:', data);
+            
+            if (data.success) {
+                displayPrompts(data.prompts);
+            } else {
+                throw new Error(data.error || 'Failed to load prompts');
+            }
+        } catch (error) {
+            console.error('Error loading prompts:', error);
+            const loadingIndicator = document.getElementById('prompts-loading');
+            if (loadingIndicator) {
+                loadingIndicator.innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        Failed to load prompts: ${error.message}
+                    </div>
+                `;
+            }
+        }
+    }
+
+    // Display actions in the accordion
+    function displayActions(actions) {
+        const accordion = document.getElementById('actionsAccordion');
+        if (!accordion) return;
+        
+        accordion.innerHTML = '';
+
+        actions.forEach((action, index) => {
+            const accordionItem = document.createElement('div');
+            accordionItem.className = 'accordion-item';
+            accordionItem.innerHTML = `
+                <h2 class="accordion-header" id="actionHeading${index}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                            data-bs-target="#actionCollapse${index}" aria-expanded="false" 
+                            aria-controls="actionCollapse${index}">
+                        <i class="bi bi-lightning me-2"></i>
+                        ${action.name}
+                    </button>
+                </h2>
+                <div id="actionCollapse${index}" class="accordion-collapse collapse" 
+                     aria-labelledby="actionHeading${index}" data-bs-parent="#actionsAccordion">
+                    <div class="accordion-body">
+                        <p class="text-muted">${action.description}</p>
+                        <h6 class="mt-3">Model Settings</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <tbody>
+                                    <tr>
+                                        <th>Model</th>
+                                        <td>${action.model_name}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Temperature</th>
+                                        <td>${action.temperature}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Max Tokens</th>
+                                        <td>${action.max_tokens}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <h6 class="mt-3">Prompt Reference</h6>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <code>${action.prompt_ref}</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            accordion.appendChild(accordionItem);
+        });
+
+        // Hide loading spinner
+        const loadingIndicator = document.getElementById('actions-loading');
+        if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+        }
+    }
+
+    // Display prompts in the accordion
+    function displayPrompts(prompts) {
+        const accordion = document.getElementById('promptsAccordion');
+        if (!accordion) return;
+        
+        accordion.innerHTML = '';
+
+        prompts.forEach((prompt, index) => {
+            const accordionItem = document.createElement('div');
+            accordionItem.className = 'accordion-item';
+            accordionItem.innerHTML = `
+                <h2 class="accordion-header" id="promptHeading${index}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                            data-bs-target="#promptCollapse${index}" aria-expanded="false" 
+                            aria-controls="promptCollapse${index}">
+                        <i class="bi bi-chat-quote me-2"></i>
+                        ${prompt.name}
+                    </button>
+                </h2>
+                <div id="promptCollapse${index}" class="accordion-collapse collapse" 
+                     aria-labelledby="promptHeading${index}" data-bs-parent="#promptsAccordion">
+                    <div class="accordion-body">
+                        <p class="text-muted">${prompt.description}</p>
+                        <h6 class="mt-3">Template</h6>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <pre class="mb-0">${prompt.template}</pre>
+                            </div>
+                        </div>
+                        <h6 class="mt-3">Variables</h6>
+                        <ul class="list-unstyled">
+                            ${prompt.variables.map(v => `
+                                <li class="mb-2">
+                                    <strong>${v.name}</strong>
+                                    ${v.required ? '<span class="badge bg-danger ms-2">required</span>' : ''}
+                                    <p class="text-muted small mb-0">${v.description}</p>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            accordion.appendChild(accordionItem);
+        });
+
+        // Hide loading spinner
+        const loadingIndicator = document.getElementById('prompts-loading');
+        if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+        }
+    }
+
+    // Add event listeners for tabs
+    const actionsTab = document.getElementById('actions-tab');
+    if (actionsTab) {
+        console.log('Found actions tab, adding event listener...');
+        actionsTab.addEventListener('shown.bs.tab', function() {
+            console.log('Actions tab shown, loading actions...');
+            loadActions();
+        });
+    } else {
+        console.error('Actions tab element not found!');
+    }
+
+    const promptsTab = document.getElementById('prompts-tab');
+    if (promptsTab) {
+        console.log('Found prompts tab, adding event listener...');
+        promptsTab.addEventListener('shown.bs.tab', function() {
+            console.log('Prompts tab shown, loading prompts...');
+            loadPrompts();
+        });
+    } else {
+        console.error('Prompts tab element not found!');
     }
 }); 

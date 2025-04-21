@@ -289,21 +289,29 @@
                         <!-- Ideas field -->
                         <div class="mb-4">
                             <label class="form-label">Ideas to Include</label>
+                            <div class="d-flex gap-2 mb-2">
+                                <button type="button" class="btn btn-outline-primary btn-sm" id="add-idea">
+                                    <i class="bi bi-plus-circle"></i> Add Idea
+                                </button>
+                                <button type="button" class="btn btn-outline-info btn-sm" id="generate-ideas">
+                                    <i class="bi bi-lightbulb"></i> Generate Ideas
+                                </button>
+                            </div>
                             <div id="ideas-container">
                                 {% if post.ideas %}
                                     {% for idea in post.ideas %}
                                     <div class="idea-item">
-                                        <input type="text" class="form-control idea-input" value="{{ idea.text }}" placeholder="Enter an idea...">
-                                        <button type="button" class="btn btn-outline-danger btn-sm btn-remove">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+                                        <div class="d-flex align-items-center gap-2 w-100">
+                                            <input type="text" class="form-control idea-input" value="{{ idea.text }}" placeholder="Enter an idea...">
+                                            <span class="badge bg-info">{{ idea.get('category', 'uncategorized') }}</span>
+                                            <button type="button" class="btn btn-outline-danger btn-sm btn-remove">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                     {% endfor %}
                                 {% endif %}
                             </div>
-                            <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="add-idea">
-                                <i class="bi bi-plus-circle"></i> Add Idea
-                            </button>
                         </div>
 
                         <div class="mb-3">
@@ -781,12 +789,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add new idea
     addIdeaBtn.addEventListener('click', function() {
         const ideaItem = document.createElement('div');
-        ideaItem.className = 'idea-item d-flex align-items-center mb-2';
+        ideaItem.className = 'idea-item';
         ideaItem.innerHTML = `
-            <input type="text" class="form-control me-2 idea-input" placeholder="Enter an idea...">
-            <button type="button" class="btn btn-outline-danger btn-sm btn-remove">
-                <i class="bi bi-trash"></i>
-            </button>
+            <div class="d-flex align-items-center gap-2 w-100">
+                <input type="text" class="form-control idea-input" placeholder="Enter an idea...">
+                <span class="badge bg-info">uncategorized</span>
+                <button type="button" class="btn btn-outline-danger btn-sm btn-remove">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
         `;
         ideasContainer.appendChild(ideaItem);
         
@@ -843,6 +854,69 @@ document.addEventListener('DOMContentLoaded', function() {
             saveStatus.textContent = `Error: ${error.message}`;
             saveStatus.className = 'ms-2 text-danger';
         });
+    });
+
+    // Generate ideas
+    const generateIdeasBtn = document.getElementById('generate-ideas');
+    generateIdeasBtn.addEventListener('click', async function() {
+        try {
+            // Show loading state
+            generateIdeasBtn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+            generateIdeasBtn.disabled = true;
+            
+            const response = await fetch(`/api/posts/${postSlug}/generate_ideas`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Clear existing ideas
+                ideasContainer.innerHTML = '';
+                
+                // Add new ideas
+                data.ideas.forEach(idea => {
+                    const ideaItem = document.createElement('div');
+                    ideaItem.className = 'idea-item';
+                    ideaItem.innerHTML = `
+                        <div class="d-flex align-items-center gap-2 w-100">
+                            <input type="text" class="form-control idea-input" value="${idea.text}" placeholder="Enter an idea...">
+                            <span class="badge bg-info">${idea.category || 'uncategorized'}</span>
+                            <button type="button" class="btn btn-outline-danger btn-sm btn-remove">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    ideasContainer.appendChild(ideaItem);
+                    
+                    // Apply dark mode styles if needed
+                    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                        ideaItem.style.backgroundColor = 'var(--bs-gray-800)';
+                        ideaItem.style.borderColor = 'var(--bs-gray-700)';
+                        const input = ideaItem.querySelector('.idea-input');
+                        input.style.backgroundColor = 'transparent';
+                        input.style.color = 'var(--bs-light)';
+                    }
+                });
+                
+                // Show success message
+                saveStatus.textContent = 'Ideas generated successfully';
+                saveStatus.className = 'ms-2 text-success';
+            } else {
+                throw new Error(data.error || 'Failed to generate ideas');
+            }
+        } catch (error) {
+            console.error('Error generating ideas:', error);
+            saveStatus.textContent = `Error: ${error.message}`;
+            saveStatus.className = 'ms-2 text-danger';
+        } finally {
+            // Reset button state
+            generateIdeasBtn.innerHTML = '<i class="bi bi-lightbulb"></i> Generate Ideas';
+            generateIdeasBtn.disabled = false;
+        }
     });
 });
 </script>

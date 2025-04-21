@@ -90,4 +90,66 @@ prompts:
     variables:
       - name: "content"
         description: "The content of the blog post"
-        required: true 
+        required: true
+
+  generate_concept:
+    name: Generate Post Concept
+    description: Generate a detailed concept for a blog post
+    template: |
+      Based on the following blog post title, generate a detailed concept that outlines the main points and direction of the article. The concept should be comprehensive and engaging.
+
+      Title: {title}
+
+      Please provide a concept that:
+      1. Clearly states the main topic and purpose
+      2. Outlines the key points to be covered
+      3. Suggests the tone and style of writing
+      4. Indicates the target audience
+      5. Provides a clear structure for the article
+
+      Concept:
+
+  generate_ideas:
+    name: Generate Post Ideas
+    description: Generate a list of topics to include in a blog post
+    template: |
+      You are generating a list of topics for a Scottish heritage blog post.
+      The target audience is people worldwide with an interest in Scottish heritage, culture, and history.
+      
+      Based on the following blog post title and concept, generate a list of 30-40 interesting, important, and unusual topics that should be included in the article. The topics should be diverse, thought-provoking, and add value to the reader's understanding.
+
+      Title: {title}
+      Concept: {concept}
+
+      The topics should:
+      - Cover both fundamental and advanced aspects of the subject
+      - Include unique or unusual angles that readers might not expect
+      - Address potential questions or concerns readers might have
+      - Suggest practical applications or real-world examples
+      - Consider historical context or future implications where relevant
+
+      IMPORTANT: Your response must be a valid JSON array of objects. Each object must have:
+      - A "text" field containing the topic text
+      - A "category" field indicating the type of topic (historical, cultural, practical, technical, comparative, or future)
+
+      Example format:
+      [
+        {
+          "text": "The evolution of tartan patterns through Scottish history",
+          "category": "historical"
+        },
+        {
+          "text": "Modern applications of traditional tartan designs",
+          "category": "practical"
+        }
+      ]
+
+      Return ONLY the JSON array, with no additional text or explanation.
+
+    variables:
+      - name: "title"
+        description: "The title of the blog post"
+        required: true
+      - name: "concept"
+        description: "The concept of the blog post"
+        required: true

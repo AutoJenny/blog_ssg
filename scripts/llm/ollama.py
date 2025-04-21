@@ -65,13 +65,13 @@ class OllamaProvider(LLMProvider):
             response = requests.post(
                 f"{self.api_base}/api/generate",
                 json=payload,
-                timeout=30  # Add timeout
+                timeout=kwargs.get('timeout', 30)  # Use provided timeout or default to 30
             )
             
             if response.status_code != 200:
                 error_msg = f"Ollama API error (HTTP {response.status_code}): {response.text}"
                 logger.error(error_msg)
-                result = LLMResponse("", {"status_code": response.status_code})
+                result = LLMResponse("")
                 result.set_error(error_msg)
                 return result
             

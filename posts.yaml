@@ -94,79 +94,49 @@ posts:
   header_image: null
   id: 5
   ideas:
-  - category: historical
-    text: The origins of hand-fasting in pre-Christian Scotland and its connection
+  - text: The origins of hand-fasting in pre-Christian Scotland and its connection
       to Celtic rituals
-  - category: historical
-    text: How hand-fasting was used as a form of trial marriage in ancient Scotland
-  - category: cultural
-    text: The significance of the ribbon or cord used in hand-fasting ceremonies
-  - category: historical
-    text: The evolution of hand-fasting from a practical arrangement to a symbol of
+  - text: How hand-fasting was used as a form of trial marriage in ancient Scotland
+  - text: The significance of the ribbon or cord used in hand-fasting ceremonies
+  - text: The evolution of hand-fasting from a practical arrangement to a symbol of
       love and devotion
-  - category: historical
-    text: Examples of historical Scottish couples who participated in hand-fasting
+  - text: Examples of historical Scottish couples who participated in hand-fasting
       ceremonies
-  - category: cultural
-    text: The role of hand-fasting in modern Scottish weddings and its increasing
+  - text: The role of hand-fasting in modern Scottish weddings and its increasing
       popularity
-  - category: practical
-    text: A step-by-step guide to conducting a traditional hand-fasting ceremony
-  - category: cultural
-    text: The symbolism behind the colors used in hand-fasting ribbons or cords
-  - category: cultural
-    text: Hand-fasting as a way to connect with Scottish heritage and cultural identity
-  - category: comparative
-    text: The connection between hand-fasting and other Celtic rituals, such as Oathing
+  - text: A step-by-step guide to conducting a traditional hand-fasting ceremony
+  - text: The symbolism behind the colors used in hand-fasting ribbons or cords
+  - text: Hand-fasting as a way to connect with Scottish heritage and cultural identity
+  - text: The connection between hand-fasting and other Celtic rituals, such as Oathing
       Stones
-  - category: comparative
-    text: How hand-fasting has influenced modern wedding ceremonies beyond Scotland
-  - category: historical
-    text: The history of hand-fasting in different regions of Scotland, including
+  - text: How hand-fasting has influenced modern wedding ceremonies beyond Scotland
+  - text: The history of hand-fasting in different regions of Scotland, including
       the Highlands and Lowlands
-  - category: cultural
-    text: The significance of hand-fasting in Scottish folklore and mythology
-  - category: comparative
-    text: A comparison of hand-fasting with other ancient Celtic rituals, such as
+  - text: The significance of hand-fasting in Scottish folklore and mythology
+  - text: A comparison of hand-fasting with other ancient Celtic rituals, such as
       Jumping the Besom
-  - category: cultural
-    text: Hand-fasting as a symbol of loyalty, family, and community in Scottish culture
-  - category: cultural
-    text: The use of hand-fasting in modern pagan and druidic ceremonies
-  - category: historical
-    text: A look at historical artifacts related to hand-fasting, such as ancient
+  - text: Hand-fasting as a symbol of loyalty, family, and community in Scottish culture
+  - text: The use of hand-fasting in modern pagan and druidic ceremonies
+  - text: A look at historical artifacts related to hand-fasting, such as ancient
       Celtic jewelry
-  - category: cultural
-    text: How hand-fasting has been featured in Scottish literature and art throughout
+  - text: How hand-fasting has been featured in Scottish literature and art throughout
       history
-  - category: cultural
-    text: The role of hand-fasting in Scottish cultural festivals and events
-  - category: practical
-    text: A guide to incorporating hand-fasting into non-traditional wedding ceremonies
-  - category: cultural
-    text: Hand-fasting as a way to honor ancestors and heritage
-  - category: historical
-    text: The connection between hand-fasting and Scottish clan traditions
-  - category: cultural
-    text: Examples of modern couples who have used hand-fasting in their wedding ceremonies
-  - category: cultural
-    text: A look at the symbolism behind the different types of materials used for
+  - text: The role of hand-fasting in Scottish cultural festivals and events
+  - text: A guide to incorporating hand-fasting into non-traditional wedding ceremonies
+  - text: Hand-fasting as a way to honor ancestors and heritage
+  - text: The connection between hand-fasting and Scottish clan traditions
+  - text: Examples of modern couples who have used hand-fasting in their wedding ceremonies
+  - text: A look at the symbolism behind the different types of materials used for
       hand-fasting ribbons or cords
-  - category: practical
-    text: Hand-fasting as a way to create a unique and personal wedding ceremony
-  - category: historical
-    text: The history of hand-fasting in relation to Scottish laws and customs
-  - category: comparative
-    text: A comparison of hand-fasting with other ancient marriage rituals from around
+  - text: Hand-fasting as a way to create a unique and personal wedding ceremony
+  - text: The history of hand-fasting in relation to Scottish laws and customs
+  - text: A comparison of hand-fasting with other ancient marriage rituals from around
       the world
-  - category: cultural
-    text: Hand-fasting as a way to connect with nature and the outdoors
-  - category: cultural
-    text: The role of hand-fasting in Scottish cultural preservation and heritage
+  - text: Hand-fasting as a way to connect with nature and the outdoors
+  - text: The role of hand-fasting in Scottish cultural preservation and heritage
       tourism
-  - category: practical
-    text: A guide to creating handmade hand-fasting ribbons or cords
-  modified_date: '2025-04-21T21:32:12Z'
+  - text: A guide to creating handmade hand-fasting ribbons or cords
+  modified_date: '2025-04-21T21:49:44Z'
   published_date: null
   slug: hand-fasting
   status: development

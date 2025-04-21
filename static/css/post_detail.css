@@ -70,4 +70,122 @@
     .meta-item {
         margin-bottom: 1rem;
     }
+}
+
+/* Content Structure Styles */
+.structure-section {
+    background-color: var(--bs-light);
+    transition: all 0.2s ease-out;
+    position: relative;
+    padding-left: 24px;
+}
+
+.structure-section:hover {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.structure-section .section-title {
+    font-weight: 500;
+    background-color: transparent;
+    border: 1px solid var(--bs-border-color);
+}
+
+.structure-section .section-title:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.bullet-points {
+    margin-bottom: 0.5rem;
+}
+
+.bullet-point-item {
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.bullet-point-item::before {
+    content: "•";
+    position: absolute;
+    left: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--bs-primary);
+}
+
+.bullet-point-item .bullet-input {
+    background-color: transparent;
+    border: 1px solid var(--bs-border-color);
+}
+
+.bullet-point-item .bullet-input:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.bullet-point-item .btn-remove-bullet {
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.bullet-point-item:hover .btn-remove-bullet {
+    opacity: 1;
+}
+
+/* Dark mode support */
+[data-bs-theme="dark"] .structure-section {
+    background-color: var(--bs-dark);
+    border-color: var(--bs-gray-700);
+}
+
+[data-bs-theme="dark"] .structure-section .section-title,
+[data-bs-theme="dark"] .bullet-point-item .bullet-input {
+    background-color: transparent;
+    border-color: var(--bs-gray-700);
+    color: var(--bs-light);
+}
+
+[data-bs-theme="dark"] .structure-section .section-title:focus,
+[data-bs-theme="dark"] .bullet-point-item .bullet-input:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Drag and drop styles */
+.structure-section.dragging {
+    opacity: 0.5;
+    cursor: move;
+}
+
+.structure-section.drag-over {
+    border: 2px dashed var(--bs-primary);
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+/* Drag handle styles */
+.drag-handle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: move;
+    color: var(--bs-gray-500);
+    transition: color 0.2s;
+}
+
+.drag-handle:hover {
+    color: var(--bs-primary);
+}
+
+/* Dark mode support for drag handle */
+[data-bs-theme="dark"] .drag-handle {
+    color: var(--bs-gray-600);
+}
+
+[data-bs-theme="dark"] .drag-handle:hover {
+    color: var(--bs-primary);
 } 

@@ -152,7 +152,7 @@ def post_detail(slug):
     post_status = workflow_status.get(slug, {'stages': {}})
     
     # Initialize missing stages with default values
-    for stage in ['conceptualisation', 'authoring', 'metadata', 'images', 'checking', 'publishing']:
+    for stage in ['conceptualisation', 'organising', 'authoring', 'metadata', 'images', 'checking', 'publishing']:
         if stage not in post_status['stages']:
             post_status['stages'][stage] = {'status': 'pending'}
             if stage == 'images':
@@ -682,6 +682,29 @@ def update_ideas(slug):
         # Save the updated posts
         save_posts(posts_data)
 
+        # Update workflow status
+        workflow_status_path = Path('data/workflow_status.json')
+        workflow_status = {}
+        if workflow_status_path.exists():
+            with open(workflow_status_path, 'r') as f:
+                workflow_status = json.load(f)
+        
+        if slug not in workflow_status:
+            workflow_status[slug] = {'stages': {}}
+        
+        # Update the conceptualisation stage status
+        if 'conceptualisation' not in workflow_status[slug]['stages']:
+            workflow_status[slug]['stages']['conceptualisation'] = {}
+        
+        workflow_status[slug]['stages']['conceptualisation'].update({
+            'status': 'complete' if data['ideas'] and len(data['ideas']) > 0 else 'pending',
+            'last_updated': datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+        })
+        
+        # Save the updated workflow status
+        with open(workflow_status_path, 'w') as f:
+            json.dump(workflow_status, f, indent=2)
+
         return jsonify({"success": True})
     except Exception as e:
         logger.error(f"Error updating ideas: {str(e)}")
@@ -821,6 +844,29 @@ def generate_ideas(slug):
             save_posts(posts_data)
             logger.info("Successfully saved updated posts")
 
+            # Update workflow status
+            workflow_status_path = Path('data/workflow_status.json')
+            workflow_status = {}
+            if workflow_status_path.exists():
+                with open(workflow_status_path, 'r') as f:
+                    workflow_status = json.load(f)
+            
+            if slug not in workflow_status:
+                workflow_status[slug] = {'stages': {}}
+            
+            # Update the conceptualisation stage status
+            if 'conceptualisation' not in workflow_status[slug]['stages']:
+                workflow_status[slug]['stages']['conceptualisation'] = {}
+            
+            workflow_status[slug]['stages']['conceptualisation'].update({
+                'status': 'complete' if ideas and len(ideas) > 0 else 'pending',
+                'last_updated': datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+            })
+            
+            # Save the updated workflow status
+            with open(workflow_status_path, 'w') as f:
+                json.dump(workflow_status, f, indent=2)
+
             return jsonify({
                 "success": True,
                 "ideas": ideas
@@ -903,6 +949,99 @@ def llm_config():
         except Exception as e:
             logger.error(f"Error updating LLM config: {str(e)}")
             return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/posts/<slug>/structure', methods=['POST'])
+def update_structure(slug):
+    try:
+        posts_data = load_posts()
+        post = next((p for p in posts_data if p['slug'] == slug), None)
+        if not post:
+            return jsonify({'success': False, 'error': 'Post not found'}), 404
+
+        data = request.get_json()
+        if 'structure' not in data:
+            return jsonify({'success': False, 'error': 'Structure data is required'}), 400
+
+        # Update the post's content structure
+        post['content_structure'] = data['structure']
+        post['modified_date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        # Update workflow status
+        workflow_status_path = Path('data/workflow_status.json')
+        workflow_status = {}
+        if workflow_status_path.exists():
+            with open(workflow_status_path, 'r') as f:
+                workflow_status = json.load(f)
+
+        if slug not in workflow_status:
+            workflow_status[slug] = {'stages': {}}
+        if 'organising' not in workflow_status[slug]['stages']:
+            workflow_status[slug]['stages']['organising'] = {'status': 'pending'}
+
+        # Update status based on content
+        if data['structure'] and len(data['structure']) > 0:
+            workflow_status[slug]['stages']['organising']['status'] = 'complete'
+        else:
+            workflow_status[slug]['stages']['organising']['status'] = 'pending'
+
+        # Save workflow status
+        with open(workflow_status_path, 'w') as f:
+            json.dump(workflow_status, f, indent=2)
+
+        # Save posts
+        save_posts(posts_data)
+
+        return jsonify({'success': True})
+    except Exception as e:
+        logger.error(f"Error updating structure: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/posts/<slug>/generate_structure', methods=['POST'])
+def generate_structure(slug):
+    try:
+        posts_data = load_posts()
+        post = next((p for p in posts_data if p['slug'] == slug), None)
+        if not post:
+            return jsonify({'success': False, 'error': 'Post not found'}), 404
+
+        # Load LLM tasks
+        tasks = load_llm_tasks()
+        if not tasks:
+            return jsonify({'success': False, 'error': 'Failed to load LLM tasks'}), 500
+
+        # Get the generate_structure task
+        task = tasks.get('generate_structure')
+        if not task:
+            return jsonify({'success': False, 'error': 'Generate structure task not found'}), 404
+
+        # Format the prompt
+        prompt = task['prompt'].format(
+            title=post['title'],
+            concept=post['concept'],
+            ideas=post.get('ideas', [])
+        )
+
+        # Call the LLM
+        response = call_llm(
+            model_name=task['model_name'],
+            prompt=prompt,
+            temperature=task['temperature'],
+            max_tokens=task['max_tokens']
+        )
+
+        if not response:
+            return jsonify({'success': False, 'error': 'Failed to generate structure'}), 500
+
+        # Parse the response (assuming it's a JSON string)
+        try:
+            structure = json.loads(response)
+            return jsonify({'success': True, 'structure': structure})
+        except json.JSONDecodeError:
+            return jsonify({'success': False, 'error': 'Invalid response format from LLM'}), 500
+
+    except Exception as e:
+        logger.error(f"Error generating structure: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001, host='0.0.0.0')

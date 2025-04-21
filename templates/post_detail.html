@@ -279,11 +279,11 @@
             <section id="workflow-stages" class="mb-4">
                 <h2>Workflow Stages</h2>
 
-                <!-- Stage I: Conceptualisation -->
+                <!-- Stage I: Ideas Brainstorm -->
                 <details class="workflow-stage" data-stage-key="conceptualisation">
                     <summary>
                         <span class="traffic-light" data-status="{{ status.stages.conceptualisation.status | default('pending') }}"></span>
-                        I. Conceptualisation
+                        I. Ideas Brainstorm
                     </summary>
                     <div class="stage-content">
                         <!-- Ideas field -->
@@ -328,11 +328,80 @@
                     </div>
                 </details>
 
-                <!-- Stage II: Content Authoring -->
+                <!-- Stage II: Organising Sections -->
+                <details class="workflow-stage" data-stage-key="organising">
+                    <summary>
+                        <span class="traffic-light" data-status="{{ status.stages.organising.status | default('pending') }}"></span>
+                        II. Organising Sections
+                    </summary>
+                    <div class="stage-content">
+                        <div class="mb-4">
+                            <h3>Content Structure</h3>
+                            <div class="d-flex gap-2 mb-3">
+                                <button type="button" class="btn btn-outline-primary btn-sm" id="add-section-structure">
+                                    <i class="bi bi-plus-circle"></i> Add Section
+                                </button>
+                                <button type="button" class="btn btn-outline-info btn-sm" id="generate-structure">
+                                    <i class="bi bi-lightbulb"></i> Generate Structure
+                                </button>
+                            </div>
+                            <div id="structure-container">
+                                {% if post.content_structure %}
+                                    {% for section in post.content_structure %}
+                                    <div class="structure-section mb-3 p-3 border rounded" data-section-index="{{ loop.index0 }}">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h4 class="mb-0">Section {{ loop.index }}</h4>
+                                            <button type="button" class="btn btn-sm btn-outline-danger delete-section-structure" data-section-index="{{ loop.index0 }}">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label">Section Title</label>
+                                            <input type="text" class="form-control section-title" value="{{ section.title | default('') }}" placeholder="Enter section title...">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label">Bullet Points</label>
+                                            <div class="bullet-points">
+                                                {% if section.bullets %}
+                                                    {% for bullet in section.bullets %}
+                                                    <div class="bullet-point-item d-flex align-items-center gap-2 mb-2">
+                                                        <input type="text" class="form-control bullet-input" value="{{ bullet }}" placeholder="Enter bullet point...">
+                                                        <button type="button" class="btn btn-outline-danger btn-sm btn-remove-bullet">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm add-bullet">
+                                                <i class="bi bi-plus-circle"></i> Add Bullet Point
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-primary" id="save-structure">Save Structure</button>
+                            <span class="ms-2 text-muted save-status"></span>
+                        </div>
+
+                        <p>
+                            <strong>Status:</strong> <code class="status-text">{{ status.stages.organising.status | default('pending') }}</code>
+                            {% set current_status = status.stages.organising.status | default('pending') %}
+                            {% if current_status != 'complete' %}<button class="status-update-button btn btn-sm btn-outline-success ms-2" data-slug="{{ post.slug }}" data-stage="organising" data-new-status="complete">Mark Complete</button>{% endif %}
+                            {% if current_status != 'pending' %}<button class="status-update-button btn btn-sm btn-outline-secondary ms-2" data-slug="{{ post.slug }}" data-stage="organising" data-new-status="pending">Mark Pending</button>{% endif %}
+                        </p>
+                    </div>
+                </details>
+
+                <!-- Stage III: Content Authoring -->
                 <details class="workflow-stage" data-stage-key="authoring">
                     <summary>
                         <span class="traffic-light" data-status="{{ status.stages.authoring.status | default('pending') }}"></span>
-                        II. Content Authoring & Structuring
+                        III. Content Authoring & Structuring
                     </summary>
                     <div class="stage-content">
                         <div class="card mb-4">
@@ -423,11 +492,11 @@
                     </div>
                 </details>
 
-                <!-- Stage III: Metadata & File Setup -->
+                <!-- Stage IV: Metadata & File Setup -->
                 <details class="workflow-stage" data-stage-key="metadata">
                     <summary>
                         <span class="traffic-light" data-status="{{ status.stages.metadata.status | default('pending') }}"></span>
-                        III. Metadata & File Setup
+                        IV. Metadata & File Setup
                     </summary>
                     <div class="stage-content">
                         <div class="card mb-4">
@@ -466,11 +535,11 @@
                     </div>
                 </details>
 
-                <!-- Stage IV: Image Workflow -->
+                <!-- Stage V: Image Workflow -->
                 <details class="workflow-stage" data-stage-key="images">
                     <summary>
                         <span class="traffic-light" data-status="{{ status.stages.images.status | default('pending') }}"></span>
-                        IV. Image Workflow
+                        V. Image Workflow
                     </summary>
                     <div class="stage-content">
                         <div class="alert alert-info small" role="alert">
@@ -503,11 +572,11 @@
                     </div>
                 </details>
 
-                <!-- Stage V: Checking & Review -->
+                <!-- Stage VI: Checking & Review -->
                 <details class="workflow-stage" data-stage-key="checking">
                     <summary>
                         <span class="traffic-light" data-status="{{ status.stages.checking.status | default('pending') }}"></span>
-                        V. Checking & Review
+                        VI. Checking & Review
                     </summary>
                     <div class="stage-content">
                         <div class="mb-3">
@@ -556,11 +625,11 @@
                     </div>
                 </details>
 
-                <!-- Stage VI: Publishing -->
+                <!-- Stage VII: Publishing -->
                 <details class="workflow-stage" data-stage-key="publishing">
                     <summary>
                         <span class="traffic-light" data-status="{{ status.stages.publishing.status | default('pending') }}"></span>
-                        VI. Publishing
+                        VII. Publishing
                     </summary>
                     <div class="stage-content">
                         <div class="mb-3">
@@ -845,6 +914,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 saveStatus.textContent = 'Ideas saved successfully';
                 saveStatus.className = 'ms-2 text-success';
+                // Update status indicator
+                const statusIndicator = document.querySelector('[data-stage-key="conceptualisation"] .traffic-light');
+                if (ideas.length > 0) {
+                    statusIndicator.setAttribute('data-status', 'complete');
+                } else {
+                    statusIndicator.setAttribute('data-status', 'pending');
+                }
             } else {
                 throw new Error(data.error || 'Failed to save ideas');
             }
@@ -902,6 +978,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
                 
+                // Update status indicator
+                const statusIndicator = document.querySelector('[data-stage-key="conceptualisation"] .traffic-light');
+                if (data.ideas.length > 0) {
+                    statusIndicator.setAttribute('data-status', 'complete');
+                } else {
+                    statusIndicator.setAttribute('data-status', 'pending');
+                }
+                
                 // Show success message
                 saveStatus.textContent = 'Ideas generated successfully';
                 saveStatus.className = 'ms-2 text-success';
@@ -917,6 +1001,241 @@ document.addEventListener('DOMContentLoaded', function() {
             generateIdeasBtn.innerHTML = '<i class="bi bi-lightbulb"></i> Generate Ideas';
             generateIdeasBtn.disabled = false;
         }
+    });
+
+    // Structure management
+    const structureContainer = document.getElementById('structure-container');
+    const addSectionBtn = document.getElementById('add-section-structure');
+    const generateStructureBtn = document.getElementById('generate-structure');
+    const saveStructureBtn = document.getElementById('save-structure');
+    const saveStatus = document.querySelector('.save-status');
+
+    // Drag and drop functionality
+    let draggedSection = null;
+
+    structureContainer.addEventListener('dragstart', function(e) {
+        if (e.target.closest('.structure-section')) {
+            draggedSection = e.target.closest('.structure-section');
+            draggedSection.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+    });
+
+    structureContainer.addEventListener('dragend', function(e) {
+        if (draggedSection) {
+            draggedSection.classList.remove('dragging');
+            draggedSection = null;
+        }
+    });
+
+    structureContainer.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        const section = e.target.closest('.structure-section');
+        if (section && section !== draggedSection) {
+            const rect = section.getBoundingClientRect();
+            const midY = rect.top + rect.height / 2;
+            
+            if (e.clientY < midY) {
+                structureContainer.insertBefore(draggedSection, section);
+            } else {
+                structureContainer.insertBefore(draggedSection, section.nextSibling);
+            }
+        }
+    });
+
+    // Add drag handle to sections
+    function addDragHandle(section) {
+        const handle = document.createElement('div');
+        handle.className = 'drag-handle';
+        handle.innerHTML = '<i class="bi bi-grip-vertical"></i>';
+        handle.setAttribute('draggable', 'true');
+        section.insertBefore(handle, section.firstChild);
+    }
+
+    // Add new section
+    addSectionBtn.addEventListener('click', function() {
+        const sectionIndex = structureContainer.children.length;
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = 'structure-section mb-3 p-3 border rounded';
+        sectionDiv.setAttribute('data-section-index', sectionIndex);
+        sectionDiv.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h4 class="mb-0">Section ${sectionIndex + 1}</h4>
+                <button type="button" class="btn btn-sm btn-outline-danger delete-section-structure" data-section-index="${sectionIndex}">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+            <div class="mb-2">
+                <label class="form-label">Section Title</label>
+                <input type="text" class="form-control section-title" placeholder="Enter section title...">
+            </div>
+            <div class="mb-2">
+                <label class="form-label">Bullet Points</label>
+                <div class="bullet-points">
+                </div>
+                <button type="button" class="btn btn-outline-secondary btn-sm add-bullet">
+                    <i class="bi bi-plus-circle"></i> Add Bullet Point
+                </button>
+            </div>
+        `;
+        structureContainer.appendChild(sectionDiv);
+        addDragHandle(sectionDiv);
+    });
+
+    // Add drag handles to existing sections
+    structureContainer.querySelectorAll('.structure-section').forEach(addDragHandle);
+
+    // Add bullet point
+    structureContainer.addEventListener('click', function(e) {
+        if (e.target.closest('.add-bullet')) {
+            const bulletPoints = e.target.closest('.mb-2').querySelector('.bullet-points');
+            const bulletItem = document.createElement('div');
+            bulletItem.className = 'bullet-point-item d-flex align-items-center gap-2 mb-2';
+            bulletItem.innerHTML = `
+                <input type="text" class="form-control bullet-input" placeholder="Enter bullet point...">
+                <button type="button" class="btn btn-outline-danger btn-sm btn-remove-bullet">
+                    <i class="bi bi-trash"></i>
+                </button>
+            `;
+            bulletPoints.appendChild(bulletItem);
+        }
+    });
+
+    // Remove bullet point
+    structureContainer.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-remove-bullet')) {
+            e.target.closest('.bullet-point-item').remove();
+        }
+    });
+
+    // Remove section
+    structureContainer.addEventListener('click', function(e) {
+        if (e.target.closest('.delete-section-structure')) {
+            e.target.closest('.structure-section').remove();
+            // Update section numbers
+            structureContainer.querySelectorAll('.structure-section').forEach((section, index) => {
+                section.setAttribute('data-section-index', index);
+                section.querySelector('h4').textContent = `Section ${index + 1}`;
+            });
+        }
+    });
+
+    // Generate structure using LLM
+    generateStructureBtn.addEventListener('click', async function() {
+        try {
+            // Show loading state
+            generateStructureBtn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+            generateStructureBtn.disabled = true;
+            
+            const response = await fetch(`http://localhost:5001/api/posts/${postSlug}/generate_structure`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Clear existing structure
+                structureContainer.innerHTML = '';
+                
+                // Add new sections
+                data.structure.forEach((section, index) => {
+                    const sectionDiv = document.createElement('div');
+                    sectionDiv.className = 'structure-section mb-3 p-3 border rounded';
+                    sectionDiv.setAttribute('data-section-index', index);
+                    sectionDiv.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h4 class="mb-0">Section ${index + 1}</h4>
+                            <button type="button" class="btn btn-sm btn-outline-danger delete-section-structure" data-section-index="${index}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Section Title</label>
+                            <input type="text" class="form-control section-title" value="${section.title}" placeholder="Enter section title...">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Bullet Points</label>
+                            <div class="bullet-points">
+                                ${section.bullets.map(bullet => `
+                                    <div class="bullet-point-item d-flex align-items-center gap-2 mb-2">
+                                        <input type="text" class="form-control bullet-input" value="${bullet}" placeholder="Enter bullet point...">
+                                        <button type="button" class="btn btn-outline-danger btn-sm btn-remove-bullet">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <button type="button" class="btn btn-outline-secondary btn-sm add-bullet">
+                                <i class="bi bi-plus-circle"></i> Add Bullet Point
+                            </button>
+                        </div>
+                    `;
+                    structureContainer.appendChild(sectionDiv);
+                });
+                
+                // Show success message
+                saveStatus.textContent = 'Structure generated successfully';
+                saveStatus.className = 'ms-2 text-success';
+            } else {
+                throw new Error(data.error || 'Failed to generate structure');
+            }
+        } catch (error) {
+            console.error('Error generating structure:', error);
+            saveStatus.textContent = `Error: ${error.message}`;
+            saveStatus.className = 'ms-2 text-danger';
+        } finally {
+            // Reset button state
+            generateStructureBtn.innerHTML = '<i class="bi bi-lightbulb"></i> Generate Structure';
+            generateStructureBtn.disabled = false;
+        }
+    });
+
+    // Save structure
+    saveStructureBtn.addEventListener('click', function() {
+        const structure = [];
+        structureContainer.querySelectorAll('.structure-section').forEach(section => {
+            const title = section.querySelector('.section-title').value;
+            const bullets = Array.from(section.querySelectorAll('.bullet-input')).map(input => input.value.trim()).filter(Boolean);
+            if (title || bullets.length > 0) {
+                structure.push({
+                    title: title,
+                    bullets: bullets
+                });
+            }
+        });
+
+        // Save to server
+        fetch(`http://localhost:5001/api/posts/${postSlug}/structure`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ structure })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                saveStatus.textContent = 'Structure saved successfully';
+                saveStatus.className = 'ms-2 text-success';
+                // Update status indicator
+                const statusIndicator = document.querySelector('[data-stage-key="organising"] .traffic-light');
+                if (structure.length > 0) {
+                    statusIndicator.setAttribute('data-status', 'complete');
+                } else {
+                    statusIndicator.setAttribute('data-status', 'pending');
+                }
+            } else {
+                throw new Error(data.error || 'Failed to save structure');
+            }
+        })
+        .catch(error => {
+            console.error('Error saving structure:', error);
+            saveStatus.textContent = `Error: ${error.message}`;
+            saveStatus.className = 'ms-2 text-danger';
+        });
     });
 });
 </script>

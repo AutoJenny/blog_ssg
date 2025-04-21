@@ -5,6 +5,22 @@ document.addEventListener('DOMContentLoaded', function() {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 
+    // Handle model selection
+    const modelSelect = document.querySelector('select[name="model_name"]');
+    const customModelInput = document.querySelector('input[name="custom_model_name"]');
+    
+    if (modelSelect && customModelInput) {
+        modelSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customModelInput.classList.remove('d-none');
+                customModelInput.required = true;
+            } else {
+                customModelInput.classList.add('d-none');
+                customModelInput.required = false;
+            }
+        });
+    }
+
     // Handle settings form submission
     const settingsForm = document.getElementById('settings-form');
     if (settingsForm) {
@@ -13,6 +29,12 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const formData = new FormData(settingsForm);
             const settings = Object.fromEntries(formData.entries());
+            
+            // Handle custom model name
+            if (settings.model_name === 'custom') {
+                settings.model_name = settings.custom_model_name;
+                delete settings.custom_model_name;
+            }
             
             try {
                 const response = await fetch('/api/llm/settings', {
@@ -100,13 +122,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error('Failed to test LLM');
             }
         } catch (error) {
-            testResult.classList.remove('d-none');
-            testResult.querySelector('pre').textContent = `Error: ${error.message}`;
-            testResult.querySelector('pre').classList.add('text-danger');
+            showAlert('Error testing LLM: ' + error.message, 'danger');
         } finally {
             // Reset button state
             testButton.disabled = false;
-            testButton.textContent = 'Test LLM';
+            testButton.innerHTML = 'Test';
         }
     }
 
@@ -124,7 +144,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Helper function to show alerts
     function showAlert(message, type) {
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
@@ -133,23 +152,25 @@ document.addEventListener('DOMContentLoaded', function() {
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         `;
         
-        const container = document.querySelector('.container');
+        const container = document.querySelector('.container-fluid');
         container.insertBefore(alertDiv, container.firstChild);
         
+        // Auto-dismiss after 5 seconds
         setTimeout(() => {
-            alertDiv.remove();
+            alertDiv.classList.remove('show');
+            setTimeout(() => alertDiv.remove(), 150);
         }, 5000);
     }
 
-    // Helper function to update current settings display
     function updateCurrentSettings(settings) {
-        const currentSettings = document.getElementById('current-settings');
-        if (currentSettings) {
-            currentSettings.innerHTML = `
-                <p><strong>Provider:</strong> ${settings.provider}</p>
-                <p><strong>Model:</strong> ${settings.model}</p>
-                <p><strong>API Base URL:</strong> ${settings.api_base_url}</p>
-            `;
+        document.getElementById('current-provider').textContent = settings.provider_type;
+        document.getElementById('current-model').textContent = settings.model_name;
+        document.getElementById('current-api-base').textContent = settings.api_base;
+        
+        // Update provider info in testing tab
+        const providerInfo = document.getElementById('provider-info');
+        if (providerInfo) {
+            providerInfo.textContent = `Using ${settings.provider_type} with ${settings.model_name}`;
         }
     }
 

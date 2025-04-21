@@ -70,7 +70,14 @@
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">Model Name</label>
-                                            <input type="text" name="model_name" value="{{ config.model_name }}" class="form-control">
+                                            <select name="model_name" class="form-select">
+                                                <option value="mistral:latest" {% if config.model_name == 'mistral:latest' %}selected{% endif %}>Mistral (Latest)</option>
+                                                <option value="deepseek-coder:latest" {% if config.model_name == 'deepseek-coder:latest' %}selected{% endif %}>Deepseek Coder (Latest)</option>
+                                                <option value="llama2:latest" {% if config.model_name == 'llama2:latest' %}selected{% endif %}>Llama 2 (Latest)</option>
+                                                <option value="mixtral:latest" {% if config.model_name == 'mixtral:latest' %}selected{% endif %}>Mixtral (Latest)</option>
+                                                <option value="custom">Custom Model</option>
+                                            </select>
+                                            <input type="text" name="custom_model_name" class="form-control mt-2 d-none" placeholder="Enter custom model name">
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">API Base URL</label>

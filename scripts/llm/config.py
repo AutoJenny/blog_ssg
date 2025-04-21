@@ -22,7 +22,7 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, LLMConfig]:
     # Load from environment variables as fallback
     env_prefix = "LLM_"
     provider_type = os.environ.get(f"{env_prefix}PROVIDER_TYPE", "ollama")
-    model_name = os.environ.get(f"{env_prefix}MODEL_NAME", "mistral")
+    model_name = os.environ.get(f"{env_prefix}MODEL_NAME", "llama3.1:70b")
     api_base = os.environ.get(f"{env_prefix}API_BASE")
     api_key = os.environ.get(f"{env_prefix}API_KEY")
     

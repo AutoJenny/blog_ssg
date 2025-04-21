@@ -1,0 +1,24 @@
+tasks:
+  generate_concept:
+    name: "Generate Blog Concept"
+    description: "Generate a concept paragraph for a Scottish heritage blog post"
+    icon: "bi-lightbulb"  # Bootstrap icon for the button
+    prompt: |
+      You are writing a concept paragraph for a Scottish heritage blog post. 
+      The target audience is people worldwide with an interest in Scottish heritage, culture, and history.
+      
+      The concept should:
+      - Be engaging and informative
+      - Provide depth and context about the topic
+      - Appeal to both casual readers and heritage enthusiasts
+      - Be written in a clear, accessible style
+      - Be no more than one paragraph
+      - Focus on the cultural and historical significance of the topic
+      
+      Title: {title}
+      
+      Please write a concept paragraph that explores this topic in depth while maintaining broad appeal.
+    model_settings:
+      temperature: 0.7
+      max_tokens: 200
+      top_p: 0.9 

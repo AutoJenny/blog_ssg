@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import os
 import yaml
-from datetime import datetime
+from datetime import datetime, timezone
 import pytz
 import re
 import logging
@@ -37,6 +37,55 @@ def datetimeformat(value, format='%d %b %y : %H:%M'):
     except (ValueError, AttributeError):
         return value
 
+def time_ago(value):
+    """Convert a datetime string to a human-readable 'time ago' format."""
+    if not value:
+        return "Never"
+        
+    try:
+        # Parse the input date string
+        dt = datetime.fromisoformat(value.replace('Z', '+00:00'))
+        
+        # Get current time in local timezone
+        local_tz = pytz.timezone('Europe/London')
+        now = datetime.now(local_tz)
+        
+        # Convert input datetime to local timezone
+        if dt.tzinfo is None:
+            dt = local_tz.localize(dt)
+        else:
+            dt = dt.astimezone(local_tz)
+        
+        # Calculate time difference
+        diff = now - dt
+        
+        # Convert to seconds
+        seconds = diff.total_seconds()
+        
+        # Return appropriate string
+        if seconds < 60:
+            return "just now"
+        elif seconds < 3600:
+            minutes = int(seconds / 60)
+            return f"{minutes} minute{'s' if minutes != 1 else ''} ago"
+        elif seconds < 86400:
+            hours = int(seconds / 3600)
+            return f"{hours} hour{'s' if hours != 1 else ''} ago"
+        elif seconds < 2592000:  # 30 days
+            days = int(seconds / 86400)
+            return f"{days} day{'s' if days != 1 else ''} ago"
+        elif seconds < 31536000:  # 365 days
+            months = int(seconds / 2592000)
+            return f"{months} month{'s' if months != 1 else ''} ago"
+        else:
+            years = int(seconds / 31536000)
+            return f"{years} year{'s' if years != 1 else ''} ago"
+    except (ValueError, AttributeError):
+        return value
+
+# Register the filter with Jinja2
+app.jinja_env.filters['time_ago'] = time_ago
+
 def load_posts():
     try:
         logger.debug("Loading posts from posts.yaml")
@@ -58,6 +107,8 @@ def index():
 @app.route('/posts')
 def posts():
     posts_data = load_posts()
+    # Sort posts by modified_date in descending order (most recent first)
+    posts_data.sort(key=lambda x: x.get('modified_date', ''), reverse=True)
     return render_template('posts.html', posts=posts_data)
 
 @app.route('/posts/<slug>')
@@ -133,10 +184,11 @@ def new_post():
             
             # Get form data
             working_title = request.form.get('working_title', '').strip()
+            subtitle = request.form.get('subtitle', '').strip()
             author = request.form.get('author', '').strip()
             concept = request.form.get('concept', '').strip()
             
-            logger.debug(f"Processed form data - Title: {working_title}, Author: {author}, Concept: {concept}")
+            logger.debug(f"Processed form data - Title: {working_title}, Subtitle: {subtitle}, Author: {author}, Concept: {concept}")
             
             if not all([working_title, author, concept]):
                 logger.warning("Missing required fields")
@@ -150,6 +202,7 @@ def new_post():
             new_post = {
                 'id': len(posts_data) + 1,
                 'title': working_title,  # Using working_title as initial title
+                'subtitle': subtitle,
                 'slug': generate_slug(working_title),
                 'author': author,
                 'categories': [],

@@ -103,11 +103,6 @@
                                             {% if post.subtitle %}
                                             <small class="text-muted">{{ post.subtitle }}</small>
                                             {% endif %}
-                                            {% if post.concept %}
-                                            <div class="mt-1">
-                                                <small class="text-muted">{{ post.concept }}</small>
-                                            </div>
-                                            {% endif %}
                                             {% if post.status == 'published' %}
                                             <div class="mt-2">
                                                 <small class="text-muted">
@@ -125,7 +120,7 @@
                                     {% if post.creation_date %}
                                     <div class="small text-muted" style="font-size: 0.75rem;">
                                         <div>{{ post.creation_date|datetimeformat('%d %b %y') }}</div>
-                                        <div class="mt-1">{{ post.modified_date|datetimeformat('%d %b %y : %I.%M%p')|lower }}</div>
+                                        <div class="mt-1">{{ post.modified_date|time_ago }}</div>
                                     </div>
                                     {% else %}
                                     <span class="text-muted">No date set</span>
@@ -138,7 +133,7 @@
                                     {% if post.status == 'published' %}
                                     <div class="mt-1">
                                         <small class="text-secondary" style="font-size: 0.75rem;">
-                                            {{ post.published_date|datetimeformat }}
+                                            {{ post.published_date|time_ago }}
                                         </small>
                                     </div>
                                     {% endif %}

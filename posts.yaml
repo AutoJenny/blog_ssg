@@ -12,6 +12,7 @@ posts:
   published_date: null
   slug: english-tartans
   status: development
+  subtitle: "A Journey Through England's Tartan Heritage"
   tags:
   - tartans
   - history
@@ -30,6 +31,7 @@ posts:
   published_date: '2025-04-01T10:30:00Z'
   slug: kilt-evolution
   status: published
+  subtitle: "From Ancient Practicality to Global Icon"
   tags:
   - post
   - history
@@ -49,15 +51,15 @@ posts:
   published_date: '2025-04-14T15:45:00Z'
   slug: quaich-traditions
   status: published
+  subtitle: "Scotland's Cup of Friendship: From Ancient Symbol to Modern Keepsake"
   tags:
   - post
-  - tradition
+  - history
   - scotland
-  - products
-  - pewter
-  - weddings
-  - celtic
+  - culture
   - quaich
+  - tradition
+  - hospitality
   title: The Tradition of the Scottish Quaich
 - author: default
   clan_id: null

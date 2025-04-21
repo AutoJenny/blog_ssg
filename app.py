@@ -1,10 +1,16 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import os
 import yaml
 from datetime import datetime
 import pytz
 import re
 import logging
+
+# Import LLM modules
+from scripts.llm import MetadataGenerator
+from scripts.llm.config import load_config, save_config
+from scripts.llm.base import LLMConfig, LLMResponse
+from scripts.llm.factory import LLMFactory
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -157,7 +163,34 @@ def edit_post(slug):
 
 @app.route('/llms')
 def llms():
-    return render_template('llms.html')
+    # Load current LLM configuration
+    configs = load_config()
+    default_config = configs.get("default", LLMConfig(
+        provider_type="ollama",
+        model_name="mistral",
+        api_base="http://localhost:11434",
+        api_key=None
+    ))
+
+    # Create a metadata generator instance
+    generator = MetadataGenerator()
+    
+    # Extract prompt templates from the generator methods
+    example_content = "Example blog post content about Scottish heritage."
+    example_title = "Example Current Title"
+    
+    # Get the prompts by calling the methods but extracting just the prompt part
+    title_response = generator.generate_title(example_content, example_title)
+    meta_desc_response = generator.generate_meta_description(example_content)
+    keywords_response = generator.generate_keywords(example_content)
+
+    prompts = {
+        "title_generation": title_response.prompt if hasattr(title_response, 'prompt') else "Title generation prompt not available",
+        "meta_description": meta_desc_response.prompt if hasattr(meta_desc_response, 'prompt') else "Meta description prompt not available",
+        "keywords": keywords_response.prompt if hasattr(keywords_response, 'prompt') else "Keywords prompt not available"
+    }
+
+    return render_template('llms.html', config=default_config, prompts=prompts)
 
 @app.route('/preview')
 def preview():
@@ -166,6 +199,38 @@ def preview():
 @app.route('/about')
 def about():
     return render_template('about.html')
+
+@app.route('/api/llm/test', methods=['POST'])
+def test_llm():
+    """Test the LLM with a given prompt."""
+    try:
+        data = request.get_json()
+        prompt = data.get('prompt')
+        
+        if not prompt:
+            return jsonify({"error": "No prompt provided"}), 400
+            
+        # Load current configuration
+        configs = load_config()
+        config = configs.get("default", LLMConfig(
+            provider_type="ollama",
+            model_name="mistral",
+            api_base="http://localhost:11434",
+            api_key=None
+        ))
+        
+        # Create provider and test
+        provider = LLMFactory.create_provider(config)
+        response = provider.generate_text(prompt)
+        
+        if response.error:
+            return jsonify({"error": response.error}), 500
+            
+        return jsonify({"response": response.text})
+        
+    except Exception as e:
+        logging.error(f"Error testing LLM: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

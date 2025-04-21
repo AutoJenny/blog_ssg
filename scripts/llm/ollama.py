@@ -14,22 +14,37 @@ class OllamaProvider(LLMProvider):
         """Initialize Ollama provider with configuration."""
         self.config = config
         self.api_base = config.api_base or "http://localhost:11434"
-        self.model = config.model_name
+        # Ensure model name includes tag
+        self.model = config.model_name if ":" in config.model_name else f"{config.model_name}:latest"
         
-        # Validate connection
-        self._validate_connection()
+        # Don't validate connection on init, do it when needed
+        self._is_connected = False
     
     def _validate_connection(self) -> None:
         """Validate connection to Ollama server."""
+        if self._is_connected:
+            return
+            
         try:
-            response = requests.get(f"{self.api_base}/api/tags")
+            response = requests.get(f"{self.api_base}/api/tags", timeout=5)
             if response.status_code != 200:
                 raise ConnectionError(f"Failed to connect to Ollama server: {response.text}")
             
             # Check if model is available
             models = response.json().get("models", [])
             if not any(model["name"] == self.model for model in models):
-                logger.warning(f"Model {self.model} not found in available models: {models}")
+                available_models = [m["name"] for m in models]
+                logger.warning(f"Model {self.model} not found. Available models: {available_models}")
+                # Try to find a matching model with latest tag
+                base_model = self.model.split(":")[0]
+                matching_models = [m["name"] for m in models if m["name"].startswith(f"{base_model}:")]
+                if matching_models:
+                    self.model = matching_models[0]
+                    logger.info(f"Using model {self.model} instead")
+                else:
+                    raise ValueError(f"Model {self.model} not found in available models: {available_models}")
+                
+            self._is_connected = True
                 
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"Failed to connect to Ollama server: {str(e)}")
@@ -37,39 +52,49 @@ class OllamaProvider(LLMProvider):
     def generate_text(self, prompt: str, **kwargs) -> LLMResponse:
         """Generate text using Ollama API."""
         try:
+            # Validate connection and model
+            self._validate_connection()
+            
             payload = {
                 "model": self.model,
                 "prompt": prompt,
+                "stream": False,  # Disable streaming for simplicity
                 **kwargs
             }
             
             response = requests.post(
                 f"{self.api_base}/api/generate",
-                json=payload
+                json=payload,
+                timeout=30  # Add timeout
             )
             
             if response.status_code != 200:
-                error_msg = f"Ollama API error: {response.text}"
+                error_msg = f"Ollama API error (HTTP {response.status_code}): {response.text}"
                 logger.error(error_msg)
                 result = LLMResponse("", {"status_code": response.status_code})
                 result.set_error(error_msg)
                 return result
             
-            # Parse streaming response
-            full_response = ""
-            for line in response.iter_lines():
-                if line:
-                    try:
-                        data = json.loads(line)
-                        if "response" in data:
-                            full_response += data["response"]
-                    except json.JSONDecodeError:
-                        logger.warning(f"Failed to parse response line: {line}")
-            
-            return LLMResponse(
-                full_response,
-                {"model": self.model}
-            )
+            try:
+                data = response.json()
+                if "response" not in data:
+                    error_msg = f"Invalid response format from Ollama: {data}"
+                    logger.error(error_msg)
+                    result = LLMResponse("")
+                    result.set_error(error_msg)
+                    return result
+                    
+                return LLMResponse(
+                    data["response"],
+                    {"model": self.model}
+                )
+                
+            except json.JSONDecodeError as e:
+                error_msg = f"Failed to parse Ollama response: {str(e)}"
+                logger.error(error_msg)
+                result = LLMResponse("")
+                result.set_error(error_msg)
+                return result
             
         except Exception as e:
             error_msg = f"Error generating text: {str(e)}"

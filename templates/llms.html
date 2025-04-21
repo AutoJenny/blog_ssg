@@ -1,57 +1,163 @@
 {% extends "base.html" %}
 
-{% block title %}LLMs{% endblock %}
+{% block title %}LLM Management{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/llms.css') }}">
+{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <h1>LLM Configuration</h1>
-        <p class="lead">Manage your language model settings</p>
-
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">OpenAI Configuration</h5>
-                    </div>
-                    <div class="card-body">
-                        <form>
-                            <div class="mb-3">
-                                <label for="apiKey" class="form-label">API Key</label>
-                                <input type="password" class="form-control" id="apiKey" placeholder="Enter your API key">
-                            </div>
-                            <div class="mb-3">
-                                <label for="model" class="form-label">Model</label>
-                                <select class="form-select" id="model">
-                                    <option value="gpt-4">GPT-4</option>
-                                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Save Settings</button>
-                        </form>
-                    </div>
-                </div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Back button and title -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <a href="{{ url_for('posts') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Posts
+                </a>
+                <h1 class="mb-0">LLM Management</h1>
             </div>
 
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Usage Statistics</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <h6>API Calls This Month</h6>
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: 65%;" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">65%</div>
+            <!-- Tab Navigation -->
+            <ul class="nav nav-tabs mb-4" id="llmTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab">
+                        <i class="bi bi-gear"></i> Settings
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="testing-tab" data-bs-toggle="tab" data-bs-target="#testing" type="button" role="tab">
+                        <i class="bi bi-code-slash"></i> Testing
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="prompts-tab" data-bs-toggle="tab" data-bs-target="#prompts" type="button" role="tab">
+                        <i class="bi bi-chat-square-text"></i> Prompts
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Settings Tab -->
+                <div class="tab-pane fade show active" id="settings" role="tabpanel">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Current Settings</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Provider:</strong> <span id="current-provider">{{ config.provider_type }}</span></p>
+                                    <p><strong>Model:</strong> <span id="current-model">{{ config.model_name }}</span></p>
+                                    <p><strong>API Base:</strong> <span id="current-api-base">{{ config.api_base }}</span></p>
+                                </div>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <h6>Tokens Used</h6>
-                            <p class="text-muted">1,234,567 tokens</p>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Update Settings</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="settings-form">
+                                        <div class="mb-3">
+                                            <label class="form-label">Provider Type</label>
+                                            <select name="provider_type" class="form-select">
+                                                <option value="ollama" {% if config.provider_type == 'ollama' %}selected{% endif %}>Ollama</option>
+                                                <option value="openai" {% if config.provider_type == 'openai' %}selected{% endif %}>OpenAI</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Model Name</label>
+                                            <input type="text" name="model_name" value="{{ config.model_name }}" class="form-control">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">API Base URL</label>
+                                            <input type="text" name="api_base" value="{{ config.api_base }}" class="form-control">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">API Key</label>
+                                            <input type="password" name="api_key" placeholder="Leave blank to keep current" class="form-control">
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Update Settings</button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <h6>Cost This Month</h6>
-                            <p class="text-muted">$12.34</p>
+                    </div>
+                </div>
+
+                <!-- Testing Tab -->
+                <div class="tab-pane fade" id="testing" role="tabpanel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Test LLM Integration</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <small class="text-muted" id="provider-info">Using {{ config.provider_type }} with {{ config.model_name }}</small>
+                            </div>
+                            <form id="test-form">
+                                <div class="mb-3">
+                                    <label class="form-label">Test Prompt</label>
+                                    <textarea id="test-prompt" name="prompt" rows="4" class="form-control" 
+                                              placeholder="Enter a test prompt here..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Test LLM</button>
+                            </form>
+                            <div id="test-result" class="mt-4 d-none">
+                                <h6>Result:</h6>
+                                <pre class="bg-light p-3 rounded"></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prompts Tab -->
+                <div class="tab-pane fade" id="prompts" role="tabpanel">
+                    <div class="accordion" id="promptsAccordion">
+                        <!-- Title Generation Template -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#titlePrompt">
+                                    Title Generation
+                                </button>
+                            </h2>
+                            <div id="titlePrompt" class="accordion-collapse collapse show" data-bs-parent="#promptsAccordion">
+                                <div class="accordion-body">
+                                    <pre class="bg-light p-3 rounded">{{ prompts.title_generation }}</pre>
+                                    <button class="btn btn-primary btn-sm mt-2">Edit Template</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Meta Description Template -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#metaPrompt">
+                                    Meta Description
+                                </button>
+                            </h2>
+                            <div id="metaPrompt" class="accordion-collapse collapse" data-bs-parent="#promptsAccordion">
+                                <div class="accordion-body">
+                                    <pre class="bg-light p-3 rounded">{{ prompts.meta_description }}</pre>
+                                    <button class="btn btn-primary btn-sm mt-2">Edit Template</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Keywords Template -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#keywordsPrompt">
+                                    Keywords
+                                </button>
+                            </h2>
+                            <div id="keywordsPrompt" class="accordion-collapse collapse" data-bs-parent="#promptsAccordion">
+                                <div class="accordion-body">
+                                    <pre class="bg-light p-3 rounded">{{ prompts.keywords }}</pre>
+                                    <button class="btn btn-primary btn-sm mt-2">Edit Template</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -59,4 +165,8 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/llms.js') }}"></script>
 {% endblock %} 

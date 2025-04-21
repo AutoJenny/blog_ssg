@@ -833,7 +833,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Save to server
-        fetch(`/api/posts/${postSlug}/ideas`, {
+        fetch(`http://localhost:5001/api/posts/${postSlug}/ideas`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -864,7 +864,7 @@ document.addEventListener('DOMContentLoaded', function() {
             generateIdeasBtn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
             generateIdeasBtn.disabled = true;
             
-            const response = await fetch(`/api/posts/${postSlug}/generate_ideas`, {
+            const response = await fetch(`http://localhost:5001/api/posts/${postSlug}/generate_ideas`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

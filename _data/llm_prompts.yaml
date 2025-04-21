@@ -110,42 +110,29 @@ prompts:
       Concept:
 
   generate_ideas:
-    name: Generate Post Ideas
-    description: Generate a list of topics to include in a blog post
+    name: "Blog Post Ideas Generation"
+    description: "Generate a list of ideas for a Scottish heritage blog post"
     template: |
-      You are generating a list of topics for a Scottish heritage blog post.
-      The target audience is people worldwide with an interest in Scottish heritage, culture, and history.
-      
-      Based on the following blog post title and concept, generate a list of 30-40 interesting, important, and unusual topics that should be included in the article. The topics should be diverse, thought-provoking, and add value to the reader's understanding.
+      You are generating specific ideas for a Scottish heritage blog post about the following topic:
 
       Title: {title}
       Concept: {concept}
 
-      The topics should:
-      - Cover both fundamental and advanced aspects of the subject
-      - Include unique or unusual angles that readers might not expect
-      - Address potential questions or concerns readers might have
-      - Suggest practical applications or real-world examples
-      - Consider historical context or future implications where relevant
-
-      IMPORTANT: Your response must be a valid JSON array of objects. Each object must have:
-      - A "text" field containing the topic text
-      - A "category" field indicating the type of topic (historical, cultural, practical, technical, comparative, or future)
-
-      Example format:
-      [
-        {
-          "text": "The evolution of tartan patterns through Scottish history",
-          "category": "historical"
-        },
-        {
-          "text": "Modern applications of traditional tartan designs",
-          "category": "practical"
-        }
-      ]
-
-      Return ONLY the JSON array, with no additional text or explanation.
-
+      Please generate a list of 30-40 specific ideas that are directly relevant to this exact topic.
+      Each idea should be a specific topic, fact, or angle that would be interesting to readers.
+      
+      The ideas should:
+      - Be directly related to the specific topic and concept above
+      - Include historical, cultural, and practical information specific to this topic
+      - Be specific and detailed, not general Scottish heritage information
+      - Focus on unique aspects of this particular topic
+      - Be interesting to both casual readers and heritage enthusiasts
+      
+      Return the ideas as a JSON array of objects, where each object has:
+      - "text": The idea text
+      - "category": One of ["historical", "cultural", "practical", "technical", "comparative", "future"]
+      
+      Please generate a list of ideas in the specified JSON format, focusing only on this specific topic.
     variables:
       - name: "title"
         description: "The title of the blog post"

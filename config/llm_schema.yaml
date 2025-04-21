@@ -1,0 +1,94 @@
+# LLM Configuration Schema
+# This file defines the structure for LLM configurations
+# No defaults are provided - all values must be explicitly set
+
+version: 1.0
+
+providers:
+  openai:
+    name: "OpenAI"
+    models:
+      - name: "gpt-4"
+        capabilities:
+          - text_generation
+          - code_generation
+          - summarization
+      - name: "gpt-3.5-turbo"
+        capabilities:
+          - text_generation
+          - summarization
+    required_parameters:
+      - api_key
+      - organization_id
+
+  anthropic:
+    name: "Anthropic"
+    models:
+      - name: "claude-3-opus"
+        capabilities:
+          - text_generation
+          - code_generation
+          - summarization
+      - name: "claude-3-sonnet"
+        capabilities:
+          - text_generation
+          - summarization
+    required_parameters:
+      - api_key
+
+  ollama:
+    name: "Ollama"
+    models:
+      - name: "mistral"
+        capabilities:
+          - text_generation
+          - summarization
+      - name: "llama2"
+        capabilities:
+          - text_generation
+          - summarization
+    required_parameters:
+      - api_base
+
+actions:
+  content_generation:
+    required_capabilities:
+      - text_generation
+    parameters:
+      temperature:
+        type: float
+        min: 0.0
+        max: 2.0
+      max_tokens:
+        type: integer
+        min: 1
+        max: 4096
+      top_p:
+        type: float
+        min: 0.0
+        max: 1.0
+      frequency_penalty:
+        type: float
+        min: -2.0
+        max: 2.0
+      presence_penalty:
+        type: float
+        min: -2.0
+        max: 2.0
+
+  summarization:
+    required_capabilities:
+      - summarization
+    parameters:
+      temperature:
+        type: float
+        min: 0.0
+        max: 2.0
+      max_tokens:
+        type: integer
+        min: 1
+        max: 4096
+      top_p:
+        type: float
+        min: 0.0
+        max: 1.0 

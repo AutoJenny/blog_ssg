@@ -1,0 +1,186 @@
+<h1>Blog Post Creation &amp; Management Workflow</h1>
+<p>This document outlines the current steps required to create, manage, and publish new blog posts using the Eleventy framework and associated scripts established in this project. This serves as a reference and a basis for future automation efforts.</p>
+<h2>Authoring Article Content</h2>
+<p>This initial phase focuses on generating the raw text content for the blog post.</p>
+<ol>
+<li><strong>First Draft (AI Assisted):</strong>
+<ul>
+<li>Use an appropriate authoring AI (e.g., ChatGPT 4 or newer).</li>
+<li>Provide a detailed prompt, including:
+<ul>
+<li>Desired Title (e.g., &quot;The Tradition of the Scottish Quaich&quot;)</li>
+<li>Request for a Subtitle and a Summary/Introduction paragraph.</li>
+<li>Request for 6-10 distinct sections covering the topic chronologically or thematically (origins, evolution, usage, modern relevance, etc.).</li>
+<li>Specify desired length (e.g., ~2000 words).</li>
+<li><strong>Crucially, request output using only UK English spellings and idioms.</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Review and Edit Text:</strong>
+<ul>
+<li>Carefully review the AI-generated text for accuracy, flow, tone, and completeness.</li>
+<li>Edit and refine the text as necessary. Ensure factual correctness.</li>
+</ul>
+</li>
+<li><strong>Prepare HTML Content:</strong>
+<ul>
+<li>Format the final text for each section (including the summary and conclusion) using basic HTML tags (primarily <code>&lt;p&gt;</code>, <code>&lt;b&gt;</code>, <code>&lt;i&gt;</code>, <code>&lt;ul&gt;</code>, <code>&lt;li&gt;</code>). This formatted HTML will be pasted into the YAML front matter later.</li>
+</ul>
+</li>
+</ol>
+<h2>Manual Workflow Steps</h2>
+<p>These are the steps to integrate the content into the project, add metadata, manage assets, and publish.</p>
+<h3>Preparing Content and Metadata File (<code>.md</code>)</h3>
+<ol>
+<li><strong>Determine Post Slug:</strong>
+<ul>
+<li>Choose a short, URL-friendly identifier for the post (e.g., <code>quaich-traditions</code>). This will be used for the filename and the image subdirectory. Keep it lowercase, using hyphens for spaces.</li>
+</ul>
+</li>
+<li><strong>Create Markdown File:</strong>
+<ul>
+<li>In the <code>posts/</code> directory, create a new Markdown file named using the slug: <code>posts/&lt;your-post-slug&gt;.md</code> (e.g., <code>posts/quaich-traditions.md</code>).</li>
+</ul>
+</li>
+<li><strong>Add YAML Front Matter &amp; Content:</strong>
+<ul>
+<li>At the very top of the new <code>.md</code> file, add the YAML block (<code>--- ... ---</code>).</li>
+<li>Fill in the metadata fields:
+<ul>
+<li><code>title</code>: &quot;Your Full Post Title&quot;</li>
+<li><code>subtitle</code>: &quot;Your Post Subtitle&quot;</li>
+<li><code>description</code>: &quot;A concise sentence or two summarizing the post for SEO/sharing.&quot;</li>
+<li><code>layout</code>: &quot;post.njk&quot; (Usually this)</li>
+<li><code>date</code>: YYYY-MM-DD (The publication date)</li>
+<li><code>author</code>: &quot;author-key&quot; (The unique key matching an entry in <code>_data/authors.json</code>. Add new authors to that file first if needed.)</li>
+<li><code>tags</code>:
+<ul>
+<li><code>- post</code> (Essential for the post collection)</li>
+<li><code>- relevant-tag-1</code></li>
+<li><code>- relevant-tag-2</code></li>
+<li>(Add other relevant keywords/topics)</li>
+</ul>
+</li>
+<li><code>headerImage</code>: (Object: <code>src</code>, <code>alt</code>, <code>caption</code>, <code>imagePrompt</code>, <code>notes</code>. <code>src</code> path defined in &quot;Managing Images&quot;.)</li>
+<li><code>summary</code>: &quot;<p>Paste the formatted HTML summary here.</p>&quot;</li>
+<li><code>sections</code>: (Array of objects. Each needs <code>heading</code>, <code>text</code> [formatted HTML], <code>image</code> [object: <code>src</code>, <code>alt</code>, <code>caption</code>], <code>imagePrompt</code>, <code>notes</code>. <code>src</code> path defined in &quot;Managing Images&quot;.)</li>
+<li><code>conclusion</code>: (Optional object with <code>heading</code>, <code>text</code> [formatted HTML], optionally <code>imagePrompt</code>, <code>notes</code>).</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3>Managing Images</h3>
+<ol start="4">
+<li><strong>Prepare Image Subdirectory:</strong>
+<ul>
+<li>In the <code>images/</code> directory, create a new subdirectory named after the post slug: <code>images/&lt;your-post-slug&gt;/</code></li>
+<li>Command (from project root): <code>mkdir -p images/&lt;your-post-slug&gt;</code></li>
+</ul>
+</li>
+<li><strong>Generate/Select, Rename, and Place Images:</strong>
+<ul>
+<li>Use the <code>imagePrompt</code> values from the front matter to generate images using an AI tool, or select appropriate existing images.</li>
+<li>Rename the final image files using descriptive, URL-friendly names (e.g., <code>quaich-header-collage.jpg</code>, <code>early-origins-wooden.jpg</code>). Use lowercase and hyphens. Ensure standard extensions (<code>.jpg</code>, <code>.png</code>, <code>.webp</code>). <strong>Crucially, filenames must be unique across all posts</strong> as they currently land in the same target directory on the server (<code>/media/blog/</code>).</li>
+<li>Move the renamed images into the subdirectory: <code>images/&lt;your-post-slug&gt;/</code>.</li>
+</ul>
+</li>
+<li><strong>Update Image Paths &amp; Details in Front Matter:</strong>
+<ul>
+<li>Go back to the <code>.md</code> file's front matter.</li>
+<li>Update the <code>src</code> path for <code>headerImage</code> and each <code>image</code> within <code>sections</code> to point to the correct file. Paths must be relative to the site root (e.g., <code>src: &quot;/images/&lt;your-post-slug&gt;/your-image-name.jpg&quot;</code>).</li>
+<li>Fill in accurate <code>alt</code> text (for accessibility) and <code>caption</code> text for each image.</li>
+</ul>
+</li>
+</ol>
+<h3>Watermarking Images</h3>
+<ol start="7">
+<li><strong>Watermark (Optional Manual Step):</strong>
+<ul>
+<li>If watermarking is desired <em>before</em> publishing:
+<ul>
+<li>Run the watermarking script, targeting the <em>new</em> image subdirectory:</li>
+</ul>
+<pre><code class="language-bash">python3 watermark_images.py images/&lt;your-post-slug&gt;
+</code></pre>
+<ul>
+<li>This creates <code>images/&lt;your-post-slug&gt;-watermarked/</code>.</li>
+<li><strong>Note:</strong> The main publishing script (<code>post_to_clan.py</code>) currently uploads images from the <em>original</em> directory (<code>images/&lt;your-post-slug&gt;/</code>). To publish the watermarked versions, you would need to either manually copy them over the originals or modify the <code>post_to_clan.py</code> script to read from the <code>-watermarked</code> directory instead.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3>Previewing Locally</h3>
+<ol start="8">
+<li><strong>Preview Site:</strong>
+<ul>
+<li>Run the Eleventy development server (ensure Flask app on port 5001 is stopped or use a different port if needed):<pre><code class="language-bash">npm start
+</code></pre>
+</li>
+<li>Open browser to <code>http://localhost:8080/</code> (for index) and <code>http://localhost:8080/&lt;your-post-slug&gt;/</code> (for the new post).</li>
+<li>Check thoroughly: title, subtitle, meta, sections, images loading, tags, navigation links. Check browser console for errors.</li>
+</ul>
+</li>
+</ol>
+<h3>Committing to Git</h3>
+<ol start="9">
+<li><strong>Commit Changes:</strong>
+<ul>
+<li>Once satisfied with the local preview:
+<ul>
+<li>Stop the Eleventy server (<code>Ctrl+C</code>).</li>
+<li>Stage changes (the <code>.md</code> file, <code>_data/authors.json</code> if updated, new <code>images/&lt;slug&gt;/</code> directory and contents, <code>_data/syndication.json</code> if post ID was added).</li>
+</ul>
+<pre><code class="language-bash">git status
+git add .
+</code></pre>
+<ul>
+<li>Commit:</li>
+</ul>
+<pre><code class="language-bash">git commit -m &quot;feat: Add blog post '&lt;Your Post Title&gt;'&quot; # Or &quot;chore: Update post...&quot;
+</code></pre>
+<ul>
+<li>Push:</li>
+</ul>
+<pre><code class="language-bash">git push origin main
+</code></pre>
+</li>
+</ul>
+</li>
+</ol>
+<h3>Publishing to Clan.com (via Admin Interface)</h3>
+<ol start="10">
+<li><strong>Publish/Update Live Post:</strong>
+<ul>
+<li>This step uses the Flask web interface.</li>
+<li>Ensure the Flask app is running: <code>python3 app.py</code></li>
+<li>Open the interface in your browser (e.g., <code>http://127.0.0.1:5001</code>).</li>
+<li>Find the desired post in the &quot;Manage Posts&quot; list.</li>
+<li>Click the &quot;Publish/Update Clan.com&quot; button next to it.</li>
+<li>Monitor the &quot;Action Log / Output&quot; section in the interface for progress and success/error messages from the <code>post_to_clan.py</code> script. This script handles:
+<ul>
+<li>Running <code>npm run build</code>.</li>
+<li>Extracting/cleaning HTML content.</li>
+<li>Uploading required images (header and section images) via the <code>uploadImage</code> API.</li>
+<li>Calling the <code>createPost</code> or <code>editPost</code> API with the post metadata, HTML content, and uploaded image paths (thumbnails).</li>
+<li>Updating the local <code>_data/syndication.json</code> with the <code>clan_com_post_id</code> on successful creation.</li>
+</ul>
+</li>
+<li>Verify the post on the live site (<code>clan.com/blog</code>) after the script reports success.</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3>Potential Future Automation Points</h3>
+<ul>
+<li>Script/Interface button to generate a boilerplate <code>.md</code> file.</li>
+<li>Interface button to automatically create the image subdirectory.</li>
+<li>Tool/Interface integration for easier image renaming/placement.</li>
+<li>Integration of watermarking into the publishing script (e.g., triggered by a flag, potentially only for production uploads).</li>
+<li>Direct content editing (summary, section text) within the interface.</li>
+<li>Interface for managing <code>_data/authors.json</code>.</li>
+<li>Interface/Script for triggering/managing social media syndication (Instagram, Facebook).</li>
+</ul>
+<hr>

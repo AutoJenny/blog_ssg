@@ -1,0 +1,276 @@
+{% extends "_includes/base.html" %}
+
+{% block title %}{{ post.title }} - CLAN.com Blog{% endblock %}
+
+{% block body_class %}public single-post{% endblock %}
+
+{% block content %}
+<article class="post">
+    {% if post.header_image %}
+    <div class="post-header-image">
+        <img src="{{ url_for('serve_image', filename=post.header_image) }}" alt="{{ post.title }}">
+    </div>
+    {% endif %}
+    
+    <div class="post-header">
+        <h1 class="post-title">{{ post.title }}</h1>
+        
+        {% if post.subtitle %}
+        <p class="post-subtitle">{{ post.subtitle }}</p>
+        {% endif %}
+        
+        <div class="post-meta">
+            {% if post.author %}
+            <span class="author">
+                <span class="material-icons">person</span>
+                {{ post.author }}
+            </span>
+            {% endif %}
+            
+            {% if post.date %}
+            <span class="date">
+                <span class="material-icons">calendar_today</span>
+                {{ post.date|format_date }}
+            </span>
+            {% endif %}
+            
+            {% if post.reading_time %}
+            <span class="reading-time">
+                <span class="material-icons">schedule</span>
+                {{ post.reading_time }} min read
+            </span>
+            {% endif %}
+        </div>
+        
+        {% if post.tags %}
+        <div class="post-tags">
+            {% for tag in post.tags %}
+            <a href="{{ url_for('tag_posts', tag=tag) }}" class="tag">{{ tag }}</a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="post-content">
+        {{ post.content|safe }}
+    </div>
+    
+    {% if post.footnotes %}
+    <div class="post-footnotes">
+        <h2>Footnotes</h2>
+        {{ post.footnotes|safe }}
+    </div>
+    {% endif %}
+</article>
+
+{% if related_posts %}
+<section class="related-posts">
+    <h2>Related Posts</h2>
+    <div class="posts-grid">
+        {% for related in related_posts[:3] %}
+        <article class="post-card">
+            <div class="post-image">
+                {% if related.header_image %}
+                <img src="{{ url_for('serve_image', filename=related.header_image) }}" alt="{{ related.title }}">
+                {% endif %}
+            </div>
+            
+            <div class="post-content">
+                <h3 class="post-title">
+                    <a href="{{ url_for('view_post_detail', slug=related.slug) }}">{{ related.title }}</a>
+                </h3>
+                
+                {% if related.subtitle %}
+                <p class="post-subtitle">{{ related.subtitle }}</p>
+                {% endif %}
+                
+                <div class="post-meta">
+                    {% if related.date %}
+                    <span class="date">
+                        <span class="material-icons">calendar_today</span>
+                        {{ related.date|format_date }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block css %}
+<style>
+.post {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.post-header-image {
+    width: 100%;
+    height: 400px;
+    overflow: hidden;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+}
+
+.post-header-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.post-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.post-title {
+    font-size: 2.5rem;
+    margin: 0;
+    color: var(--text-color);
+}
+
+.post-subtitle {
+    font-size: 1.5rem;
+    color: var(--text-color-secondary);
+    margin: 1rem 0;
+}
+
+.post-meta {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+    color: var(--text-color-secondary);
+}
+
+.post-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.post-tags {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tag {
+    background: var(--background-color);
+    color: var(--text-color-secondary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.tag:hover {
+    background: var(--primary-color-light);
+    color: var(--primary-color);
+}
+
+.post-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-color);
+}
+
+.post-content h2 {
+    font-size: 1.8rem;
+    margin: 2rem 0 1rem;
+}
+
+.post-content h3 {
+    font-size: 1.5rem;
+    margin: 1.5rem 0 1rem;
+}
+
+.post-content p {
+    margin: 1.5rem 0;
+}
+
+.post-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+}
+
+.post-content blockquote {
+    margin: 2rem 0;
+    padding: 1rem 2rem;
+    border-left: 4px solid var(--primary-color);
+    background: var(--surface-color);
+    font-style: italic;
+}
+
+.post-content code {
+    background: var(--surface-color);
+    padding: 0.2rem 0.4rem;
+    border-radius: var(--border-radius);
+    font-size: 0.9em;
+}
+
+.post-content pre {
+    background: var(--surface-color);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    overflow-x: auto;
+}
+
+.post-content pre code {
+    background: none;
+    padding: 0;
+}
+
+.post-footnotes {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.post-footnotes h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.related-posts {
+    margin: 4rem auto;
+    padding: 0 2rem;
+    max-width: 1200px;
+}
+
+.related-posts h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .post {
+        padding: 1rem;
+    }
+    
+    .post-header-image {
+        height: 300px;
+    }
+    
+    .post-title {
+        font-size: 2rem;
+    }
+    
+    .post-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .post-content {
+        font-size: 1rem;
+    }
+}
+</style>
+{% endblock %} 

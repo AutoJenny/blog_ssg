@@ -1,0 +1,98 @@
+{
+    "posts": [
+        {
+            "slug": "english-tartans",
+            "title": "English tartans",
+            "subtitle": "About English tartans",
+            "author": "nick-fiddes",
+            "date": "2025-04-18",
+            "concept": "An in-depth article about the history and development of English tartans, to be published on St George's day. This will focus on issues like similar patterns woven in England historically, and how the Celtic Fringe of England took on the idea of tartans from Scotland, and also how some English families or other organisations have developed their own tartans.",
+            "summary": "<p><strong>English tartans</strong> have a fascinating trajectory, intertwining with the better-known <strong>Scottish tartan</strong> tradition yet developing a character of their own. Although <strong>tartan</strong> is primarily identified with Scotland, England's engagement with tartan spans from ancient use of <strong>checkered cloth</strong> by <strong>Celtic</strong> peoples to a modern revival of regional and national patterns. This comprehensive overview examines the emergence and development of tartans in England – from historical origins and regional examples to influences of the <strong>textile industry</strong>, expressions of <strong>national identity</strong>, and contemporary <strong>design movements</strong> – all while preserving every detail of the rich historical narrative.</p>",
+            "headerImage": {
+                "src": "/images/new-20250418-164412/header.jpg",
+                "alt": "",
+                "caption": ""
+            },
+            "categories": ["14", "15"],
+            "status": {
+                "overall": "in_progress",
+                "last_updated": "2025-04-19T16:02:36+00:00Z",
+                "publication": {
+                    "status": "draft",
+                    "clan_post_id": null
+                },
+                "workflow": {
+                    "conceptualisation": "complete",
+                    "authoring": "complete",
+                    "metadata": "complete",
+                    "images": "pending",
+                    "validation": "pending",
+                    "publishing_clancom": "pending",
+                    "syndication": "pending"
+                }
+            }
+        },
+        {
+            "slug": "kilt-evolution",
+            "title": "The Evolution of the Kilt",
+            "subtitle": "From Great Kilt to Modern Dress",
+            "author": "nick-fiddes",
+            "date": "2025-04-03",
+            "summary": "A comprehensive exploration of how the kilt evolved from the great plaid of the Highlands to its modern form, examining its cultural significance and adaptations through history.",
+            "headerImage": {
+                "src": "/images/posts/kilt-evolution/kilt-evolution_header.jpg",
+                "alt": "Historical progression of kilt styles",
+                "caption": "The evolution of Highland dress from the great kilt to modern styles"
+            },
+            "status": {
+                "overall": "published",
+                "last_updated": "2025-04-03T10:09:26+00:00Z",
+                "publication": {
+                    "status": "published",
+                    "clan_post_id": 333
+                },
+                "workflow": {
+                    "conceptualisation": "complete",
+                    "authoring": "complete",
+                    "metadata": "complete",
+                    "images": "complete",
+                    "validation": "complete",
+                    "publishing_clancom": "complete",
+                    "syndication": "pending"
+                }
+            }
+        },
+        {
+            "slug": "quaich-traditions",
+            "title": "Quaich Traditions",
+            "subtitle": "The Story of Scotland's Friendship Cup",
+            "author": "nick-fiddes",
+            "date": "2025-04-18",
+            "summary": "Discover the rich history and enduring traditions of the quaich, Scotland's ceremonial cup of friendship and hospitality.",
+            "headerImage": {
+                "src": "/images/posts/quaich-traditions/quaich-traditions_header-collage.jpg",
+                "alt": "Collection of traditional quaichs",
+                "caption": "Traditional Scottish quaichs through the ages"
+            },
+            "status": {
+                "overall": "in_progress",
+                "last_updated": "2025-04-18T14:35:23+00:00Z",
+                "publication": {
+                    "status": "draft",
+                    "clan_post_id": 334
+                },
+                "workflow": {
+                    "conceptualisation": "complete",
+                    "authoring": "complete",
+                    "metadata": "complete",
+                    "images": "pending",
+                    "validation": "pending",
+                    "publishing_clancom": "complete",
+                    "syndication": "pending"
+                }
+            }
+        }
+    ],
+    "schema_version": "1.0",
+    "last_updated": "2025-04-19T17:30:00+00:00Z"
+} 

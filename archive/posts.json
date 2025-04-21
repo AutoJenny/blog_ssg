@@ -1,0 +1,18 @@
+[
+    {
+        "slug": "welcome-to-clan-blog",
+        "title": "Welcome to CLAN.com Blog",
+        "author": "Admin",
+        "created_at": "2024-03-20 10:00:00",
+        "summary": "Welcome to our new blog platform. We're excited to share our thoughts and insights with you.",
+        "status": "published"
+    },
+    {
+        "slug": "getting-started-with-blogging",
+        "title": "Getting Started with Blogging",
+        "author": "Admin",
+        "created_at": "2024-03-19 15:30:00",
+        "summary": "Learn the basics of creating engaging blog content and building your online presence.",
+        "status": "published"
+    }
+] 

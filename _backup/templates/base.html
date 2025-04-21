@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CLAN.com Blog{% endblock %}</title>
+    
+    {# Common CSS #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/blog.css') }}">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    {# Admin-specific CSS #}
+    {% if request.path.startswith('/admin') %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    {% endif %}
+    
+    {# Additional CSS block for templates #}
+    {% block css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    {# Admin header for admin pages #}
+    {% if request.path.startswith('/admin') %}
+    <header class="admin-header">
+        <div class="header-content">
+            <h1>{% block header_title %}{% endblock %}</h1>
+            {% block header_nav %}{% endblock %}
+        </div>
+    </header>
+    {% endif %}
+    
+    {# Main content area #}
+    <main class="{% block main_class %}{% endblock %}">
+        {% block content %}{% endblock %}
+    </main>
+    
+    {# Admin controls for authenticated users #}
+    {% if current_user.is_authenticated %}
+    <div class="admin-controls">
+        <button id="toggleDeleted" aria-pressed="false">
+            <span class="material-icons">visibility</span>
+            Show Deleted
+        </button>
+        <button id="toggleDrafts" aria-pressed="false">
+            <span class="material-icons">visibility</span>
+            Show Drafts
+        </button>
+        <button id="toggleHelp" aria-pressed="false">
+            <span class="material-icons">help</span>
+            Help
+        </button>
+    </div>
+    {% endif %}
+    
+    {# Common JavaScript #}
+    {% if current_user.is_authenticated %}
+    <script src="{{ url_for('static', filename='js/admin-controls.js') }}"></script>
+    {% endif %}
+    
+    {# Additional JavaScript block for templates #}
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

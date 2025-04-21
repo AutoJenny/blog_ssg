@@ -1,0 +1,170 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Manage Posts - CLAN.com Admin{% endblock %}
+
+{% block body_class %}admin posts-listing{% endblock %}
+
+{% block content %}
+<div class="admin-posts">
+    <div class="posts-header">
+        <h1>Manage Posts</h1>
+        <a href="{{ url_for('admin.new_post') }}" class="button primary">New Post</a>
+    </div>
+
+    <div class="posts-list">
+        {% for post in posts %}
+        <div class="post-item {% if post.deleted %}deleted{% endif %} {% if post.draft %}draft{% endif %}" data-post-id="{{ post.id }}">
+            <div class="post-info">
+                <h2>{{ post.title }}</h2>
+                <div class="post-meta">
+                    <span class="author">By {{ post.author.name }}</span>
+                    <span class="date">{{ post.created_at|format_date }}</span>
+                    {% if post.draft %}
+                    <span class="status draft">Draft</span>
+                    {% endif %}
+                    {% if post.deleted %}
+                    <span class="status deleted">Deleted</span>
+                    {% endif %}
+                </div>
+                <p class="summary">{{ post.summary|truncate_text(150) }}</p>
+            </div>
+            <div class="post-actions">
+                <a href="{{ url_for('admin.edit_post', post_id=post.id) }}" class="button">Edit</a>
+                {% if not post.deleted %}
+                <button class="button danger" data-action="delete" data-post-id="{{ post.id }}">Delete</button>
+                {% else %}
+                <button class="button" data-action="restore" data-post-id="{{ post.id }}">Restore</button>
+                {% endif %}
+                
+                {% if post.draft %}
+                <button class="button primary" data-action="publish" data-post-id="{{ post.id }}">Publish</button>
+                {% else %}
+                <button class="button" data-action="unpublish" data-post-id="{{ post.id }}">Unpublish</button>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="no-posts">
+            <p>No posts found. Create your first post!</p>
+            <a href="{{ url_for('admin.new_post') }}" class="button primary">Create Post</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if pagination.pages > 1 %}
+    <div class="pagination">
+        {% if pagination.has_prev %}
+        <a href="{{ url_for('admin.posts', page=pagination.prev_num) }}" class="button">&larr; Previous</a>
+        {% endif %}
+        
+        <span class="page-info">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+        
+        {% if pagination.has_next %}
+        <a href="{{ url_for('admin.posts', page=pagination.next_num) }}" class="button">Next &rarr;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block css %}
+{{ super() }}
+<style>
+.admin-posts {
+    padding: 2rem;
+}
+
+.posts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.post-item {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.post-item.deleted {
+    opacity: 0.7;
+    background: var(--surface-alt-color);
+}
+
+.post-info {
+    flex: 1;
+}
+
+.post-info h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+}
+
+.post-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.status {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.status.draft {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.status.deleted {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.post-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.no-posts {
+    text-align: center;
+    padding: 3rem;
+    background: var(--surface-color);
+    border-radius: 8px;
+}
+
+.pagination {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.page-info {
+    color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+    .post-item {
+        flex-direction: column;
+    }
+    
+    .post-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+</style>
+{% endblock %} 

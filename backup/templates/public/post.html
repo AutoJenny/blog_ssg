@@ -1,0 +1,147 @@
+{% extends "public/base.html" %}
+
+{% block content %}
+<article class="blog-post">
+    <header class="post-header">
+        <h1>{{ post.title }}</h1>
+        <div class="post-meta">
+            <span class="author">
+                <span class="material-icons">person</span>
+                {{ post.author }}
+            </span>
+            <span class="date">
+                <span class="material-icons">calendar_today</span>
+                {{ post.created_at|format_date }}
+            </span>
+        </div>
+    </header>
+
+    {% if post.header_image %}
+    <div class="post-image">
+        <img src="{{ url_for('serve_image', filename=post.header_image) }}" alt="{{ post.title }}">
+    </div>
+    {% endif %}
+
+    <div class="post-content">
+        {{ post.content|safe }}
+    </div>
+
+    {% if post.tags %}
+    <footer class="post-footer">
+        <div class="tags">
+            {% for tag in post.tags %}
+            <span class="tag">{{ tag }}</span>
+            {% endfor %}
+        </div>
+    </footer>
+    {% endif %}
+</article>
+{% endblock %}
+
+{% block css %}
+{{ super() }}
+<style>
+.blog-post {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.post-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.post-header h1 {
+    margin: 0 0 1rem 0;
+    font-size: 2.5rem;
+    line-height: 1.2;
+}
+
+.post-meta {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    color: var(--text-color-secondary);
+}
+
+.post-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.post-meta .material-icons {
+    font-size: 1.1rem;
+}
+
+.post-image {
+    margin-bottom: 2rem;
+}
+
+.post-image img {
+    width: 100%;
+    border-radius: var(--border-radius);
+}
+
+.post-content {
+    font-size: 1.1rem;
+    line-height: 1.7;
+}
+
+.post-content p {
+    margin: 0 0 1.5rem 0;
+}
+
+.post-content h2 {
+    margin: 2rem 0 1rem 0;
+    font-size: 1.75rem;
+}
+
+.post-content h3 {
+    margin: 1.5rem 0 1rem 0;
+    font-size: 1.5rem;
+}
+
+.post-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+}
+
+.post-footer {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tag {
+    padding: 0.25rem 0.75rem;
+    background: var(--background-color);
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    color: var(--text-color-secondary);
+}
+
+@media (max-width: 768px) {
+    .blog-post {
+        padding: 1rem;
+    }
+
+    .post-header h1 {
+        font-size: 2rem;
+    }
+
+    .post-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+</style>
+{% endblock %} 

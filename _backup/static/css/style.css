@@ -1,0 +1,728 @@
+/* Theme variables */
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #34495e;
+    --accent-color: #3498db;
+    --text-color: #333;
+    --text-light: #666;
+    --background-color: #f5f6fa;
+    --card-background: #fff;
+    --border-color: #ddd;
+    --success-color: #27ae60;
+    --warning-color: #f39c12;
+    --draft-color: #95a5a6;
+    --error-color: #e74c3c;
+    --deleted-color: #e74c3c;
+    --header-height: 60px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+    --surface-color: #fff;
+
+    /* Admin Post Detail Page */
+    .workflow-stage {
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background-color: var(--card-background);
+    }
+
+    .workflow-stage summary {
+        padding: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+    }
+
+    .workflow-stage summary:hover {
+        background-color: var(--background-color);
+    }
+
+    .workflow-stage .stage-content {
+        padding: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .traffic-light {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+
+    .traffic-light[data-status="complete"] {
+        background-color: var(--success-color);
+    }
+
+    .traffic-light[data-status="in_progress"] {
+        background-color: var(--warning-color);
+    }
+
+    .traffic-light[data-status="pending"] {
+        background-color: var(--draft-color);
+    }
+
+    .traffic-light[data-status="error"] {
+        background-color: var(--error-color);
+    }
+
+    .help-trigger {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        line-height: 18px;
+        text-align: center;
+        border-radius: 50%;
+        background-color: var(--text-light);
+        color: var(--card-background);
+        font-size: 12px;
+        cursor: help;
+        margin-left: 0.5rem;
+    }
+
+    .help-content {
+        display: none;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        background-color: var(--background-color);
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .help-trigger:hover + .help-content {
+        display: block;
+    }
+
+    .image-detail-list {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .image-detail-list li {
+        background-color: var(--card-background);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 1rem;
+    }
+
+    .image-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--background-color);
+        color: var(--text-light);
+        min-height: 150px;
+        font-size: 2rem;
+    }
+
+    /* Status text styling */
+    .status-text {
+        font-size: 0.9rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 3px;
+        background-color: var(--background-color);
+    }
+
+    /* Form controls */
+    .form-control {
+        background-color: var(--card-background);
+        border-color: var(--border-color);
+        color: var(--text-color);
+    }
+
+    .form-control:focus {
+        background-color: var(--card-background);
+        border-color: var(--accent-color);
+        color: var(--text-color);
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+
+    /* Buttons */
+    .btn {
+        border-radius: 4px;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+    }
+
+    .btn-primary:hover {
+        opacity: 0.9;
+    }
+
+    .btn-outline-secondary {
+        color: var(--text-color);
+        border-color: var(--border-color);
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: var(--background-color);
+        color: var(--text-color);
+        border-color: var(--accent-color);
+    }
+
+    /* Log section */
+    #log-output {
+        background-color: var(--card-background);
+        color: var(--text-color);
+        border: 1px solid var(--border-color);
+        padding: 1rem;
+        font-family: monospace;
+        font-size: 0.9rem;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .workflow-stage summary {
+            padding: 0.75rem;
+        }
+
+        .workflow-stage .stage-content {
+            padding: 0.75rem;
+        }
+
+        .image-detail-list {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+[data-theme="dark"] {
+    --primary-color: #1a1a2e;
+    --secondary-color: #16213e;
+    --accent-color: #3498db;
+    --text-color: #ffffff;
+    --text-light: #b4b4b4;
+    --background-color: #121212;
+    --card-background: #1e1e1e;
+    --border-color: #2d2d2d;
+    --surface-color: #2d2d2d;
+    --success-color: #2ecc71;
+    --warning-color: #f1c40f;
+    --draft-color: #95a5a6;
+    --error-color: #e74c3c;
+}
+
+/* Base styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Admin Header */
+.admin-header {
+    background-color: var(--card-background);
+    border-bottom: 1px solid var(--border-color);
+    height: var(--header-height);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    box-shadow: var(--shadow-sm);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.header-right {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.header-left h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--text-color);
+}
+
+.header-left nav {
+    display: flex;
+    gap: 1rem;
+}
+
+.header-left nav a {
+    color: var(--text-light);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.header-left nav a:hover,
+.header-left nav a.active {
+    color: var(--accent-color);
+    background-color: var(--background-color);
+}
+
+.theme-toggle {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 0.5rem;
+    font-size: 1.2rem;
+    transition: color 0.2s ease;
+}
+
+.theme-toggle:hover {
+    color: var(--accent-color);
+}
+
+/* Main Content */
+.admin-content {
+    margin-top: calc(var(--header-height) + 2rem);
+    padding: 0 2rem 2rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Posts Header */
+.posts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.posts-header h2 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+.posts-controls {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Posts List */
+.posts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.post-item {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease;
+}
+
+.post-item.deleted {
+    display: none;
+    opacity: 0.7;
+}
+
+body.show-deleted .post-item.deleted {
+    display: grid;
+}
+
+.post-image {
+    width: 200px;
+    height: 150px;
+    overflow: hidden;
+    border-radius: 4px;
+}
+
+.post-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.post-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.post-title {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.post-title a {
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+.post-title a:hover {
+    color: var(--accent-color);
+}
+
+.post-subtitle {
+    color: var(--text-light);
+    margin: 0;
+    font-size: 1rem;
+}
+
+.post-meta {
+    display: flex;
+    gap: 1rem;
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.post-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.post-concept {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+    max-height: calc(1.4em * 2);
+    position: relative;
+}
+
+/* Remove duplicate truncate-2-lines class since we've incorporated its properties into post-concept */
+.truncate-2-lines {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.post-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.post-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: center;
+    min-width: 120px;
+    color: white;
+}
+
+.post-status.published {
+    background-color: var(--success-color);
+}
+
+.post-status.in_progress {
+    background-color: var(--warning-color);
+}
+
+.post-status.draft {
+    background-color: var(--draft-color);
+}
+
+.post-status.error {
+    background-color: var(--error-color);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Buttons */
+.button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    background-color: var(--card-background);
+    color: var(--text-color);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.button:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.button.primary {
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+.button.primary:hover {
+    opacity: 0.9;
+    background-color: var(--accent-color);
+    color: white;
+}
+
+/* Deleted Posts */
+.post-deleted {
+    display: none;
+    opacity: 0.7;
+}
+
+body.show-deleted .post-deleted {
+    display: flex !important;
+}
+
+.deleted-indicator {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background-color: var(--deleted-color);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.8rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .post-item {
+        grid-template-columns: 150px 1fr 150px;
+    }
+
+    .post-image {
+        width: 150px;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-header {
+        padding: 0 1rem;
+    }
+
+    .header-left {
+        gap: 1rem;
+    }
+
+    .header-right {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .header-left h1 {
+        font-size: 1.2rem;
+    }
+
+    .admin-content {
+        padding: 0 1rem 1rem;
+    }
+
+    .post-item {
+        grid-template-columns: 1fr;
+    }
+
+    .post-image {
+        width: 100%;
+        height: 200px;
+    }
+
+    .post-actions {
+        align-items: flex-start;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .toggle-container {
+        width: 100%;
+    }
+}
+
+/* Theme Toggle and Show Deleted Toggle */
+.toggle-container {
+    display: flex;
+    align-items: center;
+}
+
+.toggle {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    gap: 0.5rem;
+}
+
+.toggle input[type="checkbox"] {
+    appearance: none;
+    width: 40px;
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.toggle input[type="checkbox"]:checked {
+    background-color: var(--primary-color);
+}
+
+.toggle input[type="checkbox"]::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: white;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s;
+}
+
+.toggle input[type="checkbox"]:checked::before {
+    transform: translateX(20px);
+}
+
+.toggle-label {
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+/* Form controls - Dark mode fixes */
+.form-control {
+    background-color: var(--card-background);
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.form-control:focus {
+    background-color: var(--card-background);
+    border-color: var(--accent-color);
+    color: var(--text-color);
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+/* Button fixes for dark mode */
+.btn {
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    opacity: 0.9;
+    color: white;
+}
+
+.btn-outline-secondary {
+    color: var(--text-color);
+    border-color: var(--border-color);
+    background-color: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--surface-color);
+    color: var(--text-color);
+    border-color: var(--accent-color);
+}
+
+/* Header Controls */
+.header-controls {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 1000;
+}
+
+.header-controls button {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header-controls button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Theme Specific Styles */
+.dark-theme {
+    --text-color: #e0e0e0;
+    --background-color: #1a1a1a;
+    --surface-color: #2d2d2d;
+    --border-color: #404040;
+    --accent-color: #4d9fff;
+    --error-color: #ff4d4d;
+    --success-color: #4dff4d;
+    --warning-color: #ffcc00;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Deleted Posts Visibility */
+.post-card.post-deleted {
+    display: none;
+    opacity: 0.7;
+}
+
+body.show-deleted .post-card.post-deleted {
+    display: block;
+} 

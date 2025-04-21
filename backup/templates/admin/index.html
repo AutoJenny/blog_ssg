@@ -1,0 +1,410 @@
+{% extends "admin/base.html" %}
+
+{% block header_title %}Blog Posts{% endblock %}
+
+{% block header_nav %}
+<nav class="admin-nav">
+    <a href="{{ url_for('admin.index') }}" class="active">Posts</a>
+    <a href="{{ url_for('admin.llm_management') }}">LLM Management</a>
+    <a href="{{ url_for('admin.authors') }}">Authors</a>
+    <a href="{{ url_for('admin.settings') }}">Settings</a>
+</nav>
+{% endblock %}
+
+{% block admin_content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <h2>Manage Posts</h2>
+        <p class="text-secondary">Create, edit, and manage your blog posts</p>
+    </div>
+    <div class="page-header-right">
+        <a href="{{ url_for('admin.create_post') }}" class="button primary">
+            <span class="material-icons">add</span>
+            Create Post
+        </a>
+    </div>
+</div>
+
+<div class="post-list">
+    {% for post in posts %}
+    <article class="post-card {% if post.deleted %}deleted{% endif %} {% if post.draft %}draft{% endif %}">
+        <div class="post-image">
+            {% if post.header_image %}
+            <img src="{{ url_for('serve_image', filename=post.header_image) }}" alt="{{ post.title }}">
+            {% else %}
+            <div class="placeholder">
+                <span class="material-icons">image</span>
+            </div>
+            {% endif %}
+        </div>
+        <div class="post-info">
+            <h3>{{ post.title }}</h3>
+            <div class="post-meta">
+                <span class="author">
+                    <span class="material-icons">person</span>
+                    {{ post.author.name }}
+                </span>
+                <span class="date">
+                    <span class="material-icons">calendar_today</span>
+                    {{ post.created_at|format_date }}
+                </span>
+                <span class="reading-time">
+                    <span class="material-icons">schedule</span>
+                    {{ post.reading_time }} min read
+                </span>
+                {% if post.draft %}
+                <span class="draft-badge">Draft</span>
+                {% endif %}
+                {% if post.deleted %}
+                <span class="deleted-badge">Deleted</span>
+                {% endif %}
+            </div>
+            <p class="summary">{{ post.summary|truncate_text(200) }}</p>
+            <div class="tags">
+                {% for tag in post.tags %}
+                <span class="tag">{{ tag }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="post-actions">
+            <a href="{{ url_for('admin.edit_post', post_id=post.id) }}" class="button primary">
+                <span class="material-icons">edit</span>
+                Edit
+            </a>
+            <a href="{{ url_for('public.view_post_detail', post_id=post.id) }}" class="button" target="_blank">
+                <span class="material-icons">preview</span>
+                Preview
+            </a>
+            {% if not post.deleted %}
+            <button class="button danger delete-post" data-post-id="{{ post.id }}">
+                <span class="material-icons">delete</span>
+                Delete
+            </button>
+            {% else %}
+            <button class="button primary restore-post" data-post-id="{{ post.id }}">
+                <span class="material-icons">restore</span>
+                Restore
+            </button>
+            {% endif %}
+        </div>
+    </article>
+    {% else %}
+    <div class="empty-state">
+        <span class="material-icons">article</span>
+        <h2>No posts found</h2>
+        <p>Start creating your first blog post!</p>
+        <a href="{{ url_for('admin.create_post') }}" class="button primary">
+            <span class="material-icons">add</span>
+            Create Post
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+{% block css %}
+{{ super() }}
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+}
+
+.page-header h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+}
+
+.page-header p {
+    margin: 0;
+    color: var(--text-color-secondary);
+}
+
+.post-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.post-card {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    transition: all 0.2s ease;
+}
+
+.post-card:hover {
+    border-color: var(--primary-color);
+}
+
+.post-card.deleted {
+    opacity: 0.7;
+    display: none;
+}
+
+.post-card.draft {
+    border: 2px dashed var(--border-color);
+    display: none;
+}
+
+.post-image {
+    width: 200px;
+    height: 150px;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.post-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.post-image .placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--background-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.post-image .placeholder .material-icons {
+    font-size: 2.5rem;
+    color: var(--text-color-secondary);
+}
+
+.post-info {
+    min-width: 0;
+}
+
+.post-info h3 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    color: var(--text-color-secondary);
+    font-size: 0.9rem;
+}
+
+.post-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.post-meta .material-icons {
+    font-size: 1.1rem;
+}
+
+.draft-badge,
+.deleted-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--border-radius);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.draft-badge {
+    background: var(--warning-color);
+    color: var(--warning-color-contrast);
+}
+
+.deleted-badge {
+    background: var(--danger-color);
+    color: var(--danger-color-contrast);
+}
+
+.summary {
+    margin: 0 0 1rem 0;
+    color: var(--text-color-secondary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tag {
+    padding: 0.25rem 0.5rem;
+    background: var(--background-color);
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    color: var(--text-color-secondary);
+}
+
+.post-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+}
+
+.empty-state .material-icons {
+    font-size: 4rem;
+    color: var(--text-color-secondary);
+    margin-bottom: 1rem;
+}
+
+.empty-state h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.empty-state p {
+    margin: 0 0 2rem 0;
+    color: var(--text-color-secondary);
+}
+
+@media (max-width: 1024px) {
+    .post-card {
+        grid-template-columns: 150px 1fr auto;
+    }
+
+    .post-image {
+        width: 150px;
+        height: 120px;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .page-header-right {
+        align-self: stretch;
+    }
+
+    .page-header-right .button {
+        width: 100%;
+    }
+
+    .post-card {
+        grid-template-columns: 1fr;
+    }
+
+    .post-image {
+        width: 100%;
+        height: 200px;
+    }
+
+    .post-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .post-actions .button {
+        flex: 1;
+        min-width: 120px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle visibility of deleted posts
+    const deletedToggle = document.getElementById('deletedToggle');
+    deletedToggle.addEventListener('click', function() {
+        const isPressed = this.getAttribute('aria-pressed') === 'true';
+        this.setAttribute('aria-pressed', !isPressed);
+        document.querySelectorAll('.post-card.deleted').forEach(card => {
+            card.style.display = !isPressed ? 'none' : 'grid';
+        });
+    });
+
+    // Toggle visibility of draft posts
+    const draftToggle = document.getElementById('draftToggle');
+    draftToggle.addEventListener('click', function() {
+        const isPressed = this.getAttribute('aria-pressed') === 'true';
+        this.setAttribute('aria-pressed', !isPressed);
+        document.querySelectorAll('.post-card.draft').forEach(card => {
+            card.style.display = !isPressed ? 'none' : 'grid';
+        });
+    });
+
+    // Delete post functionality
+    document.querySelectorAll('.delete-post').forEach(button => {
+        button.addEventListener('click', async function() {
+            if (!confirm('Are you sure you want to delete this post?')) return;
+            
+            const postId = this.dataset.postId;
+            try {
+                const response = await fetch(`/admin/posts/${postId}/delete`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const card = this.closest('.post-card');
+                    card.classList.add('deleted');
+                    card.style.display = deletedToggle.getAttribute('aria-pressed') === 'true' ? 'grid' : 'none';
+                    location.reload();
+                } else {
+                    alert('Failed to delete post');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to delete post');
+            }
+        });
+    });
+
+    // Restore post functionality
+    document.querySelectorAll('.restore-post').forEach(button => {
+        button.addEventListener('click', async function() {
+            const postId = this.dataset.postId;
+            try {
+                const response = await fetch(`/admin/posts/${postId}/restore`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const card = this.closest('.post-card');
+                    card.classList.remove('deleted');
+                    location.reload();
+                } else {
+                    alert('Failed to restore post');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to restore post');
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

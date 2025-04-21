@@ -1,0 +1,264 @@
+<h1>Project Plan: CLAN.com Integrated Promotion System (CIPS)</h1>
+<h2>1. Introduction &amp; Vision</h2>
+<p><strong>1.1. Overview:</strong>
+This document outlines the phased development plan for the CLAN.com Integrated Promotion System (CIPS). CIPS aims to evolve from the current Eleventy-based blog generator and Flask admin tool into a sophisticated, multi-channel content creation, management, and promotion engine. The ultimate goal is a highly automated system leveraging Large Language Models (LLMs) and other AI tools to support brand building and drive sales for CLAN.com, while strictly adhering to its reputation for authenticity and expertise in Scottish heritage.</p>
+<p><strong>1.2. Core Goal:</strong>
+To develop a local-first (initially) management interface that orchestrates the creation, adaptation, scheduling, deployment, and monitoring of promotional content across multiple channels (Blog, Social Media, potentially others), significantly automating the process through integrated AI/LLM capabilities.</p>
+<p><strong>1.3. Strategic Context (CLAN.com):</strong>
+All development must align with CLAN.com's brand identity:</p>
+<ul>
+<li><strong>Authenticity:</strong> Content must be accurate, respectful, and reflect deep heritage knowledge.</li>
+<li><strong>Expertise:</strong> Position CLAN.com as a world leader in tartan and Scottish heritage.</li>
+<li><strong>Brand Building:</strong> Focus on raising awareness, desirability, and trust.</li>
+<li><strong>Subtle Promotion:</strong> Avoid hard-sell tactics; integrate product/service awareness naturally within valuable content.</li>
+<li><strong>Community Engagement:</strong> Foster a sense of community around shared heritage interests.</li>
+</ul>
+<p><strong>1.4. Architectural Philosophy:</strong>
+The system will be designed with the following principles:</p>
+<ul>
+<li><strong>Modularity:</strong> Features (content types, channels, AI tools, modules) should be developed as distinct components for easier extension (&quot;bolt-on&quot;).</li>
+<li><strong>Extensibility:</strong> Utilize clear APIs, data schemas, and event hooks to allow future integrations.</li>
+<li><strong>Data-Centric:</strong> Centralize core data (content, assets, workflow status, personas, performance) in well-defined structures.</li>
+<li><strong>API-Driven:</strong> Encourage internal components (Admin UI, LLM connectors, channel publishers) to communicate via internal APIs where feasible.</li>
+<li><strong>LLM Integration Points:</strong> Design workflows with clear stages where LLM assistance or automation can be plugged in.</li>
+<li><strong>User Experience (Admin):</strong> Provide an intuitive interface for managing increasingly complex workflows and automation.</li>
+<li><strong>Measurability:</strong> Build in mechanisms to track content performance and system effectiveness.</li>
+</ul>
+<p><strong>1.5. Current Status (Foundation):</strong></p>
+<ul>
+<li>Eleventy SSG configured for blog generation.</li>
+<li>Basic Flask Admin UI (<code>app.py</code>) providing read-only views of posts and workflow status.</li>
+<li>Workflow tracking established in <code>_data/workflow_status.json</code>.</li>
+<li>Image library concept (<code>_data/image_library.json</code>) and responsive image shortcode implemented.</li>
+<li>Manual watermarking script (<code>scripts/watermark_images.py</code>).</li>
+<li>Manual SFTP deployment script (<code>scripts/post_to_clan.py</code>) triggerable via API.</li>
+<li>Basic API for status updates and deployment triggering exists.</li>
+</ul>
+<hr>
+<h2>2. Phased Development Plan</h2>
+<p><strong>Phase 1: Foundation Hardening &amp; Core Content Workflow (Consolidating the Base)</strong></p>
+<p><em>Goal: Ensure the existing blog generation and basic admin UI are robust, stable, and use standardized data structures.</em></p>
+<ul>
+<li>[x] Set up Eleventy (11ty) as the Static Site Generator.</li>
+<li>[x] Configure core Eleventy settings (<code>.eleventy.js</code>).</li>
+<li>[x] Define basic site structure (input/output dirs, includes, layouts).</li>
+<li>[x] Implement Markdown processing for posts.</li>
+<li>[x] Define Core Post Front Matter Structure (Title, Date, Tags, Image IDs, Sections, Conclusion).</li>
+<li>[x] Create basic Nunjucks templates (<code>base.njk</code>, <code>post.njk</code>, <code>index.njk</code>).</li>
+<li>[x] Implement post collections (e.g., sorted by date).</li>
+<li>[x] Implement tag collections/pages.</li>
+<li>[x] Set up CSS handling/passthrough copy.</li>
+<li>[x] Establish <code>_data/workflow_status.json</code> as the central workflow tracking file.
+<ul>
+<li>[x] Define initial schema for core stages (e.g., writing, images, publishing_clancom).</li>
+</ul>
+</li>
+<li>[x] Refactor <code>app.py</code> for robust data loading/saving (<code>load_json_data</code>, <code>save_json_data</code>).</li>
+<li>[x] Refactor <code>app.py</code> to use standardized constants and path handling.</li>
+<li>[x] Ensure basic Admin UI (<code>/</code>, <code>/admin/post/&lt;slug&gt;</code>) accurately reflects data from <code>workflow_status.json</code>.</li>
+<li>[x] Implement basic API (<code>/api/update_status</code>) for manual workflow state changes.</li>
+<li>[ ] <strong>Define Formal JSON Schemas:</strong> Document and potentially validate the structure of <code>workflow_status.json</code> and <code>image_library.json</code> to ensure consistency.</li>
+<li>[ ] <strong>Improve Error Handling &amp; Logging:</strong> Enhance robustness in <code>app.py</code> and scripts.</li>
+</ul>
+<p><strong>Phase 2: Enhanced Image Workflow &amp; Management</strong></p>
+<p><em>Goal: Streamline image preparation, integrate watermarking better, and prepare for AI assistance.</em></p>
+<ul>
+<li>[x] Integrate <code>eleventy-img</code> plugin for responsive image generation.</li>
+<li>[x] Define and implement a Nunjucks shortcode (<code>image</code>) for responsive images.</li>
+<li>[x] Create a central image library data file (<code>_data/image_library.json</code>).</li>
+<li>[x] Establish system/schema for image metadata within <code>image_library.json</code> (Desc, Prompt, Source, Alt, Caption).</li>
+<li>[x] Implement manual image watermarking script (<code>scripts/watermark_images.py</code>).</li>
+<li>[x] Define workflow structure for tracking image sub-stages within <code>_data/workflow_status.json</code>.
+<ul>
+<li>[x] Track image prompt status.</li>
+<li>[x] Track image source asset preparation status (file existence).</li>
+<li>[x] Track image metadata integration status (alt, caption).</li>
+<li>[x] Track <strong>per-image</strong> watermarking status within the post's workflow entry.</li>
+</ul>
+</li>
+<li>[x] Display detailed image workflow status (including watermarking) in Admin UI (<code>/admin/post/&lt;slug&gt;</code>).</li>
+<li>[ ] <strong>Specify Watermarked Image Output:</strong> Define clear location/naming for watermarked images (e.g., <code>images/posts/watermarked/</code>). Update script if needed.</li>
+<li>[ ] <strong>Integrate Watermarking Trigger (Optional):</strong>
+<ul>
+<li>[ ] Develop API endpoint in <code>app.py</code> to trigger <code>watermark_images.py</code> for a specific image/post.</li>
+<li>[ ] Add button in Admin UI to trigger watermarking via API.</li>
+<li>[ ] Modify <code>watermark_images.py</code> to accept parameters (image ID/path, slug) and update <code>workflow_status.json</code> upon completion via API call or direct file edit.</li>
+</ul>
+</li>
+<li>[ ] <strong>Image Library Management in Admin UI:</strong>
+<ul>
+<li>[ ] View/Browse <code>image_library.json</code> contents.</li>
+<li>[ ] Basic search/filter capabilities.</li>
+</ul>
+</li>
+<li>[ ] <strong>LLM Hook: Alt Text Generation:</strong>
+<ul>
+<li>[ ] Add button in Admin UI (per image) to &quot;Suggest Alt Text&quot;.</li>
+<li>[ ] Implement backend logic to call an LLM API (using image description/caption/prompt) to generate alt text suggestions.</li>
+<li>[ ] Allow user to accept/edit/reject suggestion (updates <code>image_library.json</code>).</li>
+</ul>
+</li>
+</ul>
+<p><strong>Phase 3: Admin Interface - Towards Content Creation &amp; Editing</strong></p>
+<p><em>Goal: Transform the Admin UI from read-only to a functional content creation and management hub.</em></p>
+<ul>
+<li>[x] Plan Admin UI features (<code>docs/interface_plan.md</code>).</li>
+<li>[x] Develop Flask backend (<code>app.py</code>) with basic data loading/display routes.</li>
+<li>[ ] <strong>Implement CRUD for Blog Posts:</strong>
+<ul>
+<li>[ ] Create New Post: UI form to input title, slug (auto-suggest?), basic metadata -&gt; creates new <code>.md</code> file with front matter.</li>
+<li>[ ] Edit Post Metadata: UI form to modify front matter fields -&gt; saves changes to <code>.md</code> file.</li>
+<li>[ ] Edit Post Content: Integrate a Markdown editor (e.g., SimpleMDE, EasyMDE) to edit the body of the <code>.md</code> file -&gt; saves changes.</li>
+<li>[ ] Delete Post: Confirmation -&gt; removes <code>.md</code> file (and potentially associated workflow data?).</li>
+</ul>
+</li>
+<li>[ ] <strong>Implement CRUD for Image Library:</strong>
+<ul>
+<li>[ ] Add New Image Entry: UI form to input description, prompt, source details, metadata -&gt; adds entry to <code>image_library.json</code>.</li>
+<li>[ ] Edit Image Entry: UI form to modify fields -&gt; updates <code>image_library.json</code>.</li>
+<li>[ ] Delete Image Entry: Confirmation -&gt; removes entry (handle referenced images?).</li>
+<li>[ ] (Optional) Image Upload: Handle file uploads, place in <code>images/</code> directory, create corresponding library entry.</li>
+</ul>
+</li>
+<li>[ ] <strong>Refine Workflow Management UI:</strong>
+<ul>
+<li>[ ] Make status indicators interactive (clickable) to trigger status updates via <code>/api/update_status</code>.</li>
+<li>[ ] Add UI elements for triggering actions (like integrated watermarking, deployment).</li>
+</ul>
+</li>
+<li>[ ] <strong>LLM Hook: Content Assistance:</strong>
+<ul>
+<li>[ ] Title Suggestions: Button to call LLM API based on draft content/topic.</li>
+<li>[ ] Summary Generation: Button to generate a post summary.</li>
+<li>[ ] Content Outline: Generate potential section headings based on a title/topic.</li>
+</ul>
+</li>
+<li>[ ] <strong>UI Framework Adoption (Optional but Recommended):</strong> Consider HTMX, Alpine.js, or a lightweight frontend framework to improve UI reactivity without a full SPA build.</li>
+</ul>
+<p><strong>Phase 4: Multi-Channel Syndication Engine</strong></p>
+<p><em>Goal: Extend beyond the blog to automatically adapt and publish content to key social media channels.</em></p>
+<ul>
+<li>[x] Plan syndication strategy (<code>docs/syndication_plan.md</code>).</li>
+<li>[x] Define initial structure for tracking syndication status in <code>workflow_status.json</code>.</li>
+<li>[ ] <strong>Develop Core Syndication Module:</strong>
+<ul>
+<li>[ ] Define generic internal representation of content adaptable for different channels.</li>
+<li>[ ] Create plugin architecture for adding new channel publishers.</li>
+</ul>
+</li>
+<li>[ ] <strong>Refine Workflow Schema:</strong> Add detailed per-channel tracking in <code>workflow_status.json</code> (e.g., <code>stages.syndication.instagram.status</code>, <code>stages.syndication.instagram.postId</code>, <code>stages.syndication.facebook.status</code>).</li>
+<li>[ ] <strong>Implement Blog Publishing Integration:</strong>
+<ul>
+<li>[x] Deployment script (<code>post_to_clan.py</code>) exists.</li>
+<li>[x] API trigger (<code>/api/publish_clan</code>) exists.</li>
+<li>[ ] Enhance script/API to update <code>workflow_status.json</code> (<code>publishing_clancom</code> stage) reliably on success/failure.</li>
+</ul>
+</li>
+<li>[ ] <strong>Implement Instagram Publisher:</strong>
+<ul>
+<li>[ ] Research Instagram API requirements (likely requires Facebook Graph API).</li>
+<li>[ ] Develop logic to adapt blog content/images for Instagram (e.g., select key image, generate concise caption - <em>LLM opportunity</em>). Respect brand guidelines.</li>
+<li>[ ] Implement API calls to post images/carousels/reels (initially images).</li>
+<li>[ ] Store resulting Post ID and update status in <code>workflow_status.json</code>.</li>
+<li>[ ] Add UI elements in Admin Interface to preview, approve, and trigger Instagram publication.</li>
+</ul>
+</li>
+<li>[ ] <strong>Implement Facebook Publisher:</strong>
+<ul>
+<li>[ ] Research Facebook Graph API requirements.</li>
+<li>[ ] Develop logic to adapt content for Facebook (e.g., generate link preview text, longer text post with image/link - <em>LLM opportunity</em>). Respect brand guidelines.</li>
+<li>[ ] Implement API calls to post to a Page/Group.</li>
+<li>[ ] Store resulting Post ID/URL and update status in <code>workflow_status.json</code>.</li>
+<li>[ ] Add UI elements in Admin Interface to preview, approve, and trigger Facebook publication.</li>
+</ul>
+</li>
+<li>[ ] <strong>Develop Content Adaptation Engine (LLM Powered):</strong>
+<ul>
+<li>[ ] Create service/functions that take core content + target channel + brand guidelines -&gt; generate adapted text (captions, summaries, hooks).</li>
+<li>[ ] Integrate this into the publishing workflow for each channel.</li>
+</ul>
+</li>
+<li>[ ] <strong>Scheduling Capability:</strong>
+<ul>
+<li>[ ] Add <code>scheduled_publish_time</code> fields to workflow status.</li>
+<li>[ ] Implement a scheduler mechanism (e.g., separate Python process using <code>APScheduler</code>, external cron job calling an API endpoint) to trigger publishing actions at scheduled times.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Phase 5: Deeper LLM Integration &amp; Automation</strong></p>
+<p><em>Goal: Move from LLM assistance to more automated content generation and workflow orchestration.</em></p>
+<ul>
+<li>[ ] <strong>Content Idea Generation:</strong>
+<ul>
+<li>[ ] Integrate with external trends/monitoring tools (Phase 7?) or internal analytics (Phase 6).</li>
+<li>[ ] Use LLM to suggest blog post topics relevant to CLAN.com and current trends/events.</li>
+<li>[ ] Present suggestions in Admin UI.</li>
+</ul>
+</li>
+<li>[ ] <strong>Draft Generation Pipeline:</strong>
+<ul>
+<li>[ ] Define workflow: Topic -&gt; Outline (LLM) -&gt; Draft Sections (LLM) -&gt; Human Review/Edit -&gt; Image Prompt Generation (LLM) -&gt; Final Polish.</li>
+<li>[ ] Implement UI and backend logic to manage this pipeline, updating <code>workflow_status.json</code> at each step.</li>
+</ul>
+</li>
+<li>[ ] <strong>Image Prompt Generation:</strong> Use LLM based on post content/section context to suggest prompts for image generation (requires integration with an image generation model/API later or manual use).</li>
+<li>[ ] <strong>Brand Voice &amp; Authenticity Check:</strong>
+<ul>
+<li>[ ] Develop LLM prompts/fine-tuning to ensure generated/adapted content matches CLAN.com's voice.</li>
+<li>[ ] Implement automated checks (e.g., LLM evaluates generated text against brand guidelines) flagging content for review.</li>
+</ul>
+</li>
+<li>[ ] <strong>Automated Workflow Progression:</strong> Based on configurable rules or LLM analysis, automatically advance workflow stages (e.g., mark writing 'complete' after review, trigger adaptation after blog publish). Requires careful design.</li>
+</ul>
+<p><strong>Phase 6: Performance Monitoring &amp; Analytics</strong></p>
+<p><em>Goal: Understand content effectiveness to inform strategy and LLM tuning.</em></p>
+<ul>
+<li>[ ] <strong>Define Key Performance Indicators (KPIs):</strong> E.g., Blog views, social media engagement (likes, shares, comments), referral traffic to CLAN.com, product page visits from content, conversions (requires e-commerce integration).</li>
+<li>[ ] <strong>Basic Engagement Tracking:</strong> Store manually entered or estimated engagement metrics in <code>workflow_status.json</code> or a separate analytics store.</li>
+<li>[ ] <strong>Integrate Web Analytics:</strong> Capture referral data from blog posts (e.g., UTM parameters) linking back to CLAN.com site analytics.</li>
+<li>[ ] <strong>Integrate Social Media Platform Analytics:</strong>
+<ul>
+<li>[ ] Regularly fetch basic engagement data (likes, comments, shares) via APIs for posts published by the system.</li>
+<li>[ ] Store aggregated data linked to the original content/workflow entry.</li>
+</ul>
+</li>
+<li>[ ] <strong>Admin UI Analytics Dashboard:</strong> Display key metrics per post, per channel, overall campaign performance.</li>
+<li>[ ] <strong>Feedback Loop:</strong> Use performance data to refine content strategies and potentially provide feedback to LLM generation prompts (long-term goal).</li>
+</ul>
+<p><strong>Phase 7: Advanced Modules &amp; Future Expansion</strong></p>
+<p><em>Goal: Incorporate planned future modules, leveraging the established architecture.</em></p>
+<ul>
+<li>[ ] <strong>Commenting &amp; Interaction Module:</strong>
+<ul>
+<li>[ ] Strategy: Integrate with third-party services (Disqus?), platform-native comments (FB), or build a custom solution?</li>
+<li>[ ] Fetching/Displaying Comments: API integrations to pull comments related to syndicated posts. Display consolidated view in Admin UI.</li>
+<li>[ ] Responding: UI for drafting responses. <em>LLM opportunity for suggesting replies</em>. API integrations to post replies.</li>
+</ul>
+</li>
+<li>[ ] <strong>Influencer Persona Module:</strong>
+<ul>
+<li>[ ] Define Persona Data Structure: Store characteristics, voice, target audience, goals for different brand personas (if needed).</li>
+<li>[ ] Integrate Personas into Content Generation: Use selected persona data to guide LLM prompts for tone and style.</li>
+<li>[ ] Track Content by Persona: Tag content generated under specific personas for performance analysis.</li>
+</ul>
+</li>
+<li>[ ] <strong>Media Monitoring Module:</strong>
+<ul>
+<li>[ ] Integrate with Social Listening Tools (APIs): Monitor mentions of CLAN.com, key topics, competitors.</li>
+<li>[ ] Surface Relevant Mentions/Trends: Display in Admin UI.</li>
+<li>[ ] Rapid Response Workflow: Use monitoring insights to trigger content creation (e.g., reactive blog post, social media reply). <em>LLM opportunity for drafting responses</em>.</li>
+</ul>
+</li>
+<li>[ ] <strong>Media Development (Video):</strong>
+<ul>
+<li>[ ] Strategy: Define types of video content (e.g., blog summaries, product highlights, heritage explainers).</li>
+<li>[ ] Script Generation: Use LLM to adapt blog content into video scripts.</li>
+<li>[ ] Asset Integration: Link video assets (source files, final renders) to content workflows.</li>
+<li>[ ] (Future) AI Video Generation: Integrate with tools that create video from text/images (highly speculative currently).</li>
+<li>[ ] Video Publishing: Extend syndication engine for video platforms (YouTube, TikTok, Instagram Reels).</li>
+</ul>
+</li>
+<li>[ ] <strong>E-commerce Integration:</strong> Deeper integration with CLAN.com product catalogue and sales data for direct performance tracking.</li>
+</ul>
+<hr>
+<p>This revised plan provides a comprehensive roadmap. Each unchecked item represents a potential development task or area requiring further research and design. The modular approach and focus on data/APIs should allow for flexibility as priorities evolve and new technologies (especially in AI) emerge. Remember to constantly evaluate decisions against the core brand principles of CLAN.com.</p>

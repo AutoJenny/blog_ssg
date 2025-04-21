@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Preview{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Post Preview</h1>
+            <div>
+                <button class="btn btn-outline-secondary me-2">
+                    <i class="bi bi-arrow-left"></i> Back to Editor
+                </button>
+                <button class="btn btn-success">
+                    <i class="bi bi-check-lg"></i> Publish
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <article class="blog-post">
+                    <h2 class="blog-post-title">Sample Blog Post</h2>
+                    <p class="blog-post-meta">April 21, 2024 by <a href="#">Author</a></p>
+
+                    <p>This is a sample blog post preview. Here you can see how your post will look when published.</p>
+                    <hr>
+                    <h3>Subheading</h3>
+                    <p>This is some additional content to demonstrate the preview functionality. You can see how different elements like:</p>
+                    <ul>
+                        <li>Lists</li>
+                        <li>Code blocks</li>
+                        <li>Images</li>
+                    </ul>
+                    <p>Will appear in your final post.</p>
+
+                    <h3>Code Example</h3>
+                    <pre><code>def hello_world():
+    print("Hello, World!")</code></pre>
+
+                    <h3>Another Subheading</h3>
+                    <p>More content to demonstrate the preview layout and styling.</p>
+                </article>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

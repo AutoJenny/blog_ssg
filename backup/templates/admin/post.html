@@ -1,0 +1,209 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="post-view">
+    <div class="post-header">
+        <h1>{{ post.title }}</h1>
+        <div class="post-meta">
+            <span class="author">
+                <span class="material-icons">person</span>
+                {{ post.author }}
+            </span>
+            <span class="date">
+                <span class="material-icons">calendar_today</span>
+                {{ post.created_at|format_date }}
+            </span>
+            <span class="status-badge {{ post.status }}">{{ post.status }}</span>
+        </div>
+    </div>
+
+    <div class="post-content">
+        <div class="post-image">
+            {% if post.header_image %}
+            <img src="{{ url_for('serve_image', filename=post.header_image) }}" alt="{{ post.title }}">
+            {% else %}
+            <div class="placeholder">
+                <span class="material-icons">image</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="post-info">
+            <div class="post-summary">
+                <h2>Summary</h2>
+                <p>{{ post.summary }}</p>
+            </div>
+
+            <div class="post-tags">
+                <h2>Tags</h2>
+                <div class="tags">
+                    {% for tag in post.tags %}
+                    <span class="tag">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-actions">
+        <a href="{{ url_for('admin.edit_post', slug=post.slug) }}" class="button primary">
+            <span class="material-icons">edit</span>
+            Edit Post
+        </a>
+        <a href="{{ url_for('preview', slug=post.slug) }}" class="button" target="_blank">
+            <span class="material-icons">preview</span>
+            Preview
+        </a>
+        {% if post.status == 'published' %}
+        <button class="button danger unpublish-post" data-post-slug="{{ post.slug }}">
+            <span class="material-icons">unpublished</span>
+            Unpublish
+        </button>
+        {% else %}
+        <button class="button primary publish-post" data-post-slug="{{ post.slug }}">
+            <span class="material-icons">publish</span>
+            Publish
+        </button>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block css %}
+{{ super() }}
+<style>
+.post-view {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.post-header {
+    margin-bottom: 2rem;
+}
+
+.post-header h1 {
+    margin: 0 0 1rem 0;
+    font-size: 2rem;
+}
+
+.post-meta {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    color: var(--text-color-secondary);
+}
+
+.post-meta .material-icons {
+    font-size: 1.1rem;
+}
+
+.post-content {
+    margin-bottom: 2rem;
+}
+
+.post-image {
+    width: 100%;
+    height: 400px;
+    margin-bottom: 2rem;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.post-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.post-image .placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--background-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.post-image .placeholder .material-icons {
+    font-size: 4rem;
+    color: var(--text-color-secondary);
+}
+
+.post-info {
+    display: grid;
+    gap: 2rem;
+}
+
+.post-summary h2,
+.post-tags h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+}
+
+.post-tags .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.post-tags .tag {
+    padding: 0.25rem 0.5rem;
+    background: var(--background-color);
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+}
+
+.post-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .post-image {
+        height: 300px;
+    }
+
+    .post-actions {
+        flex-direction: column;
+    }
+
+    .post-actions .button {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Publish/Unpublish functionality
+    document.querySelectorAll('.publish-post, .unpublish-post').forEach(button => {
+        button.addEventListener('click', async function() {
+            const action = this.classList.contains('publish-post') ? 'publish' : 'unpublish';
+            const slug = this.dataset.postSlug;
+            
+            try {
+                const response = await fetch(`/admin/posts/${slug}/${action}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert(`Failed to ${action} post`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`Failed to ${action} post`);
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

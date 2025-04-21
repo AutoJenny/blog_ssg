@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}CLAN.com Blog Admin{% endblock %}
+
+{% block css %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<header class="admin-header">
+    <div class="header-left">
+        <h1>{% block header_title %}Blog Admin{% endblock %}</h1>
+        {% block header_nav %}{% endblock %}
+    </div>
+    <div class="header-right">
+        <div class="admin-controls">
+            <button id="deletedToggle" aria-pressed="false" title="Toggle deleted posts">
+                <span class="material-icons">visibility</span>
+                <span>Show Deleted</span>
+            </button>
+            <button id="draftToggle" aria-pressed="false" title="Toggle draft posts">
+                <span class="material-icons">article</span>
+                <span>Show Drafts</span>
+            </button>
+            <button id="themeToggle" aria-pressed="false" title="Toggle theme">
+                <span class="material-icons">light_mode</span>
+                <span>Theme</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="admin-main">
+    {% block admin_content %}{% endblock %}
+</main>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% block extra_js %}{% endblock %}
+{% endblock %} 

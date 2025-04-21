@@ -1,0 +1,49 @@
+/* Light mode styles */
+.table-success {
+    --bs-table-bg: #d1e7dd;
+    --bs-table-striped-bg: #c7d9d0;
+    --bs-table-striped-color: #000;
+    --bs-table-active-bg: #bcd0c7;
+    --bs-table-active-color: #000;
+    --bs-table-hover-bg: #c1d9d0;
+    --bs-table-hover-color: #000;
+    color: #000;
+    border-color: #bcd0c7;
+}
+
+/* Dark mode styles */
+[data-bs-theme="dark"] .table-success {
+    --bs-table-bg: #1a3a2a;
+    --bs-table-striped-bg: #1f4532;
+    --bs-table-striped-color: #fff;
+    --bs-table-active-bg: #1f4532;
+    --bs-table-active-color: #fff;
+    --bs-table-hover-bg: #1f4532;
+    --bs-table-hover-color: #fff;
+    color: #fff;
+    border-color: #1f4532;
+}
+
+/* Dark mode text contrast */
+[data-bs-theme="dark"] .table-success h6,
+[data-bs-theme="dark"] .table-success td {
+    color: #fff !important;
+}
+
+[data-bs-theme="dark"] .table-success .text-muted {
+    color: #d1d1d1 !important;
+}
+
+/* Status badge colors for dark mode */
+[data-bs-theme="dark"] .badge.bg-success {
+    background-color: #2d8a5a !important;
+}
+
+[data-bs-theme="dark"] .badge.bg-warning {
+    background-color: #856404 !important;
+    color: #fff !important;
+}
+
+[data-bs-theme="dark"] .badge.bg-danger {
+    background-color: #842029 !important;
+} 

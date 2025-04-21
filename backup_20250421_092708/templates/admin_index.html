@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLAN.com Blog Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="admin-header">
+        <div class="header-left">
+            <h1>Blog Posts</h1>
+            <nav>
+                <a href="#" class="active">All Posts</a>
+                <a href="#">Published</a>
+                <a href="#">Drafts</a>
+            </nav>
+        </div>
+        <div class="header-right">
+            <button id="toggleDeleted" class="button">
+                <i class="fas fa-eye"></i> Show Deleted
+            </button>
+            <button id="theme-toggle" class="theme-toggle">
+                <i class="fas fa-sun"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="admin-content">
+        <div class="posts-header">
+            <div class="posts-controls">
+                <a href="{{ url_for('new_post') }}" class="button primary">
+                    <i class="fas fa-plus"></i> New Post
+                </a>
+            </div>
+        </div>
+
+        <div class="posts-list" id="postsList">
+            {% for post in posts %}
+            <article class="post-item{% if post.deleted %} post-deleted{% endif %}" data-deleted="{{ 'true' if post.deleted else 'false' }}">
+                <div class="post-image">
+                    {% if post.header_image %}
+                    <img src="{{ post.header_image }}" alt="Header image for {{ post.title }}">
+                    {% else %}
+                    <div class="image-placeholder">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="post-details">
+                    <h2 class="post-title">
+                        <a href="{{ url_for('view_post_detail', slug=post.slug) }}">{{ post.title }}</a>
+                    </h2>
+                    {% if post.subtitle %}
+                    <p class="post-subtitle">{{ post.subtitle }}</p>
+                    {% endif %}
+                    <div class="post-meta">
+                        <span class="post-slug">
+                            <i class="fas fa-link"></i> {{ post.slug }}
+                        </span>
+                        <span>
+                            <i class="fas fa-user"></i> {{ authors[post.author].name if post.author in authors else 'Unknown' }}
+                        </span>
+                        <span>
+                            <i class="fas fa-calendar"></i> {{ post.date }}
+                        </span>
+                        {% if post.deleted %}
+                        <span class="deleted-indicator">
+                            <i class="fas fa-trash"></i> Deleted
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% if post.concept %}
+                    <div class="post-concept truncate-2-lines">{{ post.concept }}</div>
+                    {% endif %}
+                </div>
+                <div class="post-actions">
+                    <div class="post-status {{ post.status.overall }}">
+                        {{ post.status.overall | replace('_', ' ') | title }}
+                    </div>
+                    <div class="action-buttons">
+                        <a href="{{ url_for('view_post_detail', slug=post.slug) }}" class="button">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        {% if post.clan_post_id %}
+                        <a href="https://clan.com/blog/{{ post.slug }}" target="_blank" class="button">
+                            <i class="fas fa-external-link-alt"></i> View
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </main>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const themeIcon = themeToggle.querySelector('i');
+
+        // Initialize theme from localStorage
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+
+        function updateThemeIcon(theme) {
+            themeIcon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+
+        // Show/Hide deleted content
+        const toggleDeletedBtn = document.getElementById('toggleDeleted');
+        const postsList = document.getElementById('postsList');
+        let showingDeleted = localStorage.getItem('showDeleted') === 'true';
+
+        // Initialize deleted posts visibility
+        updateDeletedVisibility();
+
+        toggleDeletedBtn.addEventListener('click', () => {
+            showingDeleted = !showingDeleted;
+            localStorage.setItem('showDeleted', showingDeleted);
+            updateDeletedVisibility();
+        });
+
+        function updateDeletedVisibility() {
+            postsList.classList.toggle('show-deleted', showingDeleted);
+            const icon = toggleDeletedBtn.querySelector('i');
+            icon.className = showingDeleted ? 'fas fa-eye-slash' : 'fas fa-eye';
+            toggleDeletedBtn.innerHTML = showingDeleted ? 
+                '<i class="fas fa-eye-slash"></i> Hide Deleted' : 
+                '<i class="fas fa-eye"></i> Show Deleted';
+        }
+    </script>
+</body>
+</html>

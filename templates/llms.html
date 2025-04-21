@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}LLMs{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>LLM Configuration</h1>
+        <p class="lead">Manage your language model settings</p>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">OpenAI Configuration</h5>
+                    </div>
+                    <div class="card-body">
+                        <form>
+                            <div class="mb-3">
+                                <label for="apiKey" class="form-label">API Key</label>
+                                <input type="password" class="form-control" id="apiKey" placeholder="Enter your API key">
+                            </div>
+                            <div class="mb-3">
+                                <label for="model" class="form-label">Model</label>
+                                <select class="form-select" id="model">
+                                    <option value="gpt-4">GPT-4</option>
+                                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Settings</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Usage Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6>API Calls This Month</h6>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: 65%;" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">65%</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h6>Tokens Used</h6>
+                            <p class="text-muted">1,234,567 tokens</p>
+                        </div>
+                        <div class="mb-3">
+                            <h6>Cost This Month</h6>
+                            <p class="text-muted">$12.34</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

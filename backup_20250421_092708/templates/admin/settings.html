@@ -1,0 +1,151 @@
+{% extends "admin/base.html" %}
+
+{% block header_title %}Settings{% endblock %}
+
+{% block header_nav %}
+<nav class="admin-nav">
+    <a href="{{ url_for('admin_index') }}">Posts</a>
+    <a href="{{ url_for('admin_authors') }}">Authors</a>
+    <a href="{{ url_for('admin_settings') }}" class="active">Settings</a>
+</nav>
+{% endblock %}
+
+{% block admin_content %}
+<div class="settings-container">
+    <section class="settings-section">
+        <h2>Blog Settings</h2>
+        <form id="blogSettingsForm" class="admin-form">
+            <div class="form-group">
+                <label for="blogTitle">Blog Title</label>
+                <input type="text" id="blogTitle" name="blog_title" value="{{ settings.blog_title if settings.blog_title else 'CLAN.com Blog' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="blogDescription">Blog Description</label>
+                <textarea id="blogDescription" name="blog_description" rows="3">{{ settings.blog_description if settings.blog_description else '' }}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="postsPerPage">Posts Per Page</label>
+                <input type="number" id="postsPerPage" name="posts_per_page" value="{{ settings.posts_per_page if settings.posts_per_page else 10 }}" min="1" max="50">
+            </div>
+            
+            <button type="submit" class="button primary">Save Settings</button>
+        </form>
+    </section>
+    
+    <section class="settings-section">
+        <h2>API Settings</h2>
+        <form id="apiSettingsForm" class="admin-form">
+            <div class="form-group">
+                <label for="clanApiKey">CLAN.com API Key</label>
+                <input type="password" id="clanApiKey" name="clan_api_key" value="{{ settings.clan_api_key if settings.clan_api_key else '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="clanApiEndpoint">CLAN.com API Endpoint</label>
+                <input type="url" id="clanApiEndpoint" name="clan_api_endpoint" value="{{ settings.clan_api_endpoint if settings.clan_api_endpoint else 'https://api.clan.com/v1' }}">
+            </div>
+            
+            <button type="submit" class="button primary">Save API Settings</button>
+        </form>
+    </section>
+    
+    <section class="settings-section">
+        <h2>Cache Settings</h2>
+        <div class="cache-info">
+            <p>Current cache size: <span id="cacheSize">Calculating...</span></p>
+            <button class="button" onclick="clearCache()">
+                <span class="material-icons">delete_sweep</span>
+                Clear Cache
+            </button>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function saveSettings(formId) {
+    const form = document.getElementById(formId);
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    
+    try {
+        const response = await fetch('/api/settings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert('success', 'Settings saved successfully');
+        } else {
+            showAlert('error', 'Failed to save settings: ' + (result.error || 'Unknown error'));
+        }
+    } catch (error) {
+        showAlert('error', 'Error saving settings: ' + error);
+    }
+}
+
+document.getElementById('blogSettingsForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    await saveSettings('blogSettingsForm');
+});
+
+document.getElementById('apiSettingsForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    await saveSettings('apiSettingsForm');
+});
+
+async function clearCache() {
+    if (confirm('Are you sure you want to clear the cache?')) {
+        try {
+            const response = await fetch('/api/clear_cache', {
+                method: 'POST'
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                showAlert('success', 'Cache cleared successfully');
+                document.getElementById('cacheSize').textContent = '0 B';
+            } else {
+                showAlert('error', 'Failed to clear cache: ' + (data.error || 'Unknown error'));
+            }
+        } catch (error) {
+            showAlert('error', 'Error clearing cache: ' + error);
+        }
+    }
+}
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `admin-alert ${type}`;
+    alertDiv.textContent = message;
+    
+    document.querySelector('.settings-container').prepend(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+
+// Calculate cache size
+fetch('/api/cache_size')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('cacheSize').textContent = data.size;
+        } else {
+            document.getElementById('cacheSize').textContent = 'Error calculating size';
+        }
+    })
+    .catch(error => {
+        document.getElementById('cacheSize').textContent = 'Error calculating size';
+    });
+</script>
+{% endblock %} 

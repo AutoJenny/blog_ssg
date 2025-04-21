@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Preview - CLAN.com Blog{% endblock %}
+
+{% block content %}
+<div class="preview-container">
+    <div class="preview-header">
+        <h1>Post Preview</h1>
+        <div class="preview-controls">
+            <button id="toggle-theme" class="button">
+                <span class="material-icons">dark_mode</span>
+                Toggle Theme
+            </button>
+            <button id="toggle-mobile" class="button">
+                <span class="material-icons">phone_android</span>
+                Mobile View
+            </button>
+            <button id="refresh-preview" class="button">
+                <span class="material-icons">refresh</span>
+                Refresh
+            </button>
+        </div>
+    </div>
+
+    <div class="preview-frame-container">
+        <iframe id="preview-frame" src="{{ url_for('view_post', slug=request.args.get('slug', 'welcome-to-clan-blog')) }}" frameborder="0"></iframe>
+    </div>
+</div>
+{% endblock %}
+
+{% block css %}
+{{ super() }}
+<style>
+.preview-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 4rem);
+    background: var(--background-color);
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--header-border);
+}
+
+.preview-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.preview-controls {
+    display: flex;
+    gap: 1rem;
+}
+
+.preview-frame-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+#preview-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.mobile-view #preview-frame {
+    max-width: 375px;
+    margin: 0 auto;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+    .preview-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .preview-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const previewFrame = document.getElementById('preview-frame');
+    const toggleThemeBtn = document.getElementById('toggle-theme');
+    const toggleMobileBtn = document.getElementById('toggle-mobile');
+    const refreshBtn = document.getElementById('refresh-preview');
+    const container = document.querySelector('.preview-container');
+    
+    // Toggle theme
+    toggleThemeBtn.addEventListener('click', function() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        previewFrame.contentWindow.document.documentElement.setAttribute('data-theme', newTheme);
+    });
+    
+    // Toggle mobile view
+    toggleMobileBtn.addEventListener('click', function() {
+        container.classList.toggle('mobile-view');
+    });
+    
+    // Refresh preview
+    refreshBtn.addEventListener('click', function() {
+        previewFrame.src = previewFrame.src;
+    });
+    
+    // Sync theme with iframe
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.attributeName === 'data-theme') {
+                const theme = document.documentElement.getAttribute('data-theme');
+                previewFrame.contentWindow.document.documentElement.setAttribute('data-theme', theme);
+            }
+        });
+    });
+    
+    observer.observe(document.documentElement, {
+        attributes: true
+    });
+});
+</script>
+{% endblock %} 

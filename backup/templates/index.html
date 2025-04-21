@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Home - CLAN.com Blog{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Welcome to CLAN.com Blog</h1>
+    <p>Your source for the latest insights and updates.</p>
+</div>
+
+<div class="post-grid">
+    {% for post in posts %}
+    <article class="post-card">
+        <h2><a href="{{ url_for('view_post', slug=post.slug) }}">{{ post.title }}</a></h2>
+        <div class="post-meta">
+            <span class="author">
+                <span class="material-icons">person</span>
+                {{ post.author }}
+            </span>
+            <span class="date">
+                <span class="material-icons">calendar_today</span>
+                {{ post.created_at|format_date }}
+            </span>
+        </div>
+        <p>{{ post.summary|truncate_text }}</p>
+        <a href="{{ url_for('view_post', slug=post.slug) }}" class="read-more">Read More</a>
+    </article>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block css %}
+{{ super() }}
+<style>
+.hero {
+    text-align: center;
+    padding: 3rem 0;
+    margin-bottom: 3rem;
+}
+
+.hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.post-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.post-card {
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+}
+
+.post-card h2 {
+    margin-top: 0;
+    font-size: 1.5rem;
+}
+
+.post-card h2 a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.post-meta {
+    display: flex;
+    gap: 1rem;
+    color: var(--text-color-secondary);
+    margin: 0.5rem 0 1rem 0;
+}
+
+.post-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.post-meta .material-icons {
+    font-size: 1.1rem;
+}
+
+.read-more {
+    display: inline-block;
+    margin-top: 1rem;
+    color: var(--secondary-color);
+    text-decoration: none;
+}
+
+.read-more:hover {
+    text-decoration: underline;
+}
+</style>
+{% endblock %} 

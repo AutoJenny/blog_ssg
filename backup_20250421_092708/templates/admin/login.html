@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Login - CLAN.com Blog Admin{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <h1>Login</h1>
+    <p>This feature is not yet implemented.</p>
+    <a href="{{ url_for('index') }}" class="button">Return to Home</a>
+</div>
+{% endblock %}
+
+{% block css %}
+<style>
+.login-container {
+    max-width: 400px;
+    margin: 4rem auto;
+    text-align: center;
+    padding: 2rem;
+    background: var(--surface-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.login-container h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.login-container p {
+    color: var(--text-color-secondary);
+    margin-bottom: 2rem;
+}
+
+.button {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    background: var(--primary-color);
+    color: white;
+    border-radius: var(--border-radius);
+    transition: background-color 0.2s ease;
+}
+
+.button:hover {
+    background: var(--primary-color-dark);
+}
+</style>
+{% endblock %} 

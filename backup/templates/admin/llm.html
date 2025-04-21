@@ -1,0 +1,193 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="llm-management">
+    <h1>LLM Management</h1>
+    
+    <div class="llm-settings">
+        <h2>Settings</h2>
+        <form id="llm-settings-form">
+            <div class="form-group">
+                <label for="model">Default Model</label>
+                <select id="model" name="model">
+                    <option value="gpt-4">GPT-4</option>
+                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                    <option value="claude-3-opus">Claude 3 Opus</option>
+                    <option value="claude-3-sonnet">Claude 3 Sonnet</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="temperature">Temperature</label>
+                <input type="range" id="temperature" name="temperature" min="0" max="2" step="0.1" value="0.7">
+                <span class="value-display">0.7</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="max-tokens">Max Tokens</label>
+                <input type="number" id="max-tokens" name="max_tokens" min="100" max="4000" value="2000">
+            </div>
+            
+            <button type="submit" class="button primary">Save Settings</button>
+        </form>
+    </div>
+    
+    <div class="llm-prompt-templates">
+        <h2>Prompt Templates</h2>
+        <div class="template-list">
+            <div class="template-card">
+                <h3>Blog Post Generation</h3>
+                <p>Generate a complete blog post based on a topic and outline.</p>
+                <button class="button" onclick="loadTemplate('blog-post')">Load Template</button>
+            </div>
+            
+            <div class="template-card">
+                <h3>Content Enhancement</h3>
+                <p>Improve and expand existing content.</p>
+                <button class="button" onclick="loadTemplate('content-enhancement')">Load Template</button>
+            </div>
+            
+            <div class="template-card">
+                <h3>SEO Optimization</h3>
+                <p>Optimize content for search engines.</p>
+                <button class="button" onclick="loadTemplate('seo-optimization')">Load Template</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block css %}
+{{ super() }}
+<style>
+.llm-management {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.llm-settings {
+    background: var(--surface-color);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+}
+
+.llm-settings h2 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group select,
+.form-group input[type="number"] {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background: var(--background-color);
+    color: var(--text-color);
+}
+
+.form-group input[type="range"] {
+    width: 100%;
+    margin: 0.5rem 0;
+}
+
+.value-display {
+    display: inline-block;
+    min-width: 3rem;
+    text-align: right;
+}
+
+.llm-prompt-templates h2 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.5rem;
+}
+
+.template-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.template-card {
+    background: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+}
+
+.template-card h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+}
+
+.template-card p {
+    margin: 0 0 1rem 0;
+    color: var(--text-color-secondary);
+}
+
+@media (max-width: 768px) {
+    .template-list {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Temperature slider
+    const temperatureSlider = document.getElementById('temperature');
+    const valueDisplay = document.querySelector('.value-display');
+    
+    temperatureSlider.addEventListener('input', function() {
+        valueDisplay.textContent = this.value;
+    });
+    
+    // Settings form
+    const settingsForm = document.getElementById('llm-settings-form');
+    settingsForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const settings = Object.fromEntries(formData.entries());
+        
+        try {
+            const response = await fetch('/admin/llm/settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(settings)
+            });
+            
+            if (response.ok) {
+                alert('Settings saved successfully');
+            } else {
+                alert('Failed to save settings');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to save settings');
+        }
+    });
+    
+    // Load template function
+    window.loadTemplate = function(templateName) {
+        // We'll implement this later
+        console.log('Loading template:', templateName);
+    };
+});
+</script>
+{% endblock %} 

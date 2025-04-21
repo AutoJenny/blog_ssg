@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin - CLAN.com Blog{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/css/style.css') }}">
+</head>
+<body>
+    <header class="admin-header">
+        <nav>
+            <a href="{{ url_for('index') }}">Dashboard</a>
+            <a href="{{ url_for('posts') }}">Posts</a>
+            <a href="{{ url_for('llm') }}">LLMs</a>
+            <a href="{{ url_for('preview') }}">Preview</a>
+        </nav>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+            <span class="material-icons">dark_mode</span>
+        </button>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='admin/js/admin.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

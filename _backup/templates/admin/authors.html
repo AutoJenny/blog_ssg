@@ -1,0 +1,202 @@
+{% extends "admin/base.html" %}
+
+{% block header_title %}Authors{% endblock %}
+
+{% block header_nav %}
+<nav class="admin-nav">
+    <a href="{{ url_for('admin_index') }}">Posts</a>
+    <a href="{{ url_for('admin_authors') }}" class="active">Authors</a>
+    <a href="{{ url_for('admin_settings') }}">Settings</a>
+</nav>
+{% endblock %}
+
+{% block admin_content %}
+<div class="authors-list">
+    {% for author_id, author in authors.items() %}
+    <div class="author-card">
+        <div class="author-avatar">
+            {% if author.avatarUrl %}
+            <img src="{{ author.avatarUrl }}" alt="{{ author.name }}">
+            {% else %}
+            <div class="avatar-placeholder">
+                <span class="material-icons">person</span>
+            </div>
+            {% endif %}
+        </div>
+        <div class="author-info">
+            <h2>{{ author.name }}</h2>
+            <p class="author-id">{{ author_id }}</p>
+            {% if author.bioPageUrl %}
+            <a href="{{ author.bioPageUrl }}" target="_blank" class="button">View Bio</a>
+            {% endif %}
+        </div>
+        <div class="author-actions">
+            <button class="button" onclick="editAuthor('{{ author_id }}', {{ author|tojson }})">
+                <span class="material-icons">edit</span>
+                Edit
+            </button>
+            <button class="button danger" onclick="deleteAuthor('{{ author_id }}')">
+                <span class="material-icons">delete</span>
+                Delete
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="admin-actions">
+    <button class="button primary" onclick="showAuthorModal()">
+        <span class="material-icons">person_add</span>
+        Add Author
+    </button>
+</div>
+
+<!-- Author Modal -->
+<div id="authorModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h2 id="modalTitle">Add Author</h2>
+        <form id="authorForm" class="admin-form">
+            <input type="hidden" id="authorId" name="id">
+            <div class="form-group">
+                <label for="authorName">Name</label>
+                <input type="text" id="authorName" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="authorBioUrl">Bio Page URL</label>
+                <input type="url" id="authorBioUrl" name="bioPageUrl">
+            </div>
+            <div class="form-group">
+                <label for="authorAvatarUrl">Avatar URL</label>
+                <input type="url" id="authorAvatarUrl" name="avatarUrl">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="button" onclick="closeAuthorModal()">Cancel</button>
+                <button type="submit" class="button primary">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showAuthorModal(authorId = '', authorData = null) {
+    const modal = document.getElementById('authorModal');
+    const form = document.getElementById('authorForm');
+    const title = document.getElementById('modalTitle');
+    
+    // Reset form
+    form.reset();
+    
+    if (authorData) {
+        title.textContent = 'Edit Author';
+        document.getElementById('authorId').value = authorId;
+        document.getElementById('authorName').value = authorData.name || '';
+        document.getElementById('authorBioUrl').value = authorData.bioPageUrl || '';
+        document.getElementById('authorAvatarUrl').value = authorData.avatarUrl || '';
+    } else {
+        title.textContent = 'Add Author';
+        document.getElementById('authorId').value = '';
+    }
+    
+    modal.style.display = 'block';
+}
+
+function closeAuthorModal() {
+    document.getElementById('authorModal').style.display = 'none';
+}
+
+function editAuthor(authorId, authorData) {
+    showAuthorModal(authorId, authorData);
+}
+
+async function deleteAuthor(authorId) {
+    if (confirm('Are you sure you want to delete this author?')) {
+        try {
+            const response = await fetch(`/api/authors/${authorId}`, {
+                method: 'DELETE'
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Failed to delete author: ' + (data.error || 'Unknown error'));
+            }
+        } catch (error) {
+            alert('Error deleting author: ' + error);
+        }
+    }
+}
+
+document.getElementById('authorForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData);
+    
+    // Generate an ID if not editing
+    if (!data.id) {
+        data.id = data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    }
+    
+    try {
+        const response = await fetch('/api/authors', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            location.reload();
+        } else {
+            alert('Failed to save author: ' + (result.error || 'Unknown error'));
+        }
+    } catch (error) {
+        alert('Error saving author: ' + error);
+    }
+});
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('authorModal');
+    if (event.target === modal) {
+        closeAuthorModal();
+    }
+}
+</script>
+
+<style>
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--card-background);
+    padding: 2rem;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+</style>
+{% endblock %} 

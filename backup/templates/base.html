@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CLAN.com Blog{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root[data-theme="light"] {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --text-color: #333;
+            --text-color-secondary: #666;
+            --background-color: #fff;
+            --border-color: #ddd;
+            --border-radius: 8px;
+        }
+
+        :root[data-theme="dark"] {
+            --primary-color: #1a1a1a;
+            --secondary-color: #3498db;
+            --text-color: #fff;
+            --text-color-secondary: #ccc;
+            --background-color: #333;
+            --border-color: #555;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .site-header {
+            background-color: var(--primary-color);
+            padding: 1rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .site-header nav {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .site-header a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .site-header a:hover {
+            color: var(--secondary-color);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            color: var(--secondary-color);
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        {% block css %}{% endblock %}
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="site-title">
+                    <a href="{{ url_for('index') }}">CLAN.com Blog</a>
+                </h1>
+                <nav class="main-nav">
+                    <a href="{{ url_for('index') }}">Home</a>
+                    <a href="{{ url_for('posts') }}">Posts</a>
+                    <a href="{{ url_for('llm') }}">LLMs</a>
+                    <a href="{{ url_for('preview') }}">Preview</a>
+                </nav>
+            </div>
+            <div class="header-right">
+                <button id="theme-toggle" class="theme-toggle">
+                    <span class="material-icons">dark_mode</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

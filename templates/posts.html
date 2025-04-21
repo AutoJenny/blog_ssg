@@ -74,7 +74,7 @@
                             <tr>
                                 <th style="width: 40%">Title</th>
                                 <th>Author</th>
-                                <th>Date</th>
+                                <th>Created/modified</th>
                                 <th>Status</th>
                                 <th>Tags</th>
                                 <th>Actions</th>
@@ -104,13 +104,25 @@
                                                 <small class="text-muted">{{ post.concept }}</small>
                                             </div>
                                             {% endif %}
+                                            {% if post.status == 'published' %}
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    <span class="text-secondary">{{ post.slug }}</span>
+                                                    <span class="mx-1">·</span>
+                                                    <span>Clan ID: <a href="https://clan.com/blog/{{ post.slug }}" target="_blank" rel="noopener noreferrer">{{ post.clan_id }}</a></span>
+                                                </small>
+                                            </div>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </td>
                                 <td>{{ post.author }}</td>
                                 <td>
                                     {% if post.creation_date %}
-                                    {{ post.creation_date }}
+                                    <div class="small text-muted" style="font-size: 0.75rem;">
+                                        <div>{{ post.creation_date|datetimeformat('%d %b %y') }}</div>
+                                        <div class="mt-1">{{ post.modified_date|datetimeformat('%d %b %y : %I.%M%p')|lower }}</div>
+                                    </div>
                                     {% else %}
                                     <span class="text-muted">No date set</span>
                                     {% endif %}
@@ -119,6 +131,13 @@
                                     <span class="badge {% if post.status == 'published' %}bg-success{% elif post.status == 'development' %}bg-warning{% elif post.status == 'deleted' %}bg-danger{% endif %}">
                                         {{ post.status|title }}
                                     </span>
+                                    {% if post.status == 'published' %}
+                                    <div class="mt-1">
+                                        <small class="text-secondary" style="font-size: 0.75rem;">
+                                            {{ post.published_date|datetimeformat }}
+                                        </small>
+                                    </div>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     {% if post.tags %}

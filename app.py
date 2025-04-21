@@ -2,10 +2,26 @@ from flask import Flask, render_template
 import os
 import yaml
 from datetime import datetime
+import pytz
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev')
 app.config['TEMPLATES_AUTO_RELOAD'] = True
+
+@app.template_filter('datetimeformat')
+def datetimeformat(value, format='%d %b %y : %H:%M'):
+    if not value:
+        return ''
+    try:
+        # Parse the input date string
+        dt = datetime.fromisoformat(value.replace('Z', '+00:00'))
+        # Convert to local timezone (you can change this to your preferred timezone)
+        local_tz = pytz.timezone('Europe/London')
+        local_dt = dt.astimezone(local_tz)
+        # Format the date
+        return local_dt.strftime(format)
+    except (ValueError, AttributeError):
+        return value
 
 def load_posts():
     with open('posts.yaml', 'r') as file:

@@ -6,8 +6,11 @@ posts:
     categories: ["history", "culture"]
     concept: "Exploring the rich history and cultural significance of English tartans"
     creation_date: "2025-03-15"
+    modified_date: "2025-04-18T17:30:00Z"
     header_image: null
     status: "development"
+    clan_id: null
+    published_date: null
     tags: ["tartans", "history", "culture", "england", "textiles", "tradition"]
 
   - id: 2
@@ -16,8 +19,11 @@ posts:
     author: "nick-fiddes"
     concept: "Tracing the development of the kilt from its origins to modern fashion"
     creation_date: "2025-03-30"
+    modified_date: "2025-04-18T17:30:00Z"
     header_image: "/static/images/posts/kilt-evolution/kilt-evolution_header.jpg"
     status: "published"
+    clan_id: 333
+    published_date: "2025-04-01T10:30:00Z"
     tags: ["post", "history", "scotland", "clothing", "tartan", "kilts", "highlandwear"]
 
   - id: 3
@@ -26,8 +32,11 @@ posts:
     author: "caitrin-stewart"
     concept: "Exploring the history and cultural significance of the Scottish quaich"
     creation_date: "2023-10-27"
+    modified_date: "2025-04-18T17:30:00Z"
     header_image: "/static/images/posts/quaich-traditions/quaich-traditions_header-collage.jpg"
     status: "published"
+    clan_id: 334
+    published_date: "2025-04-14T15:45:00Z"
     tags: ["post", "tradition", "scotland", "products", "pewter", "weddings", "celtic", "quaich"]
 
   - id: 4
@@ -36,6 +45,9 @@ posts:
     author: "default"
     concept: "test"
     creation_date: "2025-04-18"
+    modified_date: "2025-04-18T17:30:00Z"
     header_image: null
     status: "deleted"
+    clan_id: null
+    published_date: null
     tags: [] 

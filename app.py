@@ -37,6 +37,14 @@ def posts():
     posts_data = load_posts()
     return render_template('posts.html', posts=posts_data)
 
+@app.route('/posts/<slug>')
+def post_detail(slug):
+    posts_data = load_posts()
+    post = next((p for p in posts_data if p['slug'] == slug), None)
+    if not post:
+        return render_template('404.html'), 404
+    return render_template('post_detail.html', post=post)
+
 @app.route('/llms')
 def llms():
     return render_template('llms.html')

@@ -95,7 +95,11 @@
                                             {% endif %}
                                         </div>
                                         <div class="flex-grow-1">
-                                            <h6 class="mb-0">{{ post.title }}</h6>
+                                            <h6 class="mb-0">
+                                                <a href="{{ url_for('post_detail', slug=post.slug) }}" class="text-decoration-none">
+                                                    {{ post.title }}
+                                                </a>
+                                            </h6>
                                             {% if post.subtitle %}
                                             <small class="text-muted">{{ post.subtitle }}</small>
                                             {% endif %}
@@ -153,9 +157,9 @@
                                 </td>
                                 <td>
                                     <div class="btn-group">
-                                        <button class="btn btn-sm btn-outline-primary" title="Edit">
+                                        <a href="{{ url_for('post_detail', slug=post.slug) }}" class="btn btn-sm btn-outline-primary" title="Edit">
                                             <i class="bi bi-pencil"></i>
-                                        </button>
+                                        </a>
                                         <button class="btn btn-sm btn-outline-secondary" title="Preview">
                                             <i class="bi bi-eye"></i>
                                         </button>
